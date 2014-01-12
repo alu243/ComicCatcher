@@ -51,13 +51,17 @@ namespace ComicCatcher
                             ComicBase comicData = tvComicTree.SelectedNode.Tag as ComicBase;
                             if (null != comicData)
                             {
-                                if (null == comicData.imageData || comicData.imageData.Length <= 0)
+                                try
                                 {
-                                    comicData.imageData = HttpHelper.getPictureResponse(tvComicTree.SelectedNode.ImageKey);
+                                    if (null == comicData.imageData || comicData.imageData.Length <= 1024) // 圖檔不存在或是小於1k
+                                    {
+                                        comicData.imageData = HttpHelper.getPictureResponse(tvComicTree.SelectedNode.ImageKey);
+                                    }
+                                    pbIcon.Image = Image.FromStream(comicData.imageData);
+                                    lblUpdateDate.Text = comicData.updateDate;
+                                    lblUpdateChapter.Text = comicData.updateChapter;
                                 }
-                                pbIcon.Image = Image.FromStream(comicData.imageData);
-                                lblUpdateDate.Text = comicData.updateDate;
-                                lblUpdateChapter.Text = comicData.updateChapter;
+                                catch { }
                             }
                             else
                             {
@@ -483,7 +487,7 @@ namespace ComicCatcher
                 //    }
                 //} 
                 #endregion
-                
+
                 DonwloadHelper.donwload(pictureUrl, tmpFile);
 
                 // 檢查 50 次下載，如果還是都有問題，就跳出錯誤
