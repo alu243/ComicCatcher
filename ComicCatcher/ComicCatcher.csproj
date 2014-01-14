@@ -58,8 +58,10 @@
     <Compile Include="App_Code\Comic\IComic.cs" />
     <Compile Include="App_Code\Comic\Scheduler.cs" />
     <Compile Include="App_Code\Comic\WorkerMsg.cs" />
-    <Compile Include="App_Code\RARHelper\RARHelper.cs" />
-    <Compile Include="App_Code\RARHelper\CMDHelper.cs" />
+    <Compile Include="App_Code\Enum\MsgEnum.cs" />
+    <Compile Include="App_Code\Helpers\NLogger.cs" />
+    <Compile Include="App_Code\Helpers\RARHelper.cs" />
+    <Compile Include="App_Code\Helpers\CMDHelper.cs" />
     <Compile Include="App_Code\Util\CharsetConvert.cs" />
     <Compile Include="App_Code\Util\DonwloadHelper.cs" />
     <Compile Include="App_Code\Util\HttpHelper.cs" />

@@ -6,7 +6,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
-namespace RARHelper
+namespace Helpers
 {
     public class RARHelper
     {
@@ -49,7 +49,7 @@ namespace RARHelper
 
             string currRelatedPath = Path.GetFileName(path);
             string parentFullPath = Directory.GetParent(path).FullName;
-            CMDHelper.CMDHelper.ExecuteCommandAsync(new CommandObj() { fileName = this._rarPath, arguments = String.Format(rarArgument, currRelatedPath + ".rar", currRelatedPath), workdir = parentFullPath });
+            Helpers.CMDHelper.ExecuteCommandAsync(new CommandObj() { fileName = this._rarPath, arguments = String.Format(rarArgument, currRelatedPath + ".rar", currRelatedPath), workdir = parentFullPath });
         }
     }
 }

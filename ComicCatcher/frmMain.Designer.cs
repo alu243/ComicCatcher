@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -300,10 +300,10 @@
             this.tvComicTree.HideSelection = false;
             this.tvComicTree.Location = new System.Drawing.Point(4, 36);
             this.tvComicTree.Name = "tvComicTree";
-            treeNode2.Name = "http://www.xindm.cn";
-            treeNode2.Text = "新動漫(xindm)";
+            treeNode1.Name = "http://www.xindm.cn";
+            treeNode1.Text = "新動漫(xindm)";
             this.tvComicTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
+            treeNode1});
             this.tvComicTree.Size = new System.Drawing.Size(338, 607);
             this.tvComicTree.TabIndex = 3;
             this.tvComicTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvComicTree_AfterSelect);
@@ -440,7 +440,8 @@
             this.txtInfo.Size = new System.Drawing.Size(1031, 647);
             this.txtInfo.TabIndex = 7;
             this.txtInfo.Text = "release note\r\n0.0.0.1.008:\r\n  已作過壓縮成rar之資料不重新下載\r\n0.0.0.1.009:\r\n  新增搜尋功能\r\n0.0.0.1." +
-    "010\r\n  新增設定檔\r\n  新增已下載清單提示\r\n0.0.0.1.011\r\n  新增替代網址下載(需關閉Proxy，速度較慢)";
+    "010\r\n  新增設定檔\r\n  新增已下載清單提示\r\n0.0.0.1.011\r\n  新增替代網址(mh)下載(需關閉Proxy，速度較慢)\r\n0.0.0.1.0" +
+    "12\r\n  修正：下載預覽小圖出問題時不會更新右邊的資料夾";
             this.txtInfo.TextChanged += new System.EventHandler(this.txtInfo_TextChanged);
             // 
             // tabPage3
@@ -639,8 +640,8 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.Name = "frmMain";
-            this.Text = "漫畫下載器 2013/08/21 0.0.1.011";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Text = "漫畫下載器 2014/01/12 0.0.1.012";
+            this.Load += new System.EventHandler(this.frmMain_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);

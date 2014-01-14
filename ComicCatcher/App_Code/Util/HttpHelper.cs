@@ -21,6 +21,9 @@ namespace ComicCatcher.App_Code.Util
             request = (HttpWebRequest)WebRequest.Create(url);
             request.CookieContainer = myCookie;
             request.Proxy = UsingProxy.getProxy();
+
+            request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
+
             while (null == response && remainTries >= 0)
             {
                 try
