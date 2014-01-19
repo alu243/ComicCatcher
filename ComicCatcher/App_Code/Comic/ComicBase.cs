@@ -6,12 +6,17 @@ using System.Text;
 using System.IO;
 namespace ComicCatcher.App_Code.Comic
 {
-    public class ComicBase : IComic, IDisposable
+    public class ComicBase : IDisposable
     {
         /// <summary>
         /// URL
         /// </summary>
         public string url { get; set; }
+
+        /// <summary>
+        /// web網站的內容(就是url抓下來的內容)
+        /// </summary>
+        public string htmlContent { get; set; }
 
         public string iconUrl { get; set; }
 
@@ -20,10 +25,6 @@ namespace ComicCatcher.App_Code.Comic
         /// </summary>
         public string description { get; set; }
 
-        /// <summary>
-        /// web網站的內容(就是url抓下來的內容)
-        /// </summary>
-        public string content { get; set; }
 
         /// <summary>
         /// 最近更新日期
@@ -41,7 +42,7 @@ namespace ComicCatcher.App_Code.Comic
         {
             url = null;
             description = null;
-            content = null;
+            htmlContent = null;
         }
    }
 }

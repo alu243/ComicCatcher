@@ -16,13 +16,13 @@ namespace ComicCatcher.App_Code.Comic
         public ComicChapter(string url)
         {
             this.url = url;
-            this.content = HttpHelper.getResponse(url);
+            this.htmlContent = HttpHelper.getResponse(url);
         }
 
         public List<string> genPictureUrl()
         {
             List<string> pages = new List<string>();
-            foreach (Match match in rPages.Matches(this.content))
+            foreach (Match match in rPages.Matches(this.htmlContent))
             {
                 foreach (string tmp in match.Value.Split(','))
                 {

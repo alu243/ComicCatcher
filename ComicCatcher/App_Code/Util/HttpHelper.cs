@@ -21,7 +21,6 @@ namespace ComicCatcher.App_Code.Util
             request = (HttpWebRequest)WebRequest.Create(url);
             request.CookieContainer = myCookie;
             request.Proxy = UsingProxy.getProxy();
-
             request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
 
             while (null == response && remainTries >= 0)
@@ -86,16 +85,6 @@ namespace ComicCatcher.App_Code.Util
 
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             {
-                //MemoryStream ms = new MemoryStream();
-                //byte[] buffer = new byte[256];
-                //int readCount = 0;
-                //while (0 < (readCount = response.GetResponseStream().Read(buffer, 0, 256)))
-                //{
-                //    Thread.Sleep(0);
-                //    ms.Write(buffer, 0, readCount);
-                //}
-                //return ms;
-
                 using (BinaryReader br = new BinaryReader(response.GetResponseStream()))
                 {
                     MemoryStream ms = new MemoryStream();

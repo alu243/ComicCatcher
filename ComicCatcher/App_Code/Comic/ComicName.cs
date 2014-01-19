@@ -24,7 +24,7 @@ namespace ComicCatcher.App_Code.Comic
         {
             this.url = url;
 
-            this.content = HttpHelper.getResponse(url);
+            this.htmlContent = HttpHelper.getResponse(url);
         }
 
         public List<ComicBase> getComicBaseList()
@@ -55,7 +55,7 @@ namespace ComicCatcher.App_Code.Comic
         private string getURLTag()
         {
             StringBuilder sb = new StringBuilder();
-            foreach (Match match in rVolumnTag.Matches(this.content))
+            foreach (Match match in rVolumnTag.Matches(this.htmlContent))
             {
                 sb.AppendLine(match.Value);
             }

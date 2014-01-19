@@ -27,7 +27,7 @@ namespace ComicCatcher.App_Code.Comic
         public ComicList(string url)
         {
             this.url = url;
-            this.content = HttpHelper.getResponse(url);
+            this.htmlContent = HttpHelper.getResponse(url);
         }
 
         public List<ComicBase> getComicBaseList()
@@ -65,7 +65,7 @@ namespace ComicCatcher.App_Code.Comic
 
         private string getTable()
         {
-            return rTableTag.Match(this.content).ToString();
+            return rTableTag.Match(this.htmlContent).ToString();
         }
     }
 }
