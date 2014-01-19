@@ -379,25 +379,22 @@ namespace ComicCatcher
 
                 int threadCount = 40;
                 int startPage = 0;
-                int upperPage = (threadCount > allPictureUrl.Count ? allPictureUrl.Count : threadCount); // 目前多執行緒下載頁數
+                int upperPage = (threadCount > allPictureUrl.Count ? allPictureUrl.Count : threadCount); // 一次下載40頁，如果剩不到40頁就下載剩下的頁數
                 while (startPage < allPictureUrl.Count)
                 {
                     List<Thread> threadPool = new List<Thread>();
                     for (int i = startPage; i < upperPage; ++i)
                     {
                         Thread t = new Thread(new ParameterizedThreadStart(DownloadPicture));
-                        threadPool.Add(t);
                         // 圖片加入下載排程
-                        //t.Start(new Scheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = allPictureUrl[i], alternativeUrl = allPictureUrl[i].Replace(Xindm.PicHost, Xindm.PicHostAlternative) });
                         if (task.usingAlternativeUrl) // 使用替代網址下載(較慢)
-                        {
                             t.Start(new DownloadPictureScheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = allPictureUrl[i].Replace(XindmWebSite.PicHost, XindmWebSite.PicHostAlternative) });
-                        }
                         else // 使用正常網址下載(較快)
-                        {
                             t.Start(new DownloadPictureScheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = allPictureUrl[i] });
-                        }
-                    } // end of foreach
+
+                        threadPool.Add(t);
+                    }
+
                     foreach (var t in threadPool)
                     {
                         t.Join();
