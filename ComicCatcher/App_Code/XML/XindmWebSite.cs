@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ComicCatcher
 {
-    public class Xindm
+    public class XindmWebSite
     {
         public static string Title { get { return @"新動漫(xindm)"; } }
 

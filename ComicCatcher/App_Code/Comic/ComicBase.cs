@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 
 using System.IO;
+using System.Drawing;
+using ComicCatcher.App_Code.Util;
+using Helpers;
 namespace ComicCatcher.App_Code.Comic
 {
     public class ComicBase : IDisposable
@@ -19,6 +22,30 @@ namespace ComicCatcher.App_Code.Comic
         public string htmlContent { get; set; }
 
         public string iconUrl { get; set; }
+        private bool IsIconDataReaded = false;
+        private MemoryStream iconData = null;
+        public Image iconImage
+        {
+            get
+            {
+                try
+                {
+                    if (false == IsIconDataReaded)
+                    {
+                        this.iconData = HttpHelper.getPictureResponse(this.iconUrl);
+                        IsIconDataReaded = true;
+                    }
+                    return Image.FromStream(this.iconData);
+                }
+                catch (Exception ex)
+                {
+                    NLogger.Error("無法讀取icon圖檔," + ex.ToString());
+                    return null;
+                }
+            }
+        }
+
+
 
         /// <summary>
         /// 描述(第幾頁的內容或是第幾回)
@@ -44,5 +71,5 @@ namespace ComicCatcher.App_Code.Comic
             description = null;
             htmlContent = null;
         }
-   }
+    }
 }

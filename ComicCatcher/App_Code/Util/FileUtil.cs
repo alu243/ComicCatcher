@@ -10,7 +10,7 @@ namespace ComicCatcher.App_Code.Util
 {
     public static class FileUtil
     {
-        public static string CalcMD5(string localTmpFile)
+        private static string CalcMD5(string localTmpFile)
         {
             StringBuilder sb = new StringBuilder();
             System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
@@ -33,7 +33,7 @@ namespace ComicCatcher.App_Code.Util
         /// <param name="file1"></param>
         /// <param name="file2"></param>
         /// <returns></returns>
-        public static bool CompareMD5(string file1, string file2)
+        private static bool CompareMD5(string file1, string file2)
         {
             string file1MD5 = FileUtil.CalcMD5(file1);
             if (String.IsNullOrEmpty(file1MD5)) return false;
@@ -44,7 +44,21 @@ namespace ComicCatcher.App_Code.Util
         }
 
 
-        public static void MoveFileOverwrite(string sourceFile, string destFile)
+        public static bool CompareFileByMD5(string tmpFile , string cmpFile)
+        {
+            if (true == CompareMD5(tmpFile, cmpFile))
+            {
+                if (File.Exists(cmpFile)) File.Delete(cmpFile);
+                return true;
+            }
+            else
+            {
+                FileUtil.MoveFile(cmpFile, tmpFile);
+                return false;
+            }
+        }
+
+        public static void MoveFile(string sourceFile, string destFile)
         {
             if (File.Exists(destFile)) File.Delete(destFile);
             File.Move(sourceFile, destFile);

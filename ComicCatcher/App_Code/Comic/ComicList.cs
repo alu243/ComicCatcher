@@ -39,7 +39,7 @@ namespace ComicCatcher.App_Code.Comic
                 string sLink = rLink.Match(data.Value).Value;
                 
                 // 取得漫畫首頁圖像連結
-                string iUrl = new Uri(new Uri(Xindm.PicHost),
+                string iUrl = new Uri(new Uri(XindmWebSite.PicHost),
                     rIconUrl.Match(data.Value).Value.Replace("<img src=", "").Replace(@"""", "").Trim()).ToString();
                
                 // 取得最近更新日期

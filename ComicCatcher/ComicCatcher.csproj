@@ -70,7 +70,7 @@
     <Compile Include="App_Code\Util\UsingProxy.cs" />
     <Compile Include="App_Code\XML\Settings.cs" />
     <Compile Include="App_Code\XML\DownloadedList.cs" />
-    <Compile Include="App_Code\XML\Xindm.cs" />
+    <Compile Include="App_Code\XML\XindmWebSite.cs" />
     <Compile Include="CustomSort.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>

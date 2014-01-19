@@ -10,7 +10,7 @@ namespace ComicCatcher.App_Code.Comic
 {
     public class ComicChapter : ComicBase
     {
-        private static Uri webPrefix = new Uri(Xindm.PicHost);
+        private static Uri webPrefix = new Uri(XindmWebSite.PicHost);
         private static Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
 
         public ComicChapter(string url)

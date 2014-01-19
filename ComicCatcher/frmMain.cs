@@ -35,7 +35,7 @@ namespace ComicCatcher
             InitialComicRootTree();
             lblUpdateDate.Text = "";
             lblUpdateChapter.Text = "";
-            GenComicLocalDirecotryComboBox();
+            buildLocalComicDirComboBox();
 
             ConfigureSettings();
             SetSettings();
@@ -77,7 +77,6 @@ namespace ComicCatcher
             App_Code.Util.UsingProxy.isUseProxy = chkIsUseProxy.Checked;
             App_Code.Util.UsingProxy.ProxyUrl = settings.ProxyUrl;
             App_Code.Util.UsingProxy.ProxyPort = settings.ProxyPort;
-
         }
 
         private void GetSettings()
@@ -123,29 +122,13 @@ namespace ComicCatcher
                         {
                             ComicBase comicData = tvComicTree.SelectedNode.Tag as ComicBase;
                             if (null != comicData)
-                            {
-                                try
-                                {
-                                    if (null == comicData.imageData || comicData.imageData.Length <= 1024) // 圖檔不存在或是小於1k
-                                    {
-                                        comicData.imageData = HttpHelper.getPictureResponse(tvComicTree.SelectedNode.ImageKey);
-                                    }
-                                    pbIcon.Image = Image.FromStream(comicData.imageData);
-                                    lblUpdateDate.Text = comicData.updateDate;
-                                    lblUpdateChapter.Text = comicData.updateChapter;
-                                }
-                                catch (Exception ex)
-                                {
-                                    NLogger.Error(MsgEnum.讀取圖檔失敗.ToString());
-                                }
-                            }
+                                pbIcon.Image = comicData.iconImage;
                             else
-                            {
-                                pbIcon.Image = Image.FromStream(HttpHelper.getPictureResponse(tvComicTree.SelectedNode.ImageKey));
-                            }
+                                pbIcon.Image = null;
 
+                            lblUpdateDate.Text = comicData.updateDate;
+                            lblUpdateChapter.Text = comicData.updateChapter;
                             if (false == cbRelateFolders.Items.Contains(tvComicTree.SelectedNode.Text)) cbRelateFolders.Items.Add(tvComicTree.SelectedNode.Text);
-
                             cbRelateFolders.Text = tvComicTree.SelectedNode.Text;
                             pbIcon_Paint(pbIcon, null);
                         }
@@ -188,16 +171,11 @@ namespace ComicCatcher
                     var comicList = cp.getComicBaseList();
                     foreach (var comic in comicList)
                     {
-                        try
+                        // 預設在展開分頁時載入全部縮圖(抓檔時比較快)
+                        if (chkLoadPhoto.Checked)
                         {
-                            // 預設在展開分頁時載入全部縮圖(抓檔時比較快)
-                            if (chkLoadPhoto.Checked)
-                            {
-                                comic.imageData = HttpHelper.getPictureResponse(comic.iconUrl); // getComicIcon
-                            }
+                            Image img = comic.iconImage;
                         }
-                        catch (Exception ex)
-                        { NLogger.Error(MsgEnum.讀取圖檔失敗.ToString() + ex.ToString()); }
                         TreeNode tn = new TreeNode();
                         tn.Name = comic.url;
                         tn.Text = comic.description;
@@ -247,9 +225,9 @@ namespace ComicCatcher
         private void InitialComicRootTree()
         {
             tvComicTree.Nodes.Clear();
-            TreeNode root = new TreeNode(Xindm.Title);
+            TreeNode root = new TreeNode(XindmWebSite.Title);
             tvComicTree.Nodes.Add(root);
-            string pagePtn = Xindm.ListUrl + "?page={0}&classid=8&tempid=17&line=72";
+            string pagePtn = XindmWebSite.ListUrl + "?page={0}&classid=8&tempid=17&line=72";
             for (int i = 0; i < 117; ++i)
             {
                 root.Nodes.Add(String.Format(pagePtn, i.ToString()), "第" + (i + 1).ToString().PadLeft(2, '0') + "頁");
@@ -257,21 +235,12 @@ namespace ComicCatcher
             tvComicTree.ExpandAll();
         }
 
-        private void GenComicLocalDirecotryComboBox()
+        private void buildLocalComicDirComboBox()
         {
             try
             {
                 string[] dirs = new string[0];
-                //dirs = Directory.GetDirectories(txtRootPath.Text);
-                //string[] rars = Directory.GetFiles(txtRootPath.Text, "*.rar");
-                //string[] newDirs = new string[dirs.Length + rars.Length];
-                //Array.Copy(dirs, newDirs, dirs.Length);
-                //Array.Copy(rars, 0, newDirs, dirs.Length, rars.Length);
-                //Array.Sort(newDirs);
-                //newDirs = newDirs.ToList().CustomSort().ToArray();
-                //Array.Reverse(newDirs);
                 cbRelateFolders.Items.Clear();
-                //foreach (string dir in newDirs)
                 foreach (string dir in dirs)
                 {
                     cbRelateFolders.Items.Add(Path.GetFileName(dir));
@@ -281,59 +250,56 @@ namespace ComicCatcher
             }
             catch (Exception ex)
             {
-                MessageBox.Show("尋找目錄錯誤，原因：" + ex.ToString());
+                NLogger.Error("目錄錯誤，原因：" + ex.ToString());
             }
         }
 
         private void cbFolders_SelectedIndexChanged(object sender, EventArgs e)
         {
-            buildDirectoryTreeView();
+            buildLocalComicTreeView();
         }
 
         /// <summary>
         /// 產生右邊資料夾的內容
         /// </summary>
-        private void buildDirectoryTreeView()
+        private void buildLocalComicTreeView()
         {
             try
             {
                 string subPath = Path.Combine(txtRootPath.Text, cbRelateFolders.Text);
                 if (false == Directory.Exists(subPath))
                 {
-                    //MessageBox.Show("路徑：" + subPath + " 不存在！");
                     lblCbMessage.Text = "路徑：" + subPath + " 不存在！";
                 }
                 else
                 {
-                    TreeNode root = new TreeNode(cbRelateFolders.Text, 0, 0);
-
                     string[] dirs = Directory.GetDirectories(subPath);
                     string[] rars = Directory.GetFiles(subPath, "*.rar");
                     string[] newDirs = new string[dirs.Length + rars.Length];
                     Array.Copy(dirs, newDirs, dirs.Length);
                     Array.Copy(rars, 0, newDirs, dirs.Length, rars.Length);
-                    //Array.Sort(newDirs);
+
                     newDirs = newDirs.ToList().CustomSort().ToArray();
                     Array.Reverse(newDirs);
+
+                    TreeNode root = new TreeNode(cbRelateFolders.Text, 0, 0);
                     tvFolder.Nodes.Clear();
                     tvFolder.Nodes.Add(root);
                     foreach (string dir in newDirs)
                     {
-                        //string test = Regex.Replace(dir, @"(\d+)", m => m.Value.PadLeft(10, char.IsDigit(m.Value[0]) ? ' ' : '\xffff'));
-                        //MatchCollection mm = Regex.Matches(dir, @"(\d+)|(\D+)");
                         if (0 == String.Compare(".RAR", Path.GetExtension(dir), true))
-                            root.Nodes.Add(Path.GetFileName(dir), Path.GetFileName(dir), 1, 1);
+                            root.Nodes.Add(Path.GetFileName(dir), Path.GetFileName(dir), 1, 1); // rar icon
                         else
-                            root.Nodes.Add(Path.GetFileName(dir), Path.GetFileName(dir), 2, 2);
+                            root.Nodes.Add(Path.GetFileName(dir), Path.GetFileName(dir), 2, 2); // 一般 icon
                     }
-                    lblCbMessage.Text = "共" + newDirs.Count().ToString() + "筆資料！";
-
                     root.ExpandAll();
+
+                    lblCbMessage.Text = "共" + newDirs.Count().ToString() + "筆資料！";
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                NLogger.Error("無法開啟本地端漫畫," + ex.ToString());
             }
 
         }
@@ -342,7 +308,7 @@ namespace ComicCatcher
         {
             if (e.KeyChar == (char)Keys.Enter)
             {
-                GenComicLocalDirecotryComboBox();
+                buildLocalComicDirComboBox();
             }
         }
 
@@ -425,7 +391,7 @@ namespace ComicCatcher
                         //t.Start(new Scheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = allPictureUrl[i], alternativeUrl = allPictureUrl[i].Replace(Xindm.PicHost, Xindm.PicHostAlternative) });
                         if (task.usingAlternativeUrl) // 使用替代網址下載(較慢)
                         {
-                            t.Start(new DownloadPictureScheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = allPictureUrl[i].Replace(Xindm.PicHost, Xindm.PicHostAlternative) });
+                            t.Start(new DownloadPictureScheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = allPictureUrl[i].Replace(XindmWebSite.PicHost, XindmWebSite.PicHostAlternative) });
                         }
                         else // 使用正常網址下載(較快)
                         {
@@ -468,48 +434,20 @@ namespace ComicCatcher
                 string tmpFile = Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".tmp";
                 string cmpFile = Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".cmp";
 
-                #region 原本要作自動切換下載，但是遇到會檔proxy ip，所以作罷
-                //// 檢查圖片檔是不是有問題
-                //if (false == String.IsNullOrEmpty(pictureUrlAlter)) // 如果沒有替代網址，那也沒用
-                //{
-                //    if (0 != pictureUrl.CompareTo(pictureUrlAlter)) // 已經換成替代網址的話，也不用再看有沒有問題
-                //    {
-                //        FileInfo f = new FileInfo(tmpFile);
-                //        if (f.Exists)
-                //        {
-                //            if (f.Length <= 3072) // 圖片檔小於等資 3k 就當作是有問題的資料
-                //            {
-                //                pictureUrl = pictureUrlAlter;
-                //                tmpFile = Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".tmp";
-                //                cmpFile = Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".cmp";
-                //                DonwloadHelper.donwload(pictureUrl, tmpFile);
-                //            }
-                //        }
-                //        f = null;
-                //    }
-                //} 
-                #endregion
-
                 DonwloadHelper.donwload(pictureUrl, tmpFile);
 
-                // 檢查 50 次下載，如果還是都有問題，就跳出錯誤
                 int i = 0;
-                int testTimes = 50;
+                int testTimes = 50; // 檢查 50 次下載，如果還是都有問題，就跳出錯誤
                 for (i = 0; i < testTimes; ++i)
                 {
                     DonwloadHelper.donwload(pictureUrl, cmpFile);
-                    if (FileUtil.CompareMD5(tmpFile, cmpFile))
-                    {
-                        if (File.Exists(cmpFile)) File.Delete(cmpFile);
+
+                    if (FileUtil.CompareFileByMD5(tmpFile, cmpFile))
                         break;
-                    }
                     else
                     {
-                        // 把暫存圖片檔刪除，以後來下載的比較檔作為下一次比較的暫存檔
-                        FileUtil.MoveFileOverwrite(cmpFile, tmpFile);
-                        // txtInfo.AppendText("[" + myTask.name + "]檔案：" + tmpFile.Replace(".tmp", "") + "，比對失敗，重新下載比對！" + Environment.NewLine);
                         bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "", infoMsg = tagname + "檔案：" + fileName + "，比對失敗，重新下載比對！" + ThreadID });
-                        System.Threading.Thread.Sleep(1);
+                        Thread.Sleep(1);
                     }
                 }
 
@@ -519,13 +457,11 @@ namespace ComicCatcher
                 }
                 else
                 {
-                    // rename file
-                    FileUtil.MoveFileOverwrite(tmpFile, Path.Combine(localPath, Path.GetFileName(pictureUrl)));
+                    FileUtil.MoveFile(tmpFile, Path.Combine(localPath, Path.GetFileName(pictureUrl)));
                 }
             }
             catch (Exception ex)
             {
-                //txtInfo.AppendText("[" + myTask.name + "]下載失敗，原因：" + ex.ToString() + Environment.NewLine);
                 bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "", infoMsg = tagname + "下載失敗" + ThreadID + "，原因：" + ex.ToString() });
                 Thread.Sleep(1);
             }
@@ -533,18 +469,9 @@ namespace ComicCatcher
             {
                 if (File.Exists(Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".cmp")) File.Delete(Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".cmp");
 
-                //Cursor = System.Windows.Forms.Cursors.Arrow;
-                // statusMsg.Text = "[" + myTask.name + "]下載完成..." + Path.GetFileName(pictureUrl);
                 bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + fileName + "下載完成...", infoMsg = tagname + fileName + "下載完成..." + ThreadID });
                 Thread.Sleep(1);
             }
-
-            //try
-            //{
-            //    if (null != ((Scheduler)pictureSchedule).handle)
-            //        ((Scheduler)pictureSchedule).handle.Set();
-            //}
-            //catch { }
         }
 
         #region 節點類別 Web -> List -> Comic -> Chapter
@@ -555,11 +482,11 @@ namespace ComicCatcher
         /// <returns></returns>
         private bool IsChapterNode(TreeNode tn)
         {
-            if (null == tn) return false;
-
-            if (false == tn.Name.Contains(Xindm.WebUrl)) return false; // 節點本身必需要是包含此內容
-            // 如果父節點是漫畫名稱節點，表示此節點是回數(集數 )節點
-            return IsComicNameNode(tn.Parent);
+            return tn.Level == 3;
+            //if (null == tn) return false;
+            //if (false == tn.Name.Contains(XindmWebSite.WebUrl)) return false; // 節點本身必需要是包含此內容
+            //// 如果父節點是漫畫名稱節點，表示此節點是回數(集數 )節點
+            //return IsComicNameNode(tn.Parent);
         }
 
         /// <summary>
@@ -569,11 +496,12 @@ namespace ComicCatcher
         /// <returns></returns>
         private bool IsComicNameNode(TreeNode tn)
         {
-            if (null == tn) return false;
+            return tn.Level == 2;
+            //if (null == tn) return false;
 
-            if (false == tn.Name.Contains(Xindm.WebUrl)) return false; // 節點本身必需要是包含此內容
-            // 如果父節點是清單連結，表示此連結是漫畫名稱連結
-            return IsListNode(tn.Parent);
+            //if (false == tn.Name.Contains(XindmWebSite.WebUrl)) return false; // 節點本身必需要是包含此內容
+            //// 如果父節點是清單連結，表示此連結是漫畫名稱連結
+            //return IsListNode(tn.Parent);
         }
 
         /// <summary>
@@ -583,22 +511,10 @@ namespace ComicCatcher
         /// <returns></returns>
         private bool IsListNode(TreeNode tn)
         {
-            if (null == tn) return false;
-            return tn.Name.Contains(Xindm.ListUrl);
+            return tn.Level == 1;
+            //if (null == tn) return false;
+            //return tn.Name.Contains(XindmWebSite.ListUrl);
         }
-
-        /// <summary>
-        /// 是否為顯示漫畫網站的節點
-        /// </summary>
-        /// <param name="tn"></param>
-        /// <returns></returns>
-        private bool IsWebNode(TreeNode tn)
-        {
-            if (null == tn) return false;
-
-            return null == tn.Parent;
-        }
-
         #endregion
 
         private void txtInfo_TextChanged(object sender, EventArgs e)
@@ -660,7 +576,7 @@ namespace ComicCatcher
         {
             if (e.KeyCode == Keys.Enter)
             {
-                buildDirectoryTreeView();
+                buildLocalComicTreeView();
             }
         }
 
@@ -749,7 +665,7 @@ namespace ComicCatcher
 
         private void tvFolder_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            OpenComic();
+            OpenLocalComic();
         }
 
         private void btnOpen_Click(object sender, EventArgs e)
@@ -757,7 +673,7 @@ namespace ComicCatcher
             ArchiveComic();
         }
 
-        private void OpenComic()
+        private void OpenLocalComic()
         {
             try
             {
@@ -777,10 +693,13 @@ namespace ComicCatcher
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                NLogger.Error("無法開啟本地漫畫檔案," + ex.ToString());
             }
         }
 
+        /// <summary>
+        /// 壓縮漫畫檔案
+        /// </summary>
         private void ArchiveComic()
         {
             Helpers.RARHelper rar = null;
@@ -822,7 +741,7 @@ namespace ComicCatcher
                         }
                     }
                     MessageBox.Show("刪除完成！");
-                    buildDirectoryTreeView();
+                    buildLocalComicTreeView();
                 }
             }
             catch (Exception ex)
@@ -849,12 +768,12 @@ namespace ComicCatcher
         private void tvFolder_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)Keys.Return)
-                OpenComic();
+                OpenLocalComic();
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
-            buildDirectoryTreeView();
+            buildLocalComicTreeView();
         }
 
         private void chkUsingAlternativeUrl_CheckedChanged(object sender, EventArgs e)
