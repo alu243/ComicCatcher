@@ -41,9 +41,6 @@
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.VisualBasic.PowerPacks.Vs, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="NLog">
-      <HintPath>..\packages\NLog.2.1.0\lib\net40\NLog.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -63,8 +60,8 @@
     <Compile Include="App_Code\Helpers\RARHelper.cs" />
     <Compile Include="App_Code\Helpers\CMDHelper.cs" />
     <Compile Include="App_Code\Util\CharsetConvert.cs" />
-    <Compile Include="App_Code\Util\DonwloadHelper.cs" />
     <Compile Include="App_Code\Util\HttpHelper.cs" />
+    <Compile Include="App_Code\Util\DonwloadHelper.cs" />
     <Compile Include="App_Code\Comic\ComicBase.cs" />
     <Compile Include="App_Code\Comic\ComicChapter.cs" />
     <Compile Include="App_Code\Comic\ComicList.cs" />
@@ -84,7 +81,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="tryf.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -100,13 +96,6 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
-    <Content Include="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <None Include="NLog.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
