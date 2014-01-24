@@ -30,11 +30,12 @@ namespace ComicCatcher.App_Code.Comic
             {
                 try
                 {
-                    if (false == IsIconDataReaded)
+                    if (false == this.IsIconDataReaded)
                     {
                         this.iconData = HttpHelper.getPictureResponse(this.iconUrl);
-                        IsIconDataReaded = true;
+                        this.IsIconDataReaded = true;
                     }
+                    NLogger.Info("讀取icon圖檔中...," + this.description);
                     return Image.FromStream(this.iconData);
                 }
                 catch (Exception ex)

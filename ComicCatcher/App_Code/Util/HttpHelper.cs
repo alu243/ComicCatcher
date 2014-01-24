@@ -20,6 +20,7 @@ namespace ComicCatcher.App_Code.Util
             int remainTries = 10;
             request = (HttpWebRequest)WebRequest.Create(url);
             request.CookieContainer = myCookie;
+            request.Timeout = 3000;
             request.Proxy = UsingProxy.getProxy();
             request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
 
@@ -31,6 +32,7 @@ namespace ComicCatcher.App_Code.Util
                 }
                 catch (Exception e)
                 {
+                    Helpers.NLogger.Error("讀取url內容發生錯誤");
                     request = (HttpWebRequest)WebRequest.Create(url);
                     request.Proxy = UsingProxy.getProxy();
                     // doNothing
@@ -49,17 +51,14 @@ namespace ComicCatcher.App_Code.Util
                 StreamReader readStream = new StreamReader(response.GetResponseStream(), encode);
 
                 StringBuilder sb = new StringBuilder();
-
-                Char[] read = new Char[256];
+                Char[] read = new Char[8192];
                 // Reads 256 characters at a time.    
-                int count = readStream.Read(read, 0, 256);
-                Console.WriteLine("HTML...\r\n");
+                int count = readStream.Read(read, 0, 8192);
                 while (count > 0)
                 {
                     // Dumps the 256 characters on a string and displays the string to the console.
                     sb.Append(new String(read, 0, count));
-                    count = readStream.Read(read, 0, 256);
-
+                    count = readStream.Read(read, 0, 8192);
                 }
                 return sb.ToString();
                 //return readStream.ReadToEnd();

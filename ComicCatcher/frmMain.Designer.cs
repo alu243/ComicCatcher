@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -50,7 +50,7 @@
             this.btnDownload = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.tvFolderImageList1 = new System.Windows.Forms.ImageList(this.components);
-            this.btnOpen = new System.Windows.Forms.Button();
+            this.btnArchive = new System.Windows.Forms.Button();
             this.lblCbMessage = new System.Windows.Forms.Label();
             this.cbRelateFolders = new System.Windows.Forms.ComboBox();
             this.btnRefresh = new System.Windows.Forms.Button();
@@ -80,6 +80,7 @@
             this.bgWorker = new System.ComponentModel.BackgroundWorker();
             this.bgWorkMain = new System.ComponentModel.BackgroundWorker();
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
+            this.chkBackGroundLoad = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -127,6 +128,7 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.splitContainer1.Panel1.Controls.Add(this.chkBackGroundLoad);
             this.splitContainer1.Panel1.Controls.Add(this.chkUsingAlternativeUrl);
             this.splitContainer1.Panel1.Controls.Add(this.btnCollapse);
             this.splitContainer1.Panel1.Controls.Add(this.chkLoadPhoto);
@@ -146,7 +148,7 @@
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.Color.WhiteSmoke;
             this.splitContainer1.Panel2.Controls.Add(this.btnDelete);
-            this.splitContainer1.Panel2.Controls.Add(this.btnOpen);
+            this.splitContainer1.Panel2.Controls.Add(this.btnArchive);
             this.splitContainer1.Panel2.Controls.Add(this.lblCbMessage);
             this.splitContainer1.Panel2.Controls.Add(this.cbRelateFolders);
             this.splitContainer1.Panel2.Controls.Add(this.btnRefresh);
@@ -300,10 +302,10 @@
             this.tvComicTree.HideSelection = false;
             this.tvComicTree.Location = new System.Drawing.Point(4, 36);
             this.tvComicTree.Name = "tvComicTree";
-            treeNode1.Name = "http://www.xindm.cn";
-            treeNode1.Text = "新動漫(xindm)";
+            treeNode2.Name = "http://www.xindm.cn";
+            treeNode2.Text = "新動漫(xindm)";
             this.tvComicTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode2});
             this.tvComicTree.Size = new System.Drawing.Size(338, 607);
             this.tvComicTree.TabIndex = 3;
             this.tvComicTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvComicTree_AfterSelect);
@@ -343,16 +345,16 @@
             this.tvFolderImageList1.Images.SetKeyName(1, "rar");
             this.tvFolderImageList1.Images.SetKeyName(2, "dir");
             // 
-            // btnOpen
+            // btnArchive
             // 
-            this.btnOpen.Location = new System.Drawing.Point(281, 72);
-            this.btnOpen.Name = "btnOpen";
-            this.btnOpen.Size = new System.Drawing.Size(75, 23);
-            this.btnOpen.TabIndex = 4;
-            this.btnOpen.TabStop = false;
-            this.btnOpen.Text = "壓縮(&A)";
-            this.btnOpen.UseVisualStyleBackColor = true;
-            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
+            this.btnArchive.Location = new System.Drawing.Point(281, 72);
+            this.btnArchive.Name = "btnArchive";
+            this.btnArchive.Size = new System.Drawing.Size(75, 23);
+            this.btnArchive.TabIndex = 4;
+            this.btnArchive.TabStop = false;
+            this.btnArchive.Text = "壓縮(&A)";
+            this.btnArchive.UseVisualStyleBackColor = true;
+            this.btnArchive.Click += new System.EventHandler(this.btnArchive_Click);
             // 
             // lblCbMessage
             // 
@@ -630,6 +632,20 @@
             this.bgWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgWorker_DoWork);
             this.bgWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bgWorker_ProgressChanged);
             // 
+            // chkBackGroundLoad
+            // 
+            this.chkBackGroundLoad.AutoSize = true;
+            this.chkBackGroundLoad.Checked = true;
+            this.chkBackGroundLoad.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkBackGroundLoad.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.chkBackGroundLoad.Location = new System.Drawing.Point(352, 488);
+            this.chkBackGroundLoad.Margin = new System.Windows.Forms.Padding(2);
+            this.chkBackGroundLoad.Name = "chkBackGroundLoad";
+            this.chkBackGroundLoad.Size = new System.Drawing.Size(96, 16);
+            this.chkBackGroundLoad.TabIndex = 20;
+            this.chkBackGroundLoad.Text = "自動載入資訊";
+            this.chkBackGroundLoad.UseVisualStyleBackColor = true;
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -696,7 +712,7 @@
         private System.Windows.Forms.TextBox txtFind;
         private System.Windows.Forms.CheckBox chkLoadPhoto;
         private System.Windows.Forms.Button btnCollapse;
-        private System.Windows.Forms.Button btnOpen;
+        private System.Windows.Forms.Button btnArchive;
         private System.Windows.Forms.TextBox setPhotoProgramPath;
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Button btnSave;
@@ -715,6 +731,7 @@
         private System.Windows.Forms.TextBox setProxyUrl;
         private System.Windows.Forms.CheckBox setUsingProxy;
         private System.Windows.Forms.CheckBox chkUsingAlternativeUrl;
+        private System.Windows.Forms.CheckBox chkBackGroundLoad;
 
     }
 }
