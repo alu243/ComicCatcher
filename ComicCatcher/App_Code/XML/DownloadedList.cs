@@ -3,6 +3,8 @@ using System.IO;
 //using System.Xml.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
+using Helpers;
+using System.Linq;
 namespace ComicCatcher
 {
     [Serializable]
@@ -74,20 +76,24 @@ namespace ComicCatcher
         //////    }
         //////}
 
+        [Obsolete("序列化的設定已不再使用")]
         private static string filename { get { return @"donwloadedlist.bin"; } }
-        public void save()
-        {
-            using (FileStream fs = new FileStream(filename, FileMode.Create))
-            {
-                //Console.WriteLine("準備序列化物件");
-                BinaryFormatter xmlSerializer = new BinaryFormatter();
-                xmlSerializer.Serialize(fs, this);
-                fs.Flush();
-                fs.Close();
-            }
-        }
 
-        public static DownloadedList load()
+        //[Obsolete("序列化的設定已不再使用")]
+        //public void savexml()
+        //{
+        //    using (FileStream fs = new FileStream(filename, FileMode.Create))
+        //    {
+        //        //Console.WriteLine("準備序列化物件");
+        //        BinaryFormatter xmlSerializer = new BinaryFormatter();
+        //        xmlSerializer.Serialize(fs, this);
+        //        fs.Flush();
+        //        fs.Close();
+        //    }
+        //}
+
+        [Obsolete("序列化的設定已不再使用")]
+        public static DownloadedList loadxml()
         {
             using (FileStream oFileStream = new FileStream(filename, FileMode.Open))
             {
@@ -101,30 +107,56 @@ namespace ComicCatcher
                 return o;
             }
         }
-
-        public Dictionary<string, Dictionary<string, bool>> myList { get; set; }
-
-        public bool HasDownloaded(string comicName, string volumnName)
+        public void ImportToDB()
         {
-            if (null == myList) return false;
-            if (myList.ContainsKey(comicName))
+            myList.Keys.ToList().ForEach(k =>
             {
-                return myList[comicName].ContainsKey(volumnName);
-            }
-            return false;
+                myList[k].Keys.ToList().ForEach(k2 =>
+                {
+                    AddDownloaded(XindmWebSite.WebSiteName, k, k2);
+                });
+            });
         }
 
-        public void AddDownloaded(string comicName, string volumnName)
+
+        public static void LoadDB()
         {
-            if (null == myList) myList = new Dictionary<string, Dictionary<string, bool>>();
-            if (false == myList.ContainsKey(comicName))
+            SQLiteHelper.CreateDownladedListTableOnFly();
+        }
+
+        private Dictionary<string, Dictionary<string, bool>> myList { get; set; }
+
+        public static bool HasDownloaded(string comicWeb, string comicName, string comicVolumn)
+        {
+            return SQLiteHelper.IsInDownloadedList(comicWeb, comicName, comicVolumn);
+            //if (null == myList) return false;
+            //if (myList.ContainsKey(comicName))
+            //{
+            //    return myList[comicName].ContainsKey(volumnName);
+            //}
+            //return false;
+        }
+
+        public static void AddDownloaded(string comicWeb, string comicName, string comicVolumn)
+        {
+            try
             {
-                myList.Add(comicName, new Dictionary<string, bool>());
+                SQLiteHelper.InsertComicVolumn(comicWeb, comicName, comicVolumn);
             }
-            if (false == myList[comicName].ContainsKey(volumnName))
+            catch (Exception ex)
             {
-                myList[comicName].Add(volumnName, true);
+                NLogger.Error("資料已存在資料庫中，" + comicName + comicVolumn);
             }
+            //return;
+            //if (null == myList) myList = new Dictionary<string, Dictionary<string, bool>>();
+            //if (false == myList.ContainsKey(comicName))
+            //{
+            //    myList.Add(comicName, new Dictionary<string, bool>());
+            //}
+            //if (false == myList[comicName].ContainsKey(volumnName))
+            //{
+            //    myList[comicName].Add(volumnName, true);
+            //}
         }
     }
 }

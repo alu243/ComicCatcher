@@ -14,6 +14,8 @@ using ComicCatcher.App_Code.Comic;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Helpers;
+using System.Diagnostics;
+using System.Reflection;
 namespace ComicCatcher
 {
     public partial class frmMain : Form
@@ -22,24 +24,51 @@ namespace ComicCatcher
 
         private Settings settings = null;
 
-        private DownloadedList dwnedList = null;
+        //private DownloadedList dwnedList = null;
 
         public frmMain()
         {
+            ExportInteropFile();
             InitializeComponent();
             NLogger.SetBox(this.txtInfo);
         }
 
+        private void ExportInteropFile()
+        {
+            Assembly asm;
+            Stream asmfs;
+            asm = Assembly.GetExecutingAssembly();
+            asmfs = asm.GetManifestResourceStream("ComicCatcher.x86.System.Data.SQLite.dll");
+            //var files = asm.GetManifestResourceNames();
+
+            using (FileStream fs = new FileStream(@".\System.Data.SQLite.dll", FileMode.Create, FileAccess.Write))
+            {
+                asmfs.Position = 0;
+                int length = 4096;
+                byte[] buffer = new Byte[length];
+                int count = 0;
+                while (0 < (count = asmfs.Read(buffer, 0, length)))
+                {
+                    fs.Write(buffer, 0, count);
+                }
+            }
+        }
+
         private void frmMain_Load(object sender, EventArgs e)
         {
+
             InitialComicRootTree();
             lblUpdateDate.Text = "";
             lblUpdateChapter.Text = "";
             buildLocalComicDirComboBox();
 
+
             ConfigureSettings();
-            SetSettings();
-            LoadDownloadList();
+            GetSettings();
+
+            RenewXML2DB();
+            DownloadedList.LoadDB();
+            //LoadDownloadList();
         }
 
         private void tvComicTree_AfterSelect(object sender, TreeViewEventArgs e)
@@ -109,11 +138,13 @@ namespace ComicCatcher
                 if (chkBackGroundLoad.Checked)
                 {
                     Thread t1 = new Thread(BuidComicNode);
+                    t1.IsBackground = true;
                     t1.Start(tvComicTree.SelectedNode);
                 }
                 else
                 {
-                    currNode.Nodes.Clear();
+                    TreeViewHelper.ClearTreeNode(currNode); ;
+
                     // 產生清單下的漫畫名稱內容子節點
                     NLogger.Info("********************************************");
                     using (ComicList cp = new ComicList(currNode.Name))
@@ -131,8 +162,15 @@ namespace ComicCatcher
                             tn.Text = comic.description;
                             tn.ImageKey = comic.iconUrl;
                             tn.Tag = comic;
-                            currNode.Nodes.Add(tn);
-                            //currNode.Nodes.Add(comic.url, comic.description, comic.iconUrl);
+
+                            TreeViewHelper.AddTreeNode(currNode, tn);
+
+                            // 如果本地端有已經下載的漫畫的話，變為粗體
+                            if (Directory.Exists(Path.Combine(txtRootPath.Text, tn.Text)))
+                            {
+                                TreeViewHelper.SetFontBold(tvComicTree, tn);
+                            }
+
                             NLogger.Info(comic.description + "=" + comic.url);
                         }
                     }
@@ -156,18 +194,21 @@ namespace ComicCatcher
                 if (false == isNotLocked) return;
 
 
-                currNode.Nodes.Clear();
+                TreeViewHelper.ClearTreeNode(currNode);
+
+
                 // 產生漫畫的回合子節點
                 using (ComicName cv = new ComicName(currNode.Name))
                 {
                     var chapterList = cv.getComicBaseList();
                     foreach (var comic in chapterList)
                     {
-                        TreeNode tn = currNode.Nodes.Add(comic.url, comic.description);
+                        TreeNode tn = TreeViewHelper.AddTreeNode(currNode, comic.url, comic.description);
                         // 如果是已下載過的點，變粗體
-                        if (null != dwnedList && dwnedList.HasDownloaded(currNode.Text, comic.description))
+                        //if (null != dwnedList && dwnedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
+                        if (DownloadedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
                         {
-                            tn.NodeFont = new Font(tvComicTree.Font, FontStyle.Bold);
+                            TreeViewHelper.SetFontBold(tvComicTree, tn, Color.Blue);
                         }
                     }
                 }
@@ -332,12 +373,14 @@ namespace ComicCatcher
 
             try
             {
-                dwnedList.AddDownloaded(tn.Parent.Text, tn.Text);
-                dwnedList.save();
+                DownloadedList.AddDownloaded(XindmWebSite.WebSiteName, tn.Parent.Text, tn.Text);
+                //dwnedList.AddDownloaded(XindmWebSite.WebSiteName, tn.Parent.Text, tn.Text);
+                //dwnedList.savexml();
             }
             catch { }
 
-            tn.NodeFont = new Font(tvComicTree.Font, FontStyle.Bold);
+            TreeViewHelper.SetFontBold(tvComicTree, tn.Parent);
+            TreeViewHelper.SetFontBold(tvComicTree, tn, Color.Blue);
 
             if ((queue.Count<Tasker>(q => q.name == taskname)) > 0)
             {
@@ -391,6 +434,7 @@ namespace ComicCatcher
                     for (int i = startPage; i < upperPage; ++i)
                     {
                         Thread t = new Thread(new ParameterizedThreadStart(DownloadPicture));
+                        t.IsBackground = true;
                         // 圖片加入下載排程
                         if (task.usingAlternativeUrl) // 使用替代網址下載(較慢)
                             t.Start(new DownloadPictureScheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = allPictureUrl[i].Replace(XindmWebSite.PicHost, XindmWebSite.PicHostAlternative) });
@@ -733,9 +777,9 @@ namespace ComicCatcher
         {
             try
             {
-                GetSettings();
+                LoadSettingsFromSettingTab();
                 settings.save();
-                SetSettings();
+                GetSettings();
                 MessageBox.Show("儲存完成");
             }
             catch (Exception ex)
@@ -758,7 +802,7 @@ namespace ComicCatcher
             settings.save();
         }
 
-        private void SetSettings()
+        private void GetSettings()
         {
             /// 設定畫面
             setPhotoProgramPath.Text = settings.PhotoProgramPath;
@@ -768,11 +812,13 @@ namespace ComicCatcher
             setUsingProxy.Checked = settings.UsingProxy;
             setProxyUrl.Text = settings.ProxyUrl;
             setProxyPort.Text = settings.ProxyPort.ToString();
+            setBackGroundLoad.Checked = settings.BackGroundLoadNode;
 
             /// 使用畫面
             txtRootPath.Text = settings.LocalPath;
             chkLoadPhoto.Checked = settings.LoadAllPicture;
             chkIsUseProxy.Checked = settings.UsingProxy;
+            chkBackGroundLoad.Checked = settings.BackGroundLoadNode;
 
             /// Proxy設定(要在使用畫面設定完成後)
             App_Code.Util.UsingProxy.isUseProxy = chkIsUseProxy.Checked;
@@ -780,7 +826,7 @@ namespace ComicCatcher
             App_Code.Util.UsingProxy.ProxyPort = settings.ProxyPort;
         }
 
-        private void GetSettings()
+        private void LoadSettingsFromSettingTab()
         {
             settings.PhotoProgramPath = setPhotoProgramPath.Text.Trim();
             settings.WinRARPath = setWinRARPath.Text.Trim();
@@ -788,22 +834,24 @@ namespace ComicCatcher
             settings.LoadAllPicture = setLoadAllPicture.Checked;
             settings.UsingProxy = setUsingProxy.Checked;
             settings.ProxyUrl = setProxyUrl.Text.Trim();
+            settings.BackGroundLoadNode = setBackGroundLoad.Checked;
+
             if (false == String.IsNullOrEmpty(setProxyPort.Text.Trim()))
                 settings.ProxyPort = int.Parse(setProxyPort.Text.Trim());
         }
 
-        private void LoadDownloadList()
-        {
-            dwnedList = new DownloadedList();
-            try
-            {
-                dwnedList = DownloadedList.load();
-            }
-            catch (Exception ex)
-            {
-                NLogger.Error(MsgEnum.讀取已下載清單失敗.ToString() + ex.ToString());
-            }
-        }
+        //private void LoadDownloadList()
+        //{
+        //    dwnedList = new DownloadedList();
+        //    try
+        //    {
+        //        dwnedList = DownloadedList.loadxml();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        NLogger.Error(MsgEnum.讀取已下載清單失敗.ToString() + ex.ToString());
+        //    }
+        //}
         #endregion
 
         #region Form元件顯示相關功能
@@ -826,13 +874,9 @@ namespace ComicCatcher
         private void BuidComicNode(object objNode)
         {
             TreeNode currNode = objNode as TreeNode;
-
             if (IsListNode(currNode))
             {
-                if (InvokeRequired)
-                    Invoke(new MethodInvoker(() => currNode.Nodes.Clear()));
-                else
-                    currNode.Nodes.Clear();
+                TreeViewHelper.ClearTreeNode(currNode); ;
 
                 //currNode.Nodes.Clear();
                 // 產生清單下的漫畫名稱內容子節點
@@ -843,6 +887,7 @@ namespace ComicCatcher
                     foreach (var comic in comicList)
                     {
                         Thread t1 = new Thread(() => { Image img = comic.iconImage; }); // 背景讀圖
+                        t1.IsBackground = true;
                         t1.Start();
 
                         TreeNode tn = new TreeNode();
@@ -851,53 +896,110 @@ namespace ComicCatcher
                         tn.ImageKey = comic.iconUrl;
                         tn.Tag = comic;
 
-                        if (InvokeRequired)
-                            Invoke(new MethodInvoker(() => currNode.Nodes.Add(tn)));
-                        else
-                            currNode.Nodes.Add(tn);
+                        TreeViewHelper.AddTreeNode(currNode, tn); ;
+
+                        if (Directory.Exists(Path.Combine(txtRootPath.Text, tn.Text)))
+                        {
+                            TreeViewHelper.SetFontBold(tvComicTree, tn);
+                        }
+
 
                         NLogger.Info(comic.description + "=" + comic.url);
-
                     }
                 }
                 NLogger.Info("********************************************");
 
-                foreach (var node in currNode.Nodes)
-                    BuidComicNode(node);
-
+                foreach (TreeNode node in currNode.Nodes)
+                {
+                    Thread t2 = new Thread(BuildComicNameNode);
+                    t2.IsBackground = true;
+                    t2.Start(node);
+                }
             }
             else if (IsComicNameNode(currNode))
             {
-                lock (currNode)
+                Thread t2 = new Thread(BuildComicNameNode);
+                t2.IsBackground = true;
+                t2.Start(currNode);
+            }
+
+        }
+
+        private void BuildComicNameNode(object objNode)
+        {
+            TreeNode currNode = objNode as TreeNode;
+            if (null == currNode) return;
+            if (false == IsComicNameNode(currNode)) return;
+
+            lock (currNode)
+            {
+                if (currNode.Nodes.Count > 0) return; // 已有節點的不更新
+
+                // 產生漫畫的回合子節點
+                using (ComicName cn = new ComicName(currNode.Name))
                 {
-                    if (currNode.Nodes.Count > 0) return; // 已有節點的不更新
-
-                    // 產生漫畫的回合子節點
-                    using (ComicName cn = new ComicName(currNode.Name))
+                    NLogger.Info("begin Call getComicBaseList," + currNode.Name);
+                    var chapterList = cn.getComicBaseList();
+                    foreach (var comic in chapterList)
                     {
-                        NLogger.Info("begin Call getComicBaseList," + currNode.Name);
-                        var chapterList = cn.getComicBaseList();
-                        foreach (var comic in chapterList)
-                        {
-                            TreeNode tn = new TreeNode();
-                            if (InvokeRequired)
-                                Invoke(new MethodInvoker(() => tn = currNode.Nodes.Add(comic.url, comic.description)));
-                            else
-                                tn = currNode.Nodes.Add(comic.url, comic.description);
+                        TreeNode tn = TreeViewHelper.AddTreeNode(currNode, comic.url, comic.description);
 
-                            // 如果是已下載過的點，變粗體
-                            if (null != dwnedList && dwnedList.HasDownloaded(currNode.Text, comic.description))
-                            {
-                                if (InvokeRequired)
-                                    Invoke(new MethodInvoker(() => tn.NodeFont = new Font(tvComicTree.Font, FontStyle.Bold)));
-                                else
-                                    tn.NodeFont = new Font(tvComicTree.Font, FontStyle.Bold);
-                            }
+                        // 如果是已下載過的點，變粗體
+                        //if (null != dwnedList && dwnedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
+                        if (DownloadedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
+                        {
+                            TreeViewHelper.SetFontBold(tvComicTree, tn, Color.Blue);
                         }
                     }
                 }
             }
-
         }
+
+
+
+        private void OpenDirectory_Click(object sender, EventArgs e)
+        {
+            Process.Start(Path.Combine(txtRootPath.Text, cbRelateFolders.Text));
+        }
+
+        private void RenewXML2DB()
+        {
+            //if (false == File.Exists(@".\ComicCatcher.s3db")
+            //    && File.Exists(@".\donwloadedlist.bin")
+            //    && File.Exists(@".\settings.xml"))
+            if (File.Exists(@".\donwloadedlist.bin") && (false == File.Exists(@".\ComicCatcher.s3db")))
+            {
+                MessageBox.Show("按下確定後更新設定資料");
+                try
+                {
+                    using (Form prompt = new Form())
+                    {
+                        prompt.Width = 300;
+                        prompt.Height = 100;
+                        Label textLabel = new Label() { Left = 50, Top = 20, Width = 300, Text = "資料更新中，請稍候..." };
+                        prompt.Controls.Add(textLabel);
+                        prompt.StartPosition = FormStartPosition.CenterScreen;
+                        prompt.ControlBox = false;
+                        prompt.FormBorderStyle = FormBorderStyle.FixedDialog;
+                        prompt.Show();
+                        Cursor = System.Windows.Forms.Cursors.WaitCursor;
+
+
+
+                        DownloadedList.LoadDB();
+                        DownloadedList dwnedList = DownloadedList.loadxml();
+                        dwnedList.ImportToDB();
+                        File.Delete(@".\donwloadedlist.bin");
+                        prompt.Hide();
+                        MessageBox.Show("更新完成！");
+                    }
+                }
+                finally
+                {
+                    Cursor = System.Windows.Forms.Cursors.Default;
+                }
+            }
+        }
+
     }
 }

@@ -81,5 +81,12 @@ namespace ComicCatcher
             get { return this._loadAllPicture ?? true; }
             set { this._loadAllPicture = value; }
         }
+
+        private bool? _backGroundLoadNode;
+        public bool BackGroundLoadNode
+        {
+            get { return this._backGroundLoadNode ?? false; }
+            set { this._backGroundLoadNode = value; }
+        }
     }
 }

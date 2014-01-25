@@ -13,17 +13,10 @@ namespace ComicCatcher.App_Code.Util
     {
         static CookieContainer myCookie = new CookieContainer();
 
-        public static string getResponse(string url)
+        public static string getResponse(string url, int remainTries = 10)
         {
-            HttpWebRequest request = null;
+            HttpWebRequest request = CreateRequest(url);
             HttpWebResponse response = null;
-            int remainTries = 10;
-            request = (HttpWebRequest)WebRequest.Create(url);
-            request.CookieContainer = myCookie;
-            request.Timeout = 3000;
-            request.Proxy = UsingProxy.getProxy();
-            request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-
             while (null == response && remainTries >= 0)
             {
                 try
@@ -32,20 +25,16 @@ namespace ComicCatcher.App_Code.Util
                 }
                 catch (Exception e)
                 {
-                    Helpers.NLogger.Error("讀取url內容發生錯誤");
-                    request = (HttpWebRequest)WebRequest.Create(url);
-                    request.Proxy = UsingProxy.getProxy();
-                    // doNothing
+                    Helpers.NLogger.Error("讀取url內容發生錯誤," + url + Environment.NewLine + e.ToString());
+                    if (response != null) response.Close();
+                    if (request != null) request.Abort();
+                    request = CreateRequest(url);
                 }
                 remainTries--;
             }
             try
             {
-                if (null == response) throw new NullReferenceException("連線發生錯誤超過10次！！");
-                //using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                //{
-                // Insert code that uses the response object.
-                //myCookie = request.CookieContainer;
+                if (null == response) throw new NullReferenceException("連線發生錯誤，且重新測試超過10次！！");
 
                 Encoding encode = System.Text.Encoding.GetEncoding("gb2312");
                 StreamReader readStream = new StreamReader(response.GetResponseStream(), encode);
@@ -67,48 +56,45 @@ namespace ComicCatcher.App_Code.Util
             finally
             {
                 if (null != response) response.Close();
+                if (null != request) request.Abort();
                 request = null;
             }
         }
         public static MemoryStream getPictureResponse(string url)
         {
-            HttpWebRequest request = null;
-
-            request = (HttpWebRequest)WebRequest.Create(url);
-            request.Referer = url.getRefferString();
-
-            request.CookieContainer = myCookie; // 拿到上次成功連線的 cookie 當作是同一個 session 
-            //request.ContentType = "image/jpeg";
-            //request.Referer = url;
-            request.Proxy = UsingProxy.getProxy();
-
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            var request = CreateRequest(url);
+            try
             {
-                using (BinaryReader br = new BinaryReader(response.GetResponseStream()))
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 {
-                    MemoryStream ms = new MemoryStream();
-                    ms.Write(br.ReadBytes(Convert.ToInt32(response.ContentLength)), 0, Convert.ToInt32(response.ContentLength));
-                    //byte[] buffer = new byte[4096];
-                    //int count = 0;
-                    //while (0 < (count = br.Read(buffer, 0, 4096)))
-                    //{
-                    //    ms.Write(buffer, 0, count);
-                    //}
-                    return ms;
-                    //return readStream.ReadToEnd();
+                    using (BinaryReader br = new BinaryReader(response.GetResponseStream()))
+                    {
+                        MemoryStream ms = new MemoryStream();
+                        ms.Write(br.ReadBytes(Convert.ToInt32(response.ContentLength)), 0, Convert.ToInt32(response.ContentLength));
+                        //byte[] buffer = new byte[4096];
+                        //int count = 0;
+                        //while (0 < (count = br.Read(buffer, 0, 4096)))
+                        //{
+                        //    ms.Write(buffer, 0, count);
+                        //}
+                        return ms;
+                        //return readStream.ReadToEnd();
+                    }
                 }
             }
-
+            finally
+            {
+                if (null != request) request.Abort();
+            }
         }
 
-        public static MemoryStream getPictureResponse(string url,int retryTimes)
+        public static MemoryStream getPictureResponse(string url, int retryTimes)
         {
             Exception myEx = null;
             for (int i = 0; i < retryTimes; i++)
             {
                 try
                 {
-                    //return getPictureResponse(url, referer);
                     return getPictureResponse(url);
                 }
                 catch (Exception ex)
@@ -117,7 +103,23 @@ namespace ComicCatcher.App_Code.Util
                 }
             }
             throw myEx;
+        }
 
+        private static HttpWebRequest CreateRequest(string url)
+        {
+            System.Net.ServicePointManager.DefaultConnectionLimit = 120;
+            HttpWebRequest request = null;
+
+            request = (HttpWebRequest)WebRequest.Create(url);
+            request.Referer = url.getRefferString();
+            request.CookieContainer = myCookie; // 拿到上次成功連線的 cookie 當作是同一個 session 
+            //request.Timeout = 10000;
+            //request.ContentType = "image/jpeg";
+            //request.Referer = url;
+            request.Proxy = UsingProxy.getProxy();
+            request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
+            request.KeepAlive = false;
+            return request;
         }
 
     }

@@ -8,6 +8,7 @@ namespace ComicCatcher
     public class XindmWebSite
     {
         public static string Title { get { return @"新動漫(xindm)"; } }
+        public static string WebSiteName { get { return @"xindm"; } }
 
         public static string ListUrl { get { return @"http://www.xindm.cn/e/action/ListInfo.php"; } }
 

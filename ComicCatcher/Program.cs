@@ -16,6 +16,13 @@ namespace ComicCatcher
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new frmMain());
+
+            try
+            {
+                System.IO.File.Delete(@".\System.Data.SQLite.dll");
+            }
+            catch { /* doNothing */ }
+
         }
     }
 }

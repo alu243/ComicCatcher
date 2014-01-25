@@ -29,11 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
+            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.chkBackGroundLoad = new System.Windows.Forms.CheckBox();
             this.chkUsingAlternativeUrl = new System.Windows.Forms.CheckBox();
             this.btnCollapse = new System.Windows.Forms.Button();
             this.chkLoadPhoto = new System.Windows.Forms.CheckBox();
@@ -48,6 +49,7 @@
             this.txtUrl = new System.Windows.Forms.TextBox();
             this.tvComicTree = new System.Windows.Forms.TreeView();
             this.btnDownload = new System.Windows.Forms.Button();
+            this.btnOpenDirectory = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.tvFolderImageList1 = new System.Windows.Forms.ImageList(this.components);
             this.btnArchive = new System.Windows.Forms.Button();
@@ -59,6 +61,7 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.txtInfo = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.setBackGroundLoad = new System.Windows.Forms.CheckBox();
             this.gbProxy = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
             this.setProxyPort = new System.Windows.Forms.TextBox();
@@ -80,7 +83,6 @@
             this.bgWorker = new System.ComponentModel.BackgroundWorker();
             this.bgWorkMain = new System.ComponentModel.BackgroundWorker();
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
-            this.chkBackGroundLoad = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -147,6 +149,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.splitContainer1.Panel2.Controls.Add(this.btnOpenDirectory);
             this.splitContainer1.Panel2.Controls.Add(this.btnDelete);
             this.splitContainer1.Panel2.Controls.Add(this.btnArchive);
             this.splitContainer1.Panel2.Controls.Add(this.lblCbMessage);
@@ -158,6 +161,20 @@
             this.splitContainer1.SplitterDistance = 600;
             this.splitContainer1.TabIndex = 3;
             this.splitContainer1.TabStop = false;
+            // 
+            // chkBackGroundLoad
+            // 
+            this.chkBackGroundLoad.AutoSize = true;
+            this.chkBackGroundLoad.Checked = true;
+            this.chkBackGroundLoad.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkBackGroundLoad.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.chkBackGroundLoad.Location = new System.Drawing.Point(352, 488);
+            this.chkBackGroundLoad.Margin = new System.Windows.Forms.Padding(2);
+            this.chkBackGroundLoad.Name = "chkBackGroundLoad";
+            this.chkBackGroundLoad.Size = new System.Drawing.Size(96, 16);
+            this.chkBackGroundLoad.TabIndex = 20;
+            this.chkBackGroundLoad.Text = "自動載入資訊";
+            this.chkBackGroundLoad.UseVisualStyleBackColor = true;
             // 
             // chkUsingAlternativeUrl
             // 
@@ -302,10 +319,10 @@
             this.tvComicTree.HideSelection = false;
             this.tvComicTree.Location = new System.Drawing.Point(4, 36);
             this.tvComicTree.Name = "tvComicTree";
-            treeNode2.Name = "http://www.xindm.cn";
-            treeNode2.Text = "新動漫(xindm)";
+            treeNode5.Name = "http://www.xindm.cn";
+            treeNode5.Text = "新動漫(xindm)";
             this.tvComicTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
+            treeNode5});
             this.tvComicTree.Size = new System.Drawing.Size(338, 607);
             this.tvComicTree.TabIndex = 3;
             this.tvComicTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvComicTree_AfterSelect);
@@ -324,6 +341,17 @@
             this.btnDownload.UseVisualStyleBackColor = true;
             this.btnDownload.Visible = false;
             this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
+            // 
+            // btnOpenDirectory
+            // 
+            this.btnOpenDirectory.Font = new System.Drawing.Font("新細明體", 14F);
+            this.btnOpenDirectory.Location = new System.Drawing.Point(347, 206);
+            this.btnOpenDirectory.Name = "btnOpenDirectory";
+            this.btnOpenDirectory.Size = new System.Drawing.Size(29, 102);
+            this.btnOpenDirectory.TabIndex = 17;
+            this.btnOpenDirectory.Text = "開啟目錄";
+            this.btnOpenDirectory.UseVisualStyleBackColor = true;
+            this.btnOpenDirectory.Click += new System.EventHandler(this.OpenDirectory_Click);
             // 
             // btnDelete
             // 
@@ -448,6 +476,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.setBackGroundLoad);
             this.tabPage3.Controls.Add(this.gbProxy);
             this.tabPage3.Controls.Add(this.label5);
             this.tabPage3.Controls.Add(this.label4);
@@ -464,6 +493,20 @@
             this.tabPage3.Text = "設定資料";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // setBackGroundLoad
+            // 
+            this.setBackGroundLoad.AutoSize = true;
+            this.setBackGroundLoad.Checked = true;
+            this.setBackGroundLoad.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.setBackGroundLoad.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.setBackGroundLoad.Location = new System.Drawing.Point(32, 275);
+            this.setBackGroundLoad.Margin = new System.Windows.Forms.Padding(2);
+            this.setBackGroundLoad.Name = "setBackGroundLoad";
+            this.setBackGroundLoad.Size = new System.Drawing.Size(96, 16);
+            this.setBackGroundLoad.TabIndex = 31;
+            this.setBackGroundLoad.Text = "自動載入資訊";
+            this.setBackGroundLoad.UseVisualStyleBackColor = true;
+            // 
             // gbProxy
             // 
             this.gbProxy.Controls.Add(this.label7);
@@ -471,7 +514,7 @@
             this.gbProxy.Controls.Add(this.label6);
             this.gbProxy.Controls.Add(this.setProxyUrl);
             this.gbProxy.Controls.Add(this.setUsingProxy);
-            this.gbProxy.Location = new System.Drawing.Point(32, 296);
+            this.gbProxy.Location = new System.Drawing.Point(32, 306);
             this.gbProxy.Name = "gbProxy";
             this.gbProxy.Size = new System.Drawing.Size(244, 121);
             this.gbProxy.TabIndex = 30;
@@ -632,20 +675,6 @@
             this.bgWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgWorker_DoWork);
             this.bgWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bgWorker_ProgressChanged);
             // 
-            // chkBackGroundLoad
-            // 
-            this.chkBackGroundLoad.AutoSize = true;
-            this.chkBackGroundLoad.Checked = true;
-            this.chkBackGroundLoad.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkBackGroundLoad.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.chkBackGroundLoad.Location = new System.Drawing.Point(352, 488);
-            this.chkBackGroundLoad.Margin = new System.Windows.Forms.Padding(2);
-            this.chkBackGroundLoad.Name = "chkBackGroundLoad";
-            this.chkBackGroundLoad.Size = new System.Drawing.Size(96, 16);
-            this.chkBackGroundLoad.TabIndex = 20;
-            this.chkBackGroundLoad.Text = "自動載入資訊";
-            this.chkBackGroundLoad.UseVisualStyleBackColor = true;
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -732,6 +761,8 @@
         private System.Windows.Forms.CheckBox setUsingProxy;
         private System.Windows.Forms.CheckBox chkUsingAlternativeUrl;
         private System.Windows.Forms.CheckBox chkBackGroundLoad;
+        private System.Windows.Forms.Button btnOpenDirectory;
+        private System.Windows.Forms.CheckBox setBackGroundLoad;
 
     }
 }
