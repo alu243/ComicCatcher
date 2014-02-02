@@ -6,6 +6,7 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using ComicCatcher.App_Code.Util;
+using Utils;
 namespace ComicCatcher.App_Code.Comic
 {
     public class ComicChapter : ComicBase
@@ -16,7 +17,7 @@ namespace ComicCatcher.App_Code.Comic
         public ComicChapter(string url)
         {
             this.url = url;
-            this.htmlContent = HttpHelper.getResponse(url);
+            this.htmlContent = HttpUtil.getResponse(url);
         }
 
         public List<string> genPictureUrl()

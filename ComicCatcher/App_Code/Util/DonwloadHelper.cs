@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 
 using System.IO;
-namespace ComicCatcher.App_Code.Util
+using Utils;
+namespace Utils
 {
     public class DonwloadHelper
     {
@@ -22,7 +23,7 @@ namespace ComicCatcher.App_Code.Util
                 }
 
                 // 如果下載時發生錯誤，重試 10 次
-                using (MemoryStream ms = HttpHelper.getPictureResponse(pictureUrl, 10))
+                using (MemoryStream ms = HttpUtil.getPictureResponse(pictureUrl, 10))
                 {
                     using (FileStream fs = File.OpenWrite(fullFileName))
                     {

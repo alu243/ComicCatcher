@@ -16,6 +16,8 @@ using System.Text.RegularExpressions;
 using Helpers;
 using System.Diagnostics;
 using System.Reflection;
+
+using Utils;
 namespace ComicCatcher
 {
     public partial class frmMain : Form
@@ -873,85 +875,96 @@ namespace ComicCatcher
 
         private void BuidComicNode(object objNode)
         {
-            TreeNode currNode = objNode as TreeNode;
-            if (IsListNode(currNode))
+            try
             {
-                TreeViewHelper.ClearTreeNode(currNode); ;
-
-                //currNode.Nodes.Clear();
-                // 產生清單下的漫畫名稱內容子節點
-                NLogger.Info("********************************************");
-                using (ComicList cp = new ComicList(currNode.Name))
+                TreeNode currNode = objNode as TreeNode;
+                if (IsListNode(currNode))
                 {
-                    var comicList = cp.getComicBaseList();
-                    foreach (var comic in comicList)
+                    TreeViewHelper.ClearTreeNode(currNode); ;
+
+                    //currNode.Nodes.Clear();
+                    // 產生清單下的漫畫名稱內容子節點
+                    NLogger.Info("********************************************");
+                    using (ComicList cp = new ComicList(currNode.Name))
                     {
-                        Thread t1 = new Thread(() => { Image img = comic.iconImage; }); // 背景讀圖
-                        t1.IsBackground = true;
-                        t1.Start();
-
-                        TreeNode tn = new TreeNode();
-                        tn.Name = comic.url;
-                        tn.Text = comic.description;
-                        tn.ImageKey = comic.iconUrl;
-                        tn.Tag = comic;
-
-                        TreeViewHelper.AddTreeNode(currNode, tn); ;
-
-                        if (Directory.Exists(Path.Combine(txtRootPath.Text, tn.Text)))
+                        var comicList = cp.getComicBaseList();
+                        foreach (var comic in comicList)
                         {
-                            TreeViewHelper.SetFontBold(tvComicTree, tn);
+                            Thread t1 = new Thread(() => { Image img = comic.iconImage; }); // 背景讀圖
+                            t1.IsBackground = true;
+                            t1.Start();
+
+                            TreeNode tn = new TreeNode();
+                            tn.Name = comic.url;
+                            tn.Text = comic.description;
+                            tn.ImageKey = comic.iconUrl;
+                            tn.Tag = comic;
+
+                            TreeViewHelper.AddTreeNode(currNode, tn); ;
+
+                            if (Directory.Exists(Path.Combine(txtRootPath.Text, tn.Text)))
+                            {
+                                TreeViewHelper.SetFontBold(tvComicTree, tn);
+                            }
+                            NLogger.Info(comic.description + "=" + comic.url);
                         }
+                    }
+                    NLogger.Info("********************************************");
 
-
-                        NLogger.Info(comic.description + "=" + comic.url);
+                    foreach (TreeNode node in currNode.Nodes)
+                    {
+                        Thread t2 = new Thread(BuildComicNameNode);
+                        t2.IsBackground = true;
+                        t2.Start(node);
                     }
                 }
-                NLogger.Info("********************************************");
-
-                foreach (TreeNode node in currNode.Nodes)
+                else if (IsComicNameNode(currNode))
                 {
                     Thread t2 = new Thread(BuildComicNameNode);
                     t2.IsBackground = true;
-                    t2.Start(node);
+                    t2.Start(currNode);
                 }
             }
-            else if (IsComicNameNode(currNode))
+            catch (Exception ex)
             {
-                Thread t2 = new Thread(BuildComicNameNode);
-                t2.IsBackground = true;
-                t2.Start(currNode);
+                NLogger.Error("BuidComicNode," + ex.ToString());
             }
-
         }
 
         private void BuildComicNameNode(object objNode)
         {
-            TreeNode currNode = objNode as TreeNode;
-            if (null == currNode) return;
-            if (false == IsComicNameNode(currNode)) return;
-
-            lock (currNode)
+            try
             {
-                if (currNode.Nodes.Count > 0) return; // 已有節點的不更新
+                TreeNode currNode = objNode as TreeNode;
+                if (null == currNode) return;
+                if (false == IsComicNameNode(currNode)) return;
 
-                // 產生漫畫的回合子節點
-                using (ComicName cn = new ComicName(currNode.Name))
+                lock (currNode)
                 {
-                    NLogger.Info("begin Call getComicBaseList," + currNode.Name);
-                    var chapterList = cn.getComicBaseList();
-                    foreach (var comic in chapterList)
-                    {
-                        TreeNode tn = TreeViewHelper.AddTreeNode(currNode, comic.url, comic.description);
+                    if (currNode.Nodes.Count > 0) return; // 已有節點的不更新
 
-                        // 如果是已下載過的點，變粗體
-                        //if (null != dwnedList && dwnedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
-                        if (DownloadedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
+                    // 產生漫畫的回合子節點
+                    using (ComicName cn = new ComicName(currNode.Name))
+                    {
+                        NLogger.Info("begin Call getComicBaseList," + currNode.Name);
+                        var chapterList = cn.getComicBaseList();
+                        foreach (var comic in chapterList)
                         {
-                            TreeViewHelper.SetFontBold(tvComicTree, tn, Color.Blue);
+                            TreeNode tn = TreeViewHelper.AddTreeNode(currNode, comic.url, comic.description);
+
+                            // 如果是已下載過的點，變粗體
+                            //if (null != dwnedList && dwnedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
+                            if (DownloadedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
+                            {
+                                TreeViewHelper.SetFontBold(tvComicTree, tn, Color.Blue);
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                NLogger.Error("BuildComicNameNode," + ex.ToString());
             }
         }
 

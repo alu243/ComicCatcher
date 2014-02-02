@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 using System.Net;
 using System.IO;
-using System.Threading;
-using System.Reflection;
-namespace ComicCatcher.App_Code.Util
+using ComicCatcher.App_Code.Util;
+namespace Utils
 {
-    public static class HttpHelper
+    public static class HttpUtil
     {
         static CookieContainer myCookie = new CookieContainer();
 
@@ -60,6 +57,7 @@ namespace ComicCatcher.App_Code.Util
                 request = null;
             }
         }
+
         public static MemoryStream getPictureResponse(string url)
         {
             var request = CreateRequest(url);

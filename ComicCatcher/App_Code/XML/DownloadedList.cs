@@ -128,7 +128,17 @@ namespace ComicCatcher
 
         public static bool HasDownloaded(string comicWeb, string comicName, string comicVolumn)
         {
-            return SQLiteHelper.IsInDownloadedList(comicWeb, comicName, comicVolumn);
+            try
+            {
+                comicName = comicName.Replace("'", "''");
+                comicVolumn = comicVolumn.Replace("'", "''");
+                return SQLiteHelper.IsInDownloadedList(comicWeb, comicName, comicVolumn);
+            }
+            catch (Exception ex)
+            {
+                NLogger.Error("查詢資料庫時發生錯誤，" + comicName + comicVolumn);
+                return false;
+            }
             //if (null == myList) return false;
             //if (myList.ContainsKey(comicName))
             //{
@@ -141,6 +151,8 @@ namespace ComicCatcher
         {
             try
             {
+                comicName = comicName.Replace("'", "''");
+                comicVolumn = comicVolumn.Replace("'", "''");
                 SQLiteHelper.InsertComicVolumn(comicWeb, comicName, comicVolumn);
             }
             catch (Exception ex)

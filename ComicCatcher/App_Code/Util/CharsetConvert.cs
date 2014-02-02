@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace ComicCatcher.App_Code.Util
+namespace Utils
 {
     /// <summary> 
     /// 做為字碼轉換工具 

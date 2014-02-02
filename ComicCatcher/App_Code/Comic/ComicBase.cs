@@ -7,6 +7,7 @@ using System.IO;
 using System.Drawing;
 using ComicCatcher.App_Code.Util;
 using Helpers;
+using Utils;
 namespace ComicCatcher.App_Code.Comic
 {
     public class ComicBase : IDisposable
@@ -32,7 +33,7 @@ namespace ComicCatcher.App_Code.Comic
                 {
                     if (false == this.IsIconDataReaded)
                     {
-                        this.iconData = HttpHelper.getPictureResponse(this.iconUrl);
+                        this.iconData = HttpUtil.getPictureResponse(this.iconUrl);
                         this.IsIconDataReaded = true;
                     }
                     NLogger.Info("讀取icon圖檔中...," + this.description);

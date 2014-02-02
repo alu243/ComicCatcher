@@ -85,7 +85,7 @@
     <Compile Include="App_Code\Helpers\RARHelper.cs" />
     <Compile Include="App_Code\Helpers\CMDHelper.cs" />
     <Compile Include="App_Code\Util\CharsetConvert.cs" />
-    <Compile Include="App_Code\Util\HttpHelper.cs" />
+    <Compile Include="App_Code\Util\HttpUtil.cs" />
     <Compile Include="App_Code\Util\DonwloadHelper.cs" />
     <Compile Include="App_Code\Comic\ComicBase.cs" />
     <Compile Include="App_Code\Comic\ComicChapter.cs" />

@@ -9,7 +9,7 @@ namespace Helpers
 {
     public static class SQLiteHelper
     {
-        private static string connStr = "Data Source=ComicCatcher.s3db;Pooling=true;Page Size=8192;Journal Mode=off;";
+        private static string connStr = "Data Source=ComicCatcher.s3db;Pooling=true;Page Size=8192;Journal Mode=off;UTF8Encoding=True;";
         private static SQLiteConnection CreateConn()
         {
             return new SQLiteConnection(connStr);
