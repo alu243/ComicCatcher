@@ -6,7 +6,7 @@ using System.Net;
 
 namespace Utils
 {
-    public class UsingProxy
+    public class ProxySetting
     {
         private static bool? _isUseProxy;
         public static bool isUseProxy

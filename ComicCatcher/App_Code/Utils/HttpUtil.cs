@@ -115,7 +115,7 @@ namespace Utils
             //request.Timeout = 10000;
             //request.ContentType = "image/jpeg";
             //request.Referer = url;
-            request.Proxy = UsingProxy.getProxy();
+            request.Proxy = ProxySetting.getProxy();
             request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
             request.KeepAlive = false;
             return request;

@@ -79,7 +79,7 @@
     <Compile Include="App_Code\Comic\Scheduler.cs" />
     <Compile Include="App_Code\Comic\WorkerMsg.cs" />
     <Compile Include="App_Code\Enum\MsgEnum.cs" />
-    <Compile Include="App_Code\Helpers\SQLiteUtil.cs" />
+    <Compile Include="App_Code\Helpers\SQLiteHelper.cs" />
     <Compile Include="App_Code\Helpers\TreeViewHelper.cs" />
     <Compile Include="App_Code\Helpers\NLogger.cs" />
     <Compile Include="App_Code\Helpers\RARHelper.cs" />
@@ -93,10 +93,10 @@
     <Compile Include="App_Code\Comic\ComicName.cs" />
     <Compile Include="App_Code\Utils\FileUtil.cs" />
     <Compile Include="App_Code\Utils\StringExtenssion.cs" />
-    <Compile Include="App_Code\Helpers\UsingProxy.cs" />
-    <Compile Include="App_Code\XML\Settings.cs" />
-    <Compile Include="App_Code\XML\DownloadedList.cs" />
-    <Compile Include="App_Code\XML\XindmWebSite.cs" />
+    <Compile Include="App_Code\Helpers\ProxySetting.cs" />
+    <Compile Include="App_Code\Model\Settings.cs" />
+    <Compile Include="App_Code\Model\DownloadedList.cs" />
+    <Compile Include="App_Code\Model\XindmWebSite.cs" />
     <Compile Include="CustomSort.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
