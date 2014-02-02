@@ -76,6 +76,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Code\ComicModels\IComicChapter.cs" />
+    <Compile Include="App_Code\ComicModels\IComicName.cs" />
+    <Compile Include="App_Code\ComicModels\IComicList.cs" />
+    <Compile Include="App_Code\Models\DownloadedListOld.cs" />
     <Compile Include="App_Code\Models\Scheduler.cs" />
     <Compile Include="App_Code\Models\WorkerMsg.cs" />
     <Compile Include="App_Code\Models\MsgEnum.cs" />
@@ -88,15 +92,15 @@
     <Compile Include="App_Code\Utils\HttpUtil.cs" />
     <Compile Include="App_Code\Utils\DonwloadUtil.cs" />
     <Compile Include="App_Code\ComicModels\ComicBase.cs" />
-    <Compile Include="App_Code\ComicModels\ComicChapter.cs" />
-    <Compile Include="App_Code\ComicModels\ComicList.cs" />
-    <Compile Include="App_Code\ComicModels\ComicName.cs" />
+    <Compile Include="App_Code\XinDM\ComicChapter.cs" />
+    <Compile Include="App_Code\XinDM\ComicList.cs" />
+    <Compile Include="App_Code\XinDM\ComicName.cs" />
     <Compile Include="App_Code\Utils\FileUtil.cs" />
     <Compile Include="App_Code\Utils\StringExtenssion.cs" />
     <Compile Include="App_Code\Helpers\ProxySetting.cs" />
     <Compile Include="App_Code\Models\Settings.cs" />
     <Compile Include="App_Code\Models\DownloadedList.cs" />
-    <Compile Include="App_Code\ComicModels\XindmWebSite.cs" />
+    <Compile Include="App_Code\XinDM\XindmWebSite.cs" />
     <Compile Include="CustomSort.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>

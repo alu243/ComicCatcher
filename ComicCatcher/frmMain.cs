@@ -99,8 +99,8 @@ namespace ComicCatcher
                                 NLogger.Error("顯示icon失敗," + ex.ToString());
                             }
 
-                            lblUpdateDate.Text = comicData.updateDate;
-                            lblUpdateChapter.Text = comicData.updateChapter;
+                            lblUpdateDate.Text = comicData.LastUpdateDate;
+                            lblUpdateChapter.Text = comicData.LastUpdateChapter;
                             if (false == cbRelateFolders.Items.Contains(tvComicTree.SelectedNode.Text)) cbRelateFolders.Items.Add(tvComicTree.SelectedNode.Text);
                             cbRelateFolders.Text = tvComicTree.SelectedNode.Text;
                             pbIcon_Paint(pbIcon, null);
@@ -150,7 +150,7 @@ namespace ComicCatcher
                     NLogger.Info("********************************************");
                     using (ComicList cp = new ComicList(currNode.Name))
                     {
-                        var comicList = cp.getComicBaseList();
+                        var comicList = cp.getComicNameList();
                         foreach (var comic in comicList)
                         {
                             // 預設在展開分頁時載入全部縮圖(抓檔時比較快)
@@ -160,7 +160,7 @@ namespace ComicCatcher
                             }
                             TreeNode tn = new TreeNode();
                             tn.Name = comic.url;
-                            tn.Text = comic.description;
+                            tn.Text = comic.Caption;
                             tn.ImageKey = comic.iconUrl;
                             tn.Tag = comic;
 
@@ -172,7 +172,7 @@ namespace ComicCatcher
                                 TreeViewHelper.SetFontBold(tvComicTree, tn);
                             }
 
-                            NLogger.Info(comic.description + "=" + comic.url);
+                            NLogger.Info(comic.Caption + "=" + comic.url);
                         }
                     }
                     NLogger.Info("********************************************");
@@ -201,13 +201,13 @@ namespace ComicCatcher
                 // 產生漫畫的回合子節點
                 using (ComicName cv = new ComicName(currNode.Name))
                 {
-                    var chapterList = cv.getComicBaseList();
+                    var chapterList = cv.getComicChapterList();
                     foreach (var comic in chapterList)
                     {
-                        TreeNode tn = TreeViewHelper.AddTreeNode(currNode, comic.url, comic.description);
+                        TreeNode tn = TreeViewHelper.AddTreeNode(currNode, comic.url, comic.Caption);
                         // 如果是已下載過的點，變粗體
                         //if (null != dwnedList && dwnedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
-                        if (DownloadedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
+                        if (DownloadedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.Caption))
                         {
                             TreeViewHelper.SetFontBold(tvComicTree, tn, Color.Blue);
                         }
@@ -886,7 +886,7 @@ namespace ComicCatcher
                     NLogger.Info("********************************************");
                     using (ComicList cp = new ComicList(currNode.Name))
                     {
-                        var comicList = cp.getComicBaseList();
+                        var comicList = cp.getComicNameList();
                         foreach (var comic in comicList)
                         {
                             Thread t1 = new Thread(() => { Image img = comic.iconImage; }); // 背景讀圖
@@ -895,7 +895,7 @@ namespace ComicCatcher
 
                             TreeNode tn = new TreeNode();
                             tn.Name = comic.url;
-                            tn.Text = comic.description;
+                            tn.Text = comic.Caption;
                             tn.ImageKey = comic.iconUrl;
                             tn.Tag = comic;
 
@@ -905,7 +905,7 @@ namespace ComicCatcher
                             {
                                 TreeViewHelper.SetFontBold(tvComicTree, tn);
                             }
-                            NLogger.Info(comic.description + "=" + comic.url);
+                            NLogger.Info(comic.Caption + "=" + comic.url);
                         }
                     }
                     NLogger.Info("********************************************");
@@ -946,14 +946,14 @@ namespace ComicCatcher
                     using (ComicName cn = new ComicName(currNode.Name))
                     {
                         NLogger.Info("begin Call getComicBaseList," + currNode.Name);
-                        var chapterList = cn.getComicBaseList();
+                        var chapterList = cn.getComicChapterList();
                         foreach (var comic in chapterList)
                         {
-                            TreeNode tn = TreeViewHelper.AddTreeNode(currNode, comic.url, comic.description);
+                            TreeNode tn = TreeViewHelper.AddTreeNode(currNode, comic.url, comic.Caption);
 
                             // 如果是已下載過的點，變粗體
                             //if (null != dwnedList && dwnedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
-                            if (DownloadedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.description))
+                            if (DownloadedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, comic.Caption))
                             {
                                 TreeViewHelper.SetFontBold(tvComicTree, tn, Color.Blue);
                             }
@@ -996,12 +996,7 @@ namespace ComicCatcher
                         prompt.Show();
                         Cursor = System.Windows.Forms.Cursors.WaitCursor;
 
-
-
-                        DownloadedList.LoadDB();
-                        DownloadedList dwnedList = DownloadedList.loadxml();
-                        dwnedList.ImportToDB();
-                        File.Delete(@".\donwloadedlist.bin");
+                        DownloadedListOld.ImportToDB();
                         prompt.Hide();
                         MessageBox.Show("更新完成！");
                     }

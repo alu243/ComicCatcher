@@ -8,7 +8,7 @@ using System.IO;
 using Utils;
 namespace ComicModels
 {
-    public class ComicName : ComicBase
+    public class ComicName : ComicBase, IComicName
     {
 
         private readonly static Regex rVolumnTag = new Regex(@"<ul>(.|\n)*?</ul>", RegexOptions.Compiled);
@@ -20,42 +20,40 @@ namespace ComicModels
         private readonly static Regex rDesc = new Regex(@"<span class=""black"">.+?</span>", RegexOptions.Compiled);
         //Regex rDesc = new Regex
 
+        public ComicName()
+            : base()
+        { }
         public ComicName(string url)
         {
             this.url = url;
-
-            this.htmlContent = HttpUtil.getResponse(url);
         }
 
-        public List<ComicBase> getComicBaseList()
+        public List<ComicChapter> getComicChapterList()
         {
-            List<ComicBase> result = new List<ComicBase>();
-            string sTemp = getURLTag();
+            List<ComicChapter> result = new List<ComicChapter>();
+            string sTemp = getHtmlTagContent(this.htmlContent);
             foreach (Match data in rVolumnList.Matches(sTemp))
             {
                 //string sLink = rLink.Match(data.Value).Value;
                 string sLink = data.Value;
-                ComicBase cb = new ComicBase()
+                ComicChapter cb = new ComicChapter()
                 {
                     url = rUrl.Match(sLink).Value.Replace("href=", "").Replace(@"""", "").Replace(@" /", @"/").Trim(),
                     //description = CharsetConverter.ToTraditional(rDesc.Match(sLink).Value.Replace(@"<span class=""black"">", "").Replace(@"</span>", "")
                     //.Replace(@"<fontcolor=red>", "").Replace(@"</font>", "").Replace(@"<b>","").Replace(@"</b>","").Trim())
-                    description = CharsetConvertUtil.ToTraditional(rCleanTag.Replace(rDesc.Match(sLink).Value.Trim(), ""))
-
+                    Caption = CharsetConvertUtil.ToTraditional(rCleanTag.Replace(rDesc.Match(sLink).Value.Trim(), ""))
                 };
-                //foreach (char c in Path.GetInvalidFileNameChars()) cb.description = cb.description.Replace(c.ToString(), "");
-                cb.description = cb.description.trimEscapeString();
-                if (false == String.IsNullOrEmpty(cb.description))
+                if (false == String.IsNullOrEmpty(cb.Caption))
                     result.Add(cb);
             }
 
             return result;
         }
 
-        private string getURLTag()
+        private string getHtmlTagContent(string htmlContent)
         {
             StringBuilder sb = new StringBuilder();
-            foreach (Match match in rVolumnTag.Matches(this.htmlContent))
+            foreach (Match match in rVolumnTag.Matches(htmlContent))
             {
                 sb.AppendLine(match.Value);
             }

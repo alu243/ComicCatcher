@@ -9,7 +9,7 @@ using Utils;
 
 namespace ComicModels
 {
-    public class ComicList : ComicBase
+    public class ComicList : ComicBase, IComicList
     {
 
         private readonly static Regex rTableTag = new Regex(@"<table width=""\d+"" border=""\d+"" cellpadding=""\d+"" cellspacing=""\d+"" bgcolor=""#CDCDCD"">(.|\n)*?</table>", RegexOptions.Compiled);
@@ -25,15 +25,17 @@ namespace ComicModels
         private readonly static Regex rChapter1 = new Regex(@"\[<a href=""(.|\n)*?</a>\]", RegexOptions.Compiled);
         private readonly static Regex rChapter2 = new Regex(@">(.|\n)+?<", RegexOptions.Compiled);
 
+        public ComicList()
+            : base()
+        { }
         public ComicList(string url)
         {
             this.url = url;
-            this.htmlContent = HttpUtil.getResponse(url);
         }
 
-        public List<ComicBase> getComicBaseList()
+        public List<ComicName> getComicNameList()
         {
-            List<ComicBase> result = new List<ComicBase>();
+            List<ComicName> result = new List<ComicName>();
             string sTemp = getTable();
             foreach (Match data in rComicList.Matches(sTemp))
             {
@@ -49,15 +51,15 @@ namespace ComicModels
                 // 取得最近更新回數
                 string sUpdateChapter = rChapter2.Match(rChapter1.Match(data.Value).Value).Value.Replace("<", "").Replace(">", "");
 
-                ComicBase cb = new ComicBase() {
+                ComicName cb = new ComicName()
+                {
                     iconUrl = iUrl,
-                    updateDate = sUpdateDate,
-                    updateChapter = sUpdateChapter,
+                    LastUpdateDate = sUpdateDate,
+                    LastUpdateChapter = sUpdateChapter,
                     url = rUrl.Match(sLink).Value.Replace("href=", "").Replace(@"""", "").Trim(),
-                    description = CharsetConvertUtil.ToTraditional(rDesc.Match(sLink).Value.Replace("title=", "").Replace(@"""", "").Trim())
+                    Caption = CharsetConvertUtil.ToTraditional(rDesc.Match(sLink).Value.Replace("title=", "").Replace(@"""", "").Trim())
                 };
                 //foreach (char c in Path.GetInvalidFileNameChars()) cb.description = cb.description.Replace(c.ToString(), "");
-                cb.description = cb.description.trimEscapeString();
                 result.Add(cb);
 
             }

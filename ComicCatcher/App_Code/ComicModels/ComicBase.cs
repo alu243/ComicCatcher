@@ -16,29 +16,56 @@ namespace ComicModels
         /// <summary>
         /// URL
         /// </summary>
-        public string url { get; set; }
+        public string url
+        {
+            get { return this._url; }
+            set
+            {
+                this._url = value;
+                try
+                {
+                    this.htmlContent = HttpUtil.getResponse(url);
+                }
+                catch (Exception ex)
+                {
+                    NLogger.Error("讀取Url內容時發生錯誤" + ex.ToString());
+                }
+            }
+        }
+        private string _url;
 
         /// <summary>
         /// web網站的內容(就是url抓下來的內容)
         /// </summary>
         public string htmlContent { get; set; }
 
+        /// <summary>
+        /// 描述(第幾頁的內容或是第幾回)
+        /// </summary>
+        public string Caption
+        {
+            get { return this._caption; }
+            set { this._caption = value.trimEscapeString(); }
+        }
+        private string _caption;
+
+        #region Icon
         public string iconUrl { get; set; }
         private bool IsIconDataReaded = false;
-        private MemoryStream iconData = null;
+        private MemoryStream _iconData = null;
         public Image iconImage
         {
             get
             {
                 try
                 {
-                    if (false == this.IsIconDataReaded)
+                    if (false == this.IsIconDataReaded || this._iconData == null)
                     {
-                        this.iconData = HttpUtil.getPictureResponse(this.iconUrl);
+                        this._iconData = HttpUtil.getPictureResponse(this.iconUrl);
                         this.IsIconDataReaded = true;
                     }
-                    NLogger.Info("讀取icon圖檔中...," + this.description);
-                    return Image.FromStream(this.iconData);
+                    NLogger.Info("讀取icon圖檔中...," + this.Caption);
+                    return Image.FromStream(this._iconData);
                 }
                 catch (Exception ex)
                 {
@@ -47,31 +74,24 @@ namespace ComicModels
                 }
             }
         }
+        #endregion
 
-
-
-        /// <summary>
-        /// 描述(第幾頁的內容或是第幾回)
-        /// </summary>
-        public string description { get; set; }
-
-
+        #region UpdateInfo
         /// <summary>
         /// 最近更新日期
         /// </summary>
-        public string updateDate { get; set; }
+        public string LastUpdateDate { get; set; }
 
         /// <summary>
         /// 最近更新回數
         /// </summary>
-        public string updateChapter { get; set; }
-
-        public MemoryStream imageData { get; set; }
+        public string LastUpdateChapter { get; set; }
+        #endregion
 
         public void Dispose()
         {
             url = null;
-            description = null;
+            Caption = null;
             htmlContent = null;
         }
     }

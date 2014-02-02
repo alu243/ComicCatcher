@@ -8,15 +8,17 @@ using System.Text.RegularExpressions;
 using Utils;
 namespace ComicModels
 {
-    public class ComicChapter : ComicBase
+    public class ComicChapter : ComicBase, IComicChapter
     {
         private static Uri webPrefix = new Uri(XindmWebSite.PicHost);
         private static Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
 
+        public ComicChapter()
+            : base()
+        {}
         public ComicChapter(string url)
         {
             this.url = url;
-            this.htmlContent = HttpUtil.getResponse(url);
         }
 
         public List<string> genPictureUrl()
