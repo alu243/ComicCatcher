@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using System.IO;
 using ComicCatcher.App_Code.Util;
+using Utils;
 namespace Utils
 {
     public static class HttpUtil
@@ -22,7 +23,7 @@ namespace Utils
                 }
                 catch (Exception e)
                 {
-                    Helpers.NLogger.Error("讀取url內容發生錯誤," + url + Environment.NewLine + e.ToString());
+                    Utils.NLogger.Error("讀取url內容發生錯誤," + url + Environment.NewLine + e.ToString());
                     if (response != null) response.Close();
                     if (request != null) request.Abort();
                     request = CreateRequest(url);

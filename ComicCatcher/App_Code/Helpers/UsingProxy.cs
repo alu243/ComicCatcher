@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 
-namespace ComicCatcher.App_Code.Util
+namespace Utils
 {
     public class UsingProxy
     {

@@ -6,7 +6,7 @@ using System.Text;
 using System.IO;
 using System.Drawing;
 using ComicCatcher.App_Code.Util;
-using Helpers;
+using Utils;
 using Utils;
 namespace ComicCatcher.App_Code.Comic
 {

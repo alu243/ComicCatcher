@@ -55,7 +55,7 @@ namespace ComicCatcher.App_Code.Comic
                     updateDate = sUpdateDate,
                     updateChapter = sUpdateChapter,
                     url = rUrl.Match(sLink).Value.Replace("href=", "").Replace(@"""", "").Trim(),
-                    description = CharsetConverter.ToTraditional(rDesc.Match(sLink).Value.Replace("title=", "").Replace(@"""", "").Trim())
+                    description = CharsetConvertUtil.ToTraditional(rDesc.Match(sLink).Value.Replace("title=", "").Replace(@"""", "").Trim())
                 };
                 //foreach (char c in Path.GetInvalidFileNameChars()) cb.description = cb.description.Replace(c.ToString(), "");
                 cb.description = cb.description.trimEscapeString();

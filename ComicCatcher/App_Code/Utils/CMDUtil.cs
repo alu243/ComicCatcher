@@ -6,9 +6,9 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
-namespace Helpers
+namespace Utils
 {
-    public static class CMDHelper
+    public static class CMDUtil
     {
         public static void ExecuteCommandSync(object command)
         {

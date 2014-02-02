@@ -9,7 +9,7 @@ namespace Utils
     /// <summary> 
     /// 做為字碼轉換工具 
     /// </summary> 
-    public class CharsetConverter
+    public class CharsetConvertUtil
     {
         internal const int LOCALE_SYSTEM_DEFAULT = 0x0800;
         internal const int LCMAP_SIMPLIFIED_CHINESE = 0x02000000;

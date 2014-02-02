@@ -5,7 +5,7 @@ using System.Text;
 
 using System.Data.SQLite;
 using System.Data;
-namespace Helpers
+namespace Utils
 {
     public static class SQLiteHelper
     {

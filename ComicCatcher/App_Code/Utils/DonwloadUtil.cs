@@ -7,7 +7,7 @@ using System.IO;
 using Utils;
 namespace Utils
 {
-    public class DonwloadHelper
+    public class DonwloadUtil
     {
         /// <summary>
         /// 取資料後存檔

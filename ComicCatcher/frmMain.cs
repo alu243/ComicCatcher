@@ -13,10 +13,11 @@ using ComicCatcher.App_Code.Util;
 using ComicCatcher.App_Code.Comic;
 using System.Threading;
 using System.Text.RegularExpressions;
-using Helpers;
+using Utils;
 using System.Diagnostics;
 using System.Reflection;
 
+using Utils;
 using Utils;
 namespace ComicCatcher
 {
@@ -482,13 +483,13 @@ namespace ComicCatcher
                 string tmpFile = Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".tmp";
                 string cmpFile = Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".cmp";
 
-                DonwloadHelper.donwload(pictureUrl, tmpFile);
+                DonwloadUtil.donwload(pictureUrl, tmpFile);
 
                 int i = 0;
                 int testTimes = 50; // 檢查 50 次下載，如果還是都有問題，就跳出錯誤
                 for (i = 0; i < testTimes; ++i)
                 {
-                    DonwloadHelper.donwload(pictureUrl, cmpFile);
+                    DonwloadUtil.donwload(pictureUrl, cmpFile);
 
                     if (FileUtil.CompareFileByMD5(tmpFile, cmpFile))
                         break;
@@ -700,7 +701,7 @@ namespace ComicCatcher
                     Array.Sort(files);
                     arugment = " \"" + files[0] + "\" ";
                 }
-                Helpers.CMDHelper.ExecuteCommandAsync(new CommandObj() { fileName = settings.PhotoProgramPath, arguments = arugment });
+                Utils.CMDUtil.ExecuteCommandAsync(new CommandObj() { fileName = settings.PhotoProgramPath, arguments = arugment });
             }
             catch (Exception ex)
             {
@@ -718,10 +719,10 @@ namespace ComicCatcher
 
         private void ArchiveComic()
         {
-            Helpers.RARHelper rar = null;
+            Utils.RARHelper rar = null;
             try
             {
-                rar = new Helpers.RARHelper(settings.WinRARPath);
+                rar = new Utils.RARHelper(settings.WinRARPath);
                 rar.archiveDirectory(Path.Combine(txtRootPath.Text, cbRelateFolders.Text, tvFolder.SelectedNode.Text));
             }
             catch (Exception ex)

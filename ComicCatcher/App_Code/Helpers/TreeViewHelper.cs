@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Helpers
+namespace Utils
 {
     public static class TreeViewHelper
     {
