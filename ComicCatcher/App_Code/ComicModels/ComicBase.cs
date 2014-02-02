@@ -5,10 +5,11 @@ using System.Text;
 
 using System.IO;
 using System.Drawing;
-using ComicCatcher.App_Code.Util;
+using Helpers;
 using Utils;
-using Utils;
-namespace ComicModel
+using Models;
+using ComicModels;
+namespace ComicModels
 {
     public class ComicBase : IDisposable
     {

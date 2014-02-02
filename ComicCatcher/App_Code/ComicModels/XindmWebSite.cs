@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ComicModel
+namespace ComicModels
 {
     public class XindmWebSite
     {

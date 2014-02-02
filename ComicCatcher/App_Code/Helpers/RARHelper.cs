@@ -6,7 +6,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
-namespace Utils
+namespace Helpers
 {
     public class RARHelper
     {

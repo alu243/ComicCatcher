@@ -8,15 +8,15 @@ using System.Text;
 using System.Windows.Forms;
 
 using System.IO;
-using ComicCatcher.App_Code;
-using ComicCatcher.App_Code.Comic;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Reflection;
 
+using Helpers;
 using Utils;
 using Models;
+using ComicModels;
 namespace ComicCatcher
 {
     public partial class frmMain : Form
@@ -552,7 +552,7 @@ namespace ComicCatcher
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            App_Code.Util.UsingProxy.isUseProxy = chkIsUseProxy.Checked;
+            ProxySetting.isUseProxy = chkIsUseProxy.Checked;
         }
 
         private void txtPath_KeyPress(object sender, KeyPressEventArgs e)
@@ -717,10 +717,10 @@ namespace ComicCatcher
 
         private void ArchiveComic()
         {
-            Utils.RARHelper rar = null;
+            RARHelper rar = null;
             try
             {
-                rar = new Utils.RARHelper(settings.WinRARPath);
+                rar = new RARHelper(settings.WinRARPath);
                 rar.archiveDirectory(Path.Combine(txtRootPath.Text, cbRelateFolders.Text, tvFolder.SelectedNode.Text));
             }
             catch (Exception ex)
@@ -822,9 +822,9 @@ namespace ComicCatcher
             chkBackGroundLoad.Checked = settings.BackGroundLoadNode;
 
             /// Proxy設定(要在使用畫面設定完成後)
-            App_Code.Util.UsingProxy.isUseProxy = chkIsUseProxy.Checked;
-            App_Code.Util.UsingProxy.ProxyUrl = settings.ProxyUrl;
-            App_Code.Util.UsingProxy.ProxyPort = settings.ProxyPort;
+            ProxySetting.isUseProxy = chkIsUseProxy.Checked;
+            ProxySetting.ProxyUrl = settings.ProxyUrl;
+            ProxySetting.ProxyPort = settings.ProxyPort;
         }
 
         private void LoadSettingsFromSettingTab()

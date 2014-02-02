@@ -3,9 +3,12 @@ using System.IO;
 //using System.Xml.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
+using System.Linq;
+
+using Helpers;
 using Utils;
 using Models;
-using System.Linq;
+using ComicModels;
 namespace Models
 {
     [Serializable]

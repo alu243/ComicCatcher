@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 
 using System.Text.RegularExpressions;
-using ComicCatcher.App_Code.Util;
 using System.IO;
 using Utils;
 
-namespace ComicModel
+namespace ComicModels
 {
     public class ComicList : ComicBase
     {

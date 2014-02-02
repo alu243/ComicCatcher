@@ -78,7 +78,7 @@
   <ItemGroup>
     <Compile Include="App_Code\Models\Scheduler.cs" />
     <Compile Include="App_Code\Models\WorkerMsg.cs" />
-    <Compile Include="App_Code\Enum\MsgEnum.cs" />
+    <Compile Include="App_Code\Models\MsgEnum.cs" />
     <Compile Include="App_Code\Helpers\SQLiteHelper.cs" />
     <Compile Include="App_Code\Helpers\TreeViewHelper.cs" />
     <Compile Include="App_Code\Helpers\NLogger.cs" />

@@ -6,7 +6,7 @@ using System.Text;
 using System.Net;
 using System.IO;
 using System.Threading;
-namespace ComicCatcher.App_Code.Util
+namespace Utils
 {
     public static class FileUtil
     {
