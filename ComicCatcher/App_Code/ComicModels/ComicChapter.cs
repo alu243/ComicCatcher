@@ -7,7 +7,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using ComicCatcher.App_Code.Util;
 using Utils;
-namespace ComicCatcher.App_Code.Comic
+namespace ComicModel
 {
     public class ComicChapter : ComicBase
     {

@@ -8,7 +8,7 @@ using System.Drawing;
 using ComicCatcher.App_Code.Util;
 using Utils;
 using Utils;
-namespace ComicCatcher.App_Code.Comic
+namespace ComicModel
 {
     public class ComicBase : IDisposable
     {

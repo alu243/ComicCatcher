@@ -9,16 +9,14 @@ using System.Windows.Forms;
 
 using System.IO;
 using ComicCatcher.App_Code;
-using ComicCatcher.App_Code.Util;
 using ComicCatcher.App_Code.Comic;
 using System.Threading;
 using System.Text.RegularExpressions;
-using Utils;
 using System.Diagnostics;
 using System.Reflection;
 
 using Utils;
-using Utils;
+using Models;
 namespace ComicCatcher
 {
     public partial class frmMain : Form

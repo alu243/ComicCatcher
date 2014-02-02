@@ -8,7 +8,7 @@ using ComicCatcher.App_Code.Util;
 using System.IO;
 using Utils;
 
-namespace ComicCatcher.App_Code.Comic
+namespace ComicModel
 {
     public class ComicList : ComicBase
     {

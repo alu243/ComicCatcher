@@ -4,8 +4,9 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
 using Utils;
+using Models;
 using System.Linq;
-namespace ComicCatcher
+namespace Models
 {
     [Serializable]
     //public class DownloadedList : IXmlSerializable

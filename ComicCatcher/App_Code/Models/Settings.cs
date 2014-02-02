@@ -2,7 +2,7 @@
 using System.IO;
 using System.Xml.Serialization;
 using System.Reflection;
-namespace ComicCatcher
+namespace Models
 {
     [Serializable]
     public class Settings

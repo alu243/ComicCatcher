@@ -76,8 +76,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Code\Comic\Scheduler.cs" />
-    <Compile Include="App_Code\Comic\WorkerMsg.cs" />
+    <Compile Include="App_Code\Models\Scheduler.cs" />
+    <Compile Include="App_Code\Models\WorkerMsg.cs" />
     <Compile Include="App_Code\Enum\MsgEnum.cs" />
     <Compile Include="App_Code\Helpers\SQLiteHelper.cs" />
     <Compile Include="App_Code\Helpers\TreeViewHelper.cs" />
@@ -87,16 +87,16 @@
     <Compile Include="App_Code\Utils\CharsetConvertUtil.cs" />
     <Compile Include="App_Code\Utils\HttpUtil.cs" />
     <Compile Include="App_Code\Utils\DonwloadUtil.cs" />
-    <Compile Include="App_Code\Comic\ComicBase.cs" />
-    <Compile Include="App_Code\Comic\ComicChapter.cs" />
-    <Compile Include="App_Code\Comic\ComicList.cs" />
-    <Compile Include="App_Code\Comic\ComicName.cs" />
+    <Compile Include="App_Code\ComicModels\ComicBase.cs" />
+    <Compile Include="App_Code\ComicModels\ComicChapter.cs" />
+    <Compile Include="App_Code\ComicModels\ComicList.cs" />
+    <Compile Include="App_Code\ComicModels\ComicName.cs" />
     <Compile Include="App_Code\Utils\FileUtil.cs" />
     <Compile Include="App_Code\Utils\StringExtenssion.cs" />
     <Compile Include="App_Code\Helpers\ProxySetting.cs" />
-    <Compile Include="App_Code\Model\Settings.cs" />
-    <Compile Include="App_Code\Model\DownloadedList.cs" />
-    <Compile Include="App_Code\Model\XindmWebSite.cs" />
+    <Compile Include="App_Code\Models\Settings.cs" />
+    <Compile Include="App_Code\Models\DownloadedList.cs" />
+    <Compile Include="App_Code\ComicModels\XindmWebSite.cs" />
     <Compile Include="CustomSort.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-namespace ComicCatcher.App_Code.Comic
+namespace Models
 {
     public class Tasker
     {
