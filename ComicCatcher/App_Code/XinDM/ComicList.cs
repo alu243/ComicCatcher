@@ -30,33 +30,34 @@ namespace ComicModels
         { }
         public ComicList(string url)
         {
-            this.url = url;
+            this.Url = url;
         }
 
         public List<ComicName> getComicNameList()
         {
+            string htmlContent = HttpUtil.getResponse(this.Url);
             List<ComicName> result = new List<ComicName>();
-            string sTemp = getTable();
+            string sTemp = rTableTag.Match(htmlContent).ToString();
             foreach (Match data in rComicList.Matches(sTemp))
             {
                 string sLink = rLink.Match(data.Value).Value;
                 
                 // 取得漫畫首頁圖像連結
-                string iUrl = new Uri(new Uri(XindmWebSite.PicHost),
+                string iconUrl = new Uri(new Uri(XindmWebSite.PicHost),
                     rIconUrl.Match(data.Value).Value.Replace("<img src=", "").Replace(@"""", "").Trim()).ToString();
                
                 // 取得最近更新日期
-                string sUpdateDate = rUpdateDate.Match(data.Value).Value.Replace(@"<span class=""gray font11"">", "").Replace("</span>", "");
+                string lastUpdateDate = rUpdateDate.Match(data.Value).Value.Replace(@"<span class=""gray font11"">", "").Replace("</span>", "");
 
                 // 取得最近更新回數
-                string sUpdateChapter = rChapter2.Match(rChapter1.Match(data.Value).Value).Value.Replace("<", "").Replace(">", "");
+                string lastUpdateChapter = rChapter2.Match(rChapter1.Match(data.Value).Value).Value.Replace("<", "").Replace(">", "");
 
                 ComicName cb = new ComicName()
                 {
-                    iconUrl = iUrl,
-                    LastUpdateDate = sUpdateDate,
-                    LastUpdateChapter = sUpdateChapter,
-                    url = rUrl.Match(sLink).Value.Replace("href=", "").Replace(@"""", "").Trim(),
+                    IconUrl = iconUrl,
+                    LastUpdateDate = lastUpdateDate,
+                    LastUpdateChapter = lastUpdateChapter,
+                    Url = rUrl.Match(sLink).Value.Replace("href=", "").Replace(@"""", "").Trim(),
                     Caption = CharsetConvertUtil.ToTraditional(rDesc.Match(sLink).Value.Replace("title=", "").Replace(@"""", "").Trim())
                 };
                 //foreach (char c in Path.GetInvalidFileNameChars()) cb.description = cb.description.Replace(c.ToString(), "");
@@ -64,11 +65,6 @@ namespace ComicModels
 
             }
             return result;
-        }
-
-        private string getTable()
-        {
-            return rTableTag.Match(this.htmlContent).ToString();
         }
     }
 }

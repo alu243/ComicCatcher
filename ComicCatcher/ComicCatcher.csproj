@@ -79,6 +79,7 @@
     <Compile Include="App_Code\ComicModels\IComicChapter.cs" />
     <Compile Include="App_Code\ComicModels\IComicName.cs" />
     <Compile Include="App_Code\ComicModels\IComicList.cs" />
+    <Compile Include="App_Code\Helpers\ComicNodeHelper.cs" />
     <Compile Include="App_Code\Models\DownloadedListOld.cs" />
     <Compile Include="App_Code\Models\Scheduler.cs" />
     <Compile Include="App_Code\Models\WorkerMsg.cs" />

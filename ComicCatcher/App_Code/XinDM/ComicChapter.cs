@@ -18,13 +18,14 @@ namespace ComicModels
         {}
         public ComicChapter(string url)
         {
-            this.url = url;
+            this.Url = url;
         }
 
         public List<string> genPictureUrl()
         {
+            string htmlContent = HttpUtil.getResponse(this.Url);
             List<string> pages = new List<string>();
-            foreach (Match match in rPages.Matches(this.htmlContent))
+            foreach (Match match in rPages.Matches(htmlContent))
             {
                 foreach (string tmp in match.Value.Split(','))
                 {

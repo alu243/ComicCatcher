@@ -25,20 +25,21 @@ namespace ComicModels
         { }
         public ComicName(string url)
         {
-            this.url = url;
+            this.Url = url;
         }
 
         public List<ComicChapter> getComicChapterList()
         {
+            string htmlContent = HttpUtil.getResponse(this.Url);
             List<ComicChapter> result = new List<ComicChapter>();
-            string sTemp = getHtmlTagContent(this.htmlContent);
+            string sTemp = getHtmlTagContent(htmlContent);
             foreach (Match data in rVolumnList.Matches(sTemp))
             {
                 //string sLink = rLink.Match(data.Value).Value;
                 string sLink = data.Value;
                 ComicChapter cb = new ComicChapter()
                 {
-                    url = rUrl.Match(sLink).Value.Replace("href=", "").Replace(@"""", "").Replace(@" /", @"/").Trim(),
+                    Url = rUrl.Match(sLink).Value.Replace("href=", "").Replace(@"""", "").Replace(@" /", @"/").Trim(),
                     //description = CharsetConverter.ToTraditional(rDesc.Match(sLink).Value.Replace(@"<span class=""black"">", "").Replace(@"</span>", "")
                     //.Replace(@"<fontcolor=red>", "").Replace(@"</font>", "").Replace(@"<b>","").Replace(@"</b>","").Trim())
                     Caption = CharsetConvertUtil.ToTraditional(rCleanTag.Replace(rDesc.Match(sLink).Value.Trim(), ""))

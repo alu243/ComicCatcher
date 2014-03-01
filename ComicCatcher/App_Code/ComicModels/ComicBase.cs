@@ -16,28 +16,7 @@ namespace ComicModels
         /// <summary>
         /// URL
         /// </summary>
-        public string url
-        {
-            get { return this._url; }
-            set
-            {
-                this._url = value;
-                try
-                {
-                    this.htmlContent = HttpUtil.getResponse(url);
-                }
-                catch (Exception ex)
-                {
-                    NLogger.Error("讀取Url內容時發生錯誤" + ex.ToString());
-                }
-            }
-        }
-        private string _url;
-
-        /// <summary>
-        /// web網站的內容(就是url抓下來的內容)
-        /// </summary>
-        public string htmlContent { get; set; }
+        public string Url { get; set; }
 
         /// <summary>
         /// 描述(第幾頁的內容或是第幾回)
@@ -50,10 +29,10 @@ namespace ComicModels
         private string _caption;
 
         #region Icon
-        public string iconUrl { get; set; }
+        public string IconUrl { get; set; }
         private bool IsIconDataReaded = false;
         private MemoryStream _iconData = null;
-        public Image iconImage
+        public Image IconImage
         {
             get
             {
@@ -61,7 +40,7 @@ namespace ComicModels
                 {
                     if (false == this.IsIconDataReaded || this._iconData == null)
                     {
-                        this._iconData = HttpUtil.getPictureResponse(this.iconUrl);
+                        this._iconData = HttpUtil.getPictureResponse(this.IconUrl);
                         this.IsIconDataReaded = true;
                     }
                     NLogger.Info("讀取icon圖檔中...," + this.Caption);
@@ -90,9 +69,8 @@ namespace ComicModels
 
         public void Dispose()
         {
-            url = null;
+            Url = null;
             Caption = null;
-            htmlContent = null;
         }
     }
 }

@@ -13,6 +13,7 @@ namespace Utils
         /// <returns></returns>
         public static string trimEscapeString(this string s)
         {
+            if (String.IsNullOrEmpty(s)) return String.Empty;
             string ss = s;
             ss = ss.Replace("?", "");
             ss = ss.Replace("*", "＊");

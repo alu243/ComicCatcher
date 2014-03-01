@@ -9,22 +9,29 @@ namespace Helpers
 {
     public static class TreeViewHelper
     {
-        public static void SetFontBold(TreeView tv, TreeNode tn)
+        private static Font font = new Font("新細明體", 10, FontStyle.Bold);
+        public static void SetFontBold(TreeNode tn)
         {
-            if (tv.InvokeRequired)
-                tv.Invoke(new MethodInvoker(() => tn.NodeFont = new Font(tv.Font, FontStyle.Bold)));
-            else
-                tn.NodeFont = new Font(tv.Font, FontStyle.Bold);
+            if (tn.TreeView != null)
+            {
+                if (tn.TreeView.InvokeRequired)
+                    tn.TreeView.Invoke(new MethodInvoker(() => tn.NodeFont = font));
+                else
+                    tn.NodeFont = font;
+            }
         }
 
-        public static void SetFontBold(TreeView tv, TreeNode tn, Color color)
+        public static void SetFontBold(TreeNode tn, Color color)
         {
-            if (tv.InvokeRequired)
-                tv.Invoke(new MethodInvoker(() => { tn.NodeFont = new Font(tv.Font, FontStyle.Bold); tn.ForeColor = color; }));
-            else
+            if (tn.TreeView != null)
             {
-                tn.NodeFont = new Font(tv.Font, FontStyle.Bold);
-                tn.ForeColor = color;
+                if (tn.TreeView.InvokeRequired)
+                    tn.TreeView.Invoke(new MethodInvoker(() => { tn.NodeFont = font; tn.ForeColor = color; }));
+                else
+                {
+                    tn.NodeFont = font;
+                    tn.ForeColor = color;
+                }
             }
         }
 
