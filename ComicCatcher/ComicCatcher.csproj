@@ -77,15 +77,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Code\ComicModels\IComicChapter.cs" />
+    <Compile Include="App_Code\ComicModels\IComicRoot.cs" />
     <Compile Include="App_Code\ComicModels\IComicName.cs" />
-    <Compile Include="App_Code\ComicModels\IComicList.cs" />
-    <Compile Include="App_Code\Helpers\ComicNodeHelper.cs" />
+    <Compile Include="App_Code\ComicModels\IComicPage.cs" />
+    <Compile Include="App_Code\ComicModels\ComicSiteSettings.cs" />
     <Compile Include="App_Code\Models\DownloadedListOld.cs" />
     <Compile Include="App_Code\Models\Scheduler.cs" />
     <Compile Include="App_Code\Models\WorkerMsg.cs" />
     <Compile Include="App_Code\Models\MsgEnum.cs" />
     <Compile Include="App_Code\Helpers\SQLiteHelper.cs" />
-    <Compile Include="App_Code\Helpers\TreeViewHelper.cs" />
+    <Compile Include="App_Code\Utils\TreeViewUtil.cs" />
     <Compile Include="App_Code\Helpers\NLogger.cs" />
     <Compile Include="App_Code\Helpers\RARHelper.cs" />
     <Compile Include="App_Code\Utils\CMDUtil.cs" />
@@ -93,15 +94,17 @@
     <Compile Include="App_Code\Utils\HttpUtil.cs" />
     <Compile Include="App_Code\Utils\DonwloadUtil.cs" />
     <Compile Include="App_Code\ComicModels\ComicBase.cs" />
-    <Compile Include="App_Code\XinDM\ComicChapter.cs" />
-    <Compile Include="App_Code\XinDM\ComicList.cs" />
-    <Compile Include="App_Code\XinDM\ComicName.cs" />
+    <Compile Include="App_Code\Utils\NodeCheckUtil.cs" />
+    <Compile Include="App_Code\XinDM\XindmChapter.cs" />
+    <Compile Include="App_Code\XinDM\XindmPage.cs" />
+    <Compile Include="App_Code\XinDM\XindmName.cs" />
     <Compile Include="App_Code\Utils\FileUtil.cs" />
-    <Compile Include="App_Code\Utils\StringExtenssion.cs" />
+    <Compile Include="App_Code\Utils\StringExtension.cs" />
     <Compile Include="App_Code\Helpers\ProxySetting.cs" />
     <Compile Include="App_Code\Models\Settings.cs" />
     <Compile Include="App_Code\Models\DownloadedList.cs" />
-    <Compile Include="App_Code\XinDM\XindmWebSite.cs" />
+    <Compile Include="App_Code\XinDM\Xindm.cs" />
+    <Compile Include="App_Code\XinDM\XindmSiteSettings.cs" />
     <Compile Include="CustomSort.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
@@ -161,6 +164,9 @@
       <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Code\sfacg\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

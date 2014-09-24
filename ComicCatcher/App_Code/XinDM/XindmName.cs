@@ -28,7 +28,7 @@ namespace ComicModels
             this.Url = url;
         }
 
-        public List<ComicChapter> getComicChapterList()
+        public List<ComicChapter> getComicChapters()
         {
             string htmlContent = HttpUtil.getResponse(this.Url);
             List<ComicChapter> result = new List<ComicChapter>();
@@ -44,6 +44,9 @@ namespace ComicModels
                     //.Replace(@"<fontcolor=red>", "").Replace(@"</font>", "").Replace(@"<b>","").Replace(@"</b>","").Trim())
                     Caption = CharsetConvertUtil.ToTraditional(rCleanTag.Replace(rDesc.Match(sLink).Value.Trim(), ""))
                 };
+                if (Uri.IsWellFormedUriString(cb.Url, UriKind.Absolute) == false) cb.Url = (new Uri(new Uri(XindmWebSite.WebUrl), cb.Url)).ToString();
+
+
                 if (false == String.IsNullOrEmpty(cb.Caption))
                     result.Add(cb);
             }

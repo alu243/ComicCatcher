@@ -77,10 +77,12 @@ namespace ComicCatcher
             tvComicTree.Nodes.Clear();
             TreeNode root = new TreeNode(XindmWebSite.Title);
             tvComicTree.Nodes.Add(root);
-            string pagePtn = XindmWebSite.ListUrl + "?page={0}&classid=8&tempid=17&line=72";
-            for (int i = 0; i < 117; ++i)
+            //string pagePtn = XindmWebSite.ListUrl + "?page={0}&classid=8&tempid=17&line=72";
+            for (int i = 0; i < 300; ++i)
             {
-                root.Nodes.Add(String.Format(pagePtn, i.ToString()), "第" + (i + 1).ToString().PadLeft(2, '0') + "頁");
+                string pageUrl = XindmWebSite.ListUrl.Replace("index.html", "index_" + (i + 1).ToString() + ".html").Replace("index_1.html", "index.html");
+                //root.Nodes.Add(String.Format(pagePtn, i.ToString()), "第" + (i + 1).ToString().PadLeft(2, '0') + "頁");
+                root.Nodes.Add(pageUrl, "第" + (i + 1).ToString().PadLeft(3, '0') + "頁");
             }
             tvComicTree.ExpandAll();
         }
@@ -88,28 +90,42 @@ namespace ComicCatcher
         private void tvComicTree_AfterSelect(object sender, TreeViewEventArgs e)
         {
             Cursor = System.Windows.Forms.Cursors.WaitCursor;
-            Application.DoEvents();
+            //Application.DoEvents();
             try
             {
                 if (null == tvComicTree.SelectedNode) return;
 
-                if (NodeChecker.IsComicNameNode(tvComicTree.SelectedNode))
+                #region IsComicNameNode
+                if (NodeCheckUtil.IsComicNameNode(tvComicTree.SelectedNode))
                 {
                     // 如果是漫畫名稱節點，就顯示icon圖片
-                    pbIcon.Image = null;
+                    lock (pbIcon)
+                    {
+                        pbIcon.Image = null;
+                    }
                     ComicBase comicData = tvComicTree.SelectedNode.Tag as ComicBase;
                     try
                     {
-                        pbIcon.Image = comicData.IconImage;
+                        lock (pbIcon)
+                        {
+                            pbIcon.Image = comicData.IconImage;
+                        }
                     }
                     catch (Exception ex)
                     {
                         NLogger.Error("顯示icon失敗," + ex.ToString());
-                        pbIcon.Image = null;
+
+                        lock (pbIcon)
+                        {
+                            pbIcon.Image = null;
+                        }
                     }
                     finally
                     {
-                        pbIcon_Paint(pbIcon, null);
+                        lock (pbIcon)
+                        {
+                            pbIcon_Paint(pbIcon, null);
+                        }
                     }
 
                     // 顯示其餘資料
@@ -127,6 +143,7 @@ namespace ComicCatcher
                         pbIcon.Image = null;
                     }
                 }
+                #endregion
 
                 // 如果沒有子節點，就產生子節點
                 if (tvComicTree.SelectedNode.Nodes.Count <= 0)
@@ -142,7 +159,7 @@ namespace ComicCatcher
             finally
             {
                 Cursor = System.Windows.Forms.Cursors.Arrow;
-                Application.DoEvents();
+                //Application.DoEvents();
             }
         }
 
@@ -153,14 +170,18 @@ namespace ComicCatcher
                 try
                 {
                     Cursor = System.Windows.Forms.Cursors.WaitCursor;
-                    Application.DoEvents();
+                    //Application.DoEvents();
                     buildComicNode(tvComicTree.SelectedNode);
                     tvComicTree.SelectedNode.Expand();
+                }
+                catch (Exception ex)
+                {
+                    NLogger.Error(ex.ToString());
                 }
                 finally
                 {
                     Cursor = System.Windows.Forms.Cursors.Arrow;
-                    Application.DoEvents();
+                    //Application.DoEvents();
                 }
             }
         }
@@ -211,7 +232,7 @@ namespace ComicCatcher
 
         private void AddDownloadTask(TreeNode tn)
         {
-            if (false == NodeChecker.IsChapterNode(tvComicTree.SelectedNode)) return;
+            if (false == NodeCheckUtil.IsChapterNode(tvComicTree.SelectedNode)) return;
 
             string taskname = tn.Parent.Text + "/" + tn.Text;
             string localPath = Path.Combine(Path.Combine(txtRootPath.Text, tn.Parent.Text), tn.Text);
@@ -220,13 +241,11 @@ namespace ComicCatcher
             try
             {
                 DownloadedList.AddDownloaded(XindmWebSite.WebSiteName, tn.Parent.Text, tn.Text);
-                //dwnedList.AddDownloaded(XindmWebSite.WebSiteName, tn.Parent.Text, tn.Text);
-                //dwnedList.savexml();
             }
             catch { }
 
-            TreeViewHelper.SetFontBold(tn.Parent);
-            TreeViewHelper.SetFontBold(tn, Color.Blue);
+            TreeViewUtil.SetFontBold(tn.Parent);
+            TreeViewUtil.SetFontBold(tn, Color.Blue);
 
             if ((queue.Count<Tasker>(q => q.name == taskname)) > 0)
             {
@@ -279,7 +298,7 @@ namespace ComicCatcher
             if (false == Directory.Exists(task.downloadPath)) Directory.CreateDirectory(task.downloadPath);
             using (ComicChapter cp = new ComicChapter(downUrl))
             {
-                List<string> allPictureUrl = cp.genPictureUrl();
+                List<string> allPictureUrl = cp.genPictureUrls();
 
                 // 因為 ManuelResetEvent 有 64 個上限限制，所以 thread Pool 手動寫
                 //ThreadPool.SetMaxThreads(20, 40);
@@ -485,7 +504,7 @@ namespace ComicCatcher
                 if (isStopFind) return true; // 遞回時，已經在迴圈裡面的，需再判斷一次是不是已經找到node了
 
                 // 遇到頁的節點，先點一下展開後再繼續找
-                if (false == NodeChecker.IsComicNameNode(node))
+                if (false == NodeCheckUtil.IsComicNameNode(node))
                 {
                     if (0 >= node.Nodes.Count)
                     {
@@ -714,7 +733,12 @@ namespace ComicCatcher
 
         private void txtInfo_TextChanged(object sender, EventArgs e)
         {
-            if (txtInfo.Lines.Length > 10000) txtInfo.Text = "";
+            if (txtInfo.Lines.Length > 500)
+            {
+                txtInfo.SuspendLayout();
+                txtInfo.Text = "";
+                txtInfo.ResumeLayout();
+            }
         }
         #endregion
 
@@ -767,7 +791,7 @@ namespace ComicCatcher
                 {
                     Thread t1 = new Thread(buildComicNodeBackground);
                     t1.IsBackground = true;
-                    t1.Start(tvComicTree.SelectedNode);
+                    t1.Start(currNode);
                 }
                 else
                 {
@@ -786,11 +810,11 @@ namespace ComicCatcher
             {
                 // node.Name 就是 URL
                 // 取得該頁下所有的漫畫清單
-                if (NodeChecker.IsListNode(currNode))
+                if (NodeCheckUtil.IsListNode(currNode))
                 {
                     buildComicNameNode(currNode);
                 }
-                else if (NodeChecker.IsComicNameNode(currNode))
+                else if (NodeCheckUtil.IsComicNameNode(currNode))
                 {
                     buildComicChapterNode(currNode);
                 }
@@ -807,7 +831,7 @@ namespace ComicCatcher
             try
             {
                 TreeNode currNode = objNode as TreeNode;
-                if (NodeChecker.IsListNode(currNode))
+                if (NodeCheckUtil.IsListNode(currNode))
                 {
                     buildComicNameNode(currNode);
                     foreach (TreeNode node in currNode.Nodes)
@@ -817,7 +841,7 @@ namespace ComicCatcher
                         t2.Start(node);
                     }
                 }
-                else if (NodeChecker.IsComicNameNode(currNode))
+                else if (NodeCheckUtil.IsComicNameNode(currNode))
                 {
                     #region Lock的另一種作法
                     //bool isNotLocked = false;
@@ -850,41 +874,37 @@ namespace ComicCatcher
         {
             TreeNode currNode = listNode as TreeNode;
             if (null == currNode) return;
-            if (false == NodeChecker.IsListNode(currNode)) return;
+            if (false == NodeCheckUtil.IsListNode(currNode)) return;
 
-            lock (currNode)
+            try
             {
-                TreeViewHelper.ClearTreeNode(currNode); ;
                 // 產生清單下的漫畫名稱內容子節點
-                NLogger.Info("********************************************");
-                using (ComicList cp = new ComicList(currNode.Name))
+                //NLogger.Info("********************************************");
+                TreeViewUtil.ClearTreeNode(currNode); ;
+                using (ComicList cl = new ComicList(currNode.Name))
                 {
-                    var comicList = cp.getComicNameList();
-                    foreach (var comic in comicList)
+                    foreach (var comic in cl.getComicNames())
                     {
                         if (chkLoadPhoto.Checked)
                         {
-                            Thread t1 = new Thread(() => { Image img = comic.IconImage; }); // 背景讀圖
-                            t1.IsBackground = true;
-                            t1.Start();
+                            Image img = comic.IconImage; // 此動作已內建 multithread 了
                         }
 
-                        TreeNode nameNode = new TreeNode();
-                        nameNode.Name = comic.Url;
-                        nameNode.Text = comic.Caption;
-                        nameNode.ImageKey = comic.IconUrl;
-                        nameNode.Tag = comic;
-
-                        TreeViewHelper.AddTreeNode(currNode, nameNode);
-                        // 如果本地端有已經下載的漫畫的話，變為粗體
-                        if (Directory.Exists(Path.Combine(txtRootPath.Text, nameNode.Text)))
+                        TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text);
+                        lock (currNode.TreeView)
                         {
-                            TreeViewHelper.SetFontBold(nameNode);
+                            TreeViewUtil.AddTreeNode(currNode, nameNode);
                         }
-                        NLogger.Info(comic.Caption + "=" + comic.Url);
+                        //NLogger.Info(comic.Caption + "=" + comic.Url);
                     }
                 }
-                NLogger.Info("********************************************");
+                //NLogger.Info("********************************************");
+            }
+            catch (Exception ex)
+            {
+                NLogger.Error("產生漫畫名稱節點錯誤:" + currNode.Name);
+                NLogger.Error(ex.ToString());
+                TreeViewUtil.SetFontBold(currNode, Color.Red);
             }
         }
 
@@ -892,76 +912,32 @@ namespace ComicCatcher
         {
             TreeNode currNode = nameNode as TreeNode;
             if (null == currNode) return;
-            if (false == NodeChecker.IsComicNameNode(currNode)) return;
+            if (false == NodeCheckUtil.IsComicNameNode(currNode)) return;
 
-            lock (currNode)
+            try
             {
-                TreeViewHelper.ClearTreeNode(currNode); ;
-                //if (currNode.Nodes.Count > 0) return; // 已有節點的不更新
                 // 產生漫畫的回合子節點
-                NLogger.Info("********************************************");
+                //NLogger.Info("********************************************");
+                TreeViewUtil.ClearTreeNode(currNode); ;
                 using (ComicName cn = new ComicName(currNode.Name))
                 {
-                    var chapterList = cn.getComicChapterList();
-                    foreach (var comic in chapterList)
+                    foreach (var chapter in cn.getComicChapters())
                     {
-
-                        TreeNode chapterNode = TreeViewHelper.AddTreeNode(currNode, comic.Url, comic.Caption);
-                        // 如果是已下載過的點，變粗體，改顏色
-                        //if (Models.DownloadedList.HasDownloaded(XindmWebSite.WebSiteName, currNode.Text, chapterNode.Text))
-                        //{
-                        //    TreeViewHelper.SetFontBold(chapterNode, Color.Blue);
-                        //}
-                        NLogger.Info(comic.Caption + "=" + comic.Url);
+                        TreeNode chapterNode = TreeViewUtil.BuildNode(chapter, XindmWebSite.WebSiteName, currNode.Text);
+                        lock (currNode)
+                        {
+                            TreeViewUtil.AddTreeNode(currNode, chapterNode);
+                        }
+                        //NLogger.Info(comic.Caption + "=" + comic.Url);
                     }
                 }
-                NLogger.Info("********************************************");
+                //NLogger.Info("********************************************");
             }
-        }
-        #endregion
-
-        #region 判斷節點類別 Web -> List(page) -> ComicName -> Chapter
-        internal class NodeChecker
-        {
-            /// <summary>
-            /// 是否為顯示回數(集數)的節點
-            /// </summary>
-            /// <param name="tn"></param>
-            /// <returns></returns>
-            public static bool IsChapterNode(TreeNode tn)
+            catch (Exception ex)
             {
-                return tn.Level == 3;
-                //if (null == tn) return false;
-                //if (false == tn.Name.Contains(XindmWebSite.WebUrl)) return false; // 節點本身必需要是包含此內容
-                //// 如果父節點是漫畫名稱節點，表示此節點是回數(集數 )節點
-                //return IsComicNameNode(tn.Parent);
-            }
-
-            /// <summary>
-            /// 是否為顯示漫畫名稱的節點
-            /// </summary>
-            /// <param name="tn"></param>
-            /// <returns></returns>
-            public static bool IsComicNameNode(TreeNode tn)
-            {
-                return tn.Level == 2;
-                //if (null == tn) return false;
-
-                //if (false == tn.Name.Contains(XindmWebSite.WebUrl)) return false; // 節點本身必需要是包含此內容
-                //// 如果父節點是清單連結，表示此連結是漫畫名稱連結
-                //return IsListNode(tn.Parent);
-            }
-
-            /// <summary>
-            /// 是否為顯示漫畫清單的節點
-            /// </summary>
-            /// <param name="tn"></param>
-            /// <returns></returns>
-            public static bool IsListNode(TreeNode tn)
-            {
-                return tn.Level == 1;
-                //if (null == tn) return false;
-                //return tn.Name.Contains(XindmWebSite.ListUrl);
+                NLogger.Error("產生漫畫回數節點錯誤:" + currNode.Name);
+                NLogger.Error(ex.ToString());
+                TreeViewUtil.SetFontBold(currNode, Color.Red);
             }
         }
         #endregion

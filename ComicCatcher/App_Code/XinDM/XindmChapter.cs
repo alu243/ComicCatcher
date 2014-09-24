@@ -21,7 +21,7 @@ namespace ComicModels
             this.Url = url;
         }
 
-        public List<string> genPictureUrl()
+        public List<string> genPictureUrls()
         {
             string htmlContent = HttpUtil.getResponse(this.Url);
             List<string> pages = new List<string>();

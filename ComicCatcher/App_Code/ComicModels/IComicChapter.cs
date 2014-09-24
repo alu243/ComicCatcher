@@ -10,6 +10,6 @@ namespace ComicModels
 {
     interface IComicChapter
     {
-        List<string> genPictureUrl();
+        IList<string> genPictureUrls();
     }
 }

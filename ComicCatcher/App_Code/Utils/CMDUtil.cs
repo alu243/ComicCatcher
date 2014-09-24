@@ -24,7 +24,6 @@ namespace Utils
                     new System.Diagnostics.ProcessStartInfo((command as CommandObj).fileName, (command as CommandObj).arguments);
 
 
-
                 // The following commands are needed to redirect the standard output.
                 // This means that it will be redirected to the Process.StandardOutput StreamReader.
                 //procStartInfo.RedirectStandardInput = true;

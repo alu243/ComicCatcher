@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 namespace Utils
 {
-    public static class StringExtenssion
+    public static class StringExtension
     {
         /// <summary>
         /// 清除有可能會造錯成錯誤目之字串

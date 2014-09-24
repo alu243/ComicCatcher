@@ -9,8 +9,8 @@ using Utils;
 
 namespace ComicModels
 {
-    interface IComicList
+    interface IComicRoot
     {
-        List<ComicName> getComicNameList();
+        IList<IComicPage> getComicPages(IComicRoot cRoot);
     }
 }

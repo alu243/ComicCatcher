@@ -6,10 +6,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 using Utils;
+
 namespace ComicModels
 {
-    interface IComicName
+    interface IComicPage
     {
-        IList<IComicChapter> getComicChapters();
+        IList<IComicName> getComicNames();
     }
 }
