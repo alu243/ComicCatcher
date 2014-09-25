@@ -76,11 +76,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Code\ComicModels\IComicChapter.cs" />
-    <Compile Include="App_Code\ComicModels\IComicRoot.cs" />
-    <Compile Include="App_Code\ComicModels\IComicName.cs" />
-    <Compile Include="App_Code\ComicModels\IComicPage.cs" />
-    <Compile Include="App_Code\ComicModels\ComicSiteSettings.cs" />
+    <Compile Include="App_Code\ComicModels\ComicPage.cs" />
+    <Compile Include="App_Code\ComicModels\ComicUtil.cs" />
+    <Compile Include="App_Code\ComicModels\ComicChapter.cs" />
+    <Compile Include="App_Code\ComicModels\ComicName.cs" />
+    <Compile Include="App_Code\ComicModels\ComicGroup.cs" />
+    <Compile Include="App_Code\ComicModels\ComicNodeBase.cs" />
+    <Compile Include="App_Code\ComicModels\ComicRoot.cs" />
     <Compile Include="App_Code\Models\DownloadedListOld.cs" />
     <Compile Include="App_Code\Models\Scheduler.cs" />
     <Compile Include="App_Code\Models\WorkerMsg.cs" />
@@ -93,18 +95,14 @@
     <Compile Include="App_Code\Utils\CharsetConvertUtil.cs" />
     <Compile Include="App_Code\Utils\HttpUtil.cs" />
     <Compile Include="App_Code\Utils\DonwloadUtil.cs" />
-    <Compile Include="App_Code\ComicModels\ComicBase.cs" />
+    <Compile Include="App_Code\ComicModels\IComicCatcher.cs" />
     <Compile Include="App_Code\Utils\NodeCheckUtil.cs" />
-    <Compile Include="App_Code\XinDM\XindmChapter.cs" />
-    <Compile Include="App_Code\XinDM\XindmPage.cs" />
-    <Compile Include="App_Code\XinDM\XindmName.cs" />
     <Compile Include="App_Code\Utils\FileUtil.cs" />
     <Compile Include="App_Code\Utils\StringExtension.cs" />
     <Compile Include="App_Code\Helpers\ProxySetting.cs" />
     <Compile Include="App_Code\Models\Settings.cs" />
     <Compile Include="App_Code\Models\DownloadedList.cs" />
     <Compile Include="App_Code\XinDM\Xindm.cs" />
-    <Compile Include="App_Code\XinDM\XindmSiteSettings.cs" />
     <Compile Include="CustomSort.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>

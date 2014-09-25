@@ -25,6 +25,8 @@ namespace ComicCatcher
 
         private Settings settings = null;
 
+        private IComicCatcher xindm = new Xindm();
+        
         //private DownloadedList dwnedList = null;
 
         public frmMain()
@@ -75,15 +77,16 @@ namespace ComicCatcher
         private void InitialComicRootTree()
         {
             tvComicTree.Nodes.Clear();
-            TreeNode root = new TreeNode(XindmWebSite.Title);
+
+            ComicRoot cr = xindm.GetComicRoot();
+            TreeNode root = new TreeNode(cr.WebSiteTitle);
             tvComicTree.Nodes.Add(root);
-            //string pagePtn = XindmWebSite.ListUrl + "?page={0}&classid=8&tempid=17&line=72";
-            for (int i = 0; i < 300; ++i)
+
+            var groups = xindm.GetComicGroups();
+            groups.ForEach(g =>
             {
-                string pageUrl = XindmWebSite.ListUrl.Replace("index.html", "index_" + (i + 1).ToString() + ".html").Replace("index_1.html", "index.html");
-                //root.Nodes.Add(String.Format(pagePtn, i.ToString()), "第" + (i + 1).ToString().PadLeft(2, '0') + "頁");
-                root.Nodes.Add(pageUrl, "第" + (i + 1).ToString().PadLeft(3, '0') + "頁");
-            }
+                root.Nodes.Add(g.Url, g.Caption);
+            });
             tvComicTree.ExpandAll();
         }
 

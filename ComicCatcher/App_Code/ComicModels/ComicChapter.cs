@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using System.Text.RegularExpressions;
 using System.IO;
+using System.Drawing;
+using Helpers;
 using Utils;
+using Models;
+using ComicModels;
+using System.Threading;
 namespace ComicModels
 {
-    interface IComicName
+    public class ComicChapter : ComicNodeBase
     {
-        IList<IComicChapter> getComicChapters();
+
     }
 }
