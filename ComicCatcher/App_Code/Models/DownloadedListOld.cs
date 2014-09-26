@@ -124,13 +124,17 @@ namespace Models
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Import()
         {
             myList.Keys.ToList().ForEach(k =>
             {
                 myList[k].Keys.ToList().ForEach(k2 =>
                 {
-                    AddDownloaded(XindmWebSite.WebSiteName, k, k2);
+                    // 舊資料轉換為 sqllite，舊資料目前只有從新動漫來，所以是固定值xindm
+                    AddDownloaded("xindm", k, k2);
                 });
             });
         }

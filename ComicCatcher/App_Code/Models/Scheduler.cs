@@ -8,8 +8,7 @@ namespace Models
     public class Tasker
     {
         public string name { get; set; }
-        public string downloadUrl { get; set; }
-        public bool usingAlternativeUrl { get; set; }
+        public List<string> downloadUrls { get; set; }
         public string downloadPath { get; set; }
     }
     public class DownloadPictureScheduler
