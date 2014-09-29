@@ -25,6 +25,12 @@ namespace ComicModels
         }
 
 
+        public static string GetUtf8Content(string url)
+        {
+            return HttpUtil.getUtf8Response(url);
+        }
+
+
 
         private static VsaEngine _vsaEngine = VsaEngine.CreateEngine();
         public static object EvalJScript(string JScript)
@@ -32,7 +38,7 @@ namespace ComicModels
             object Result = null;
             try
             {
-                Result = Eval.JScriptEvaluate(JScript, "unsafe", _vsaEngine);
+                Result = Eval.JScriptEvaluate(JScript, _vsaEngine);
             }
             catch (Exception ex)
             {

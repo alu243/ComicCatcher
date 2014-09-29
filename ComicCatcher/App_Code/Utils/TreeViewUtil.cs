@@ -23,6 +23,18 @@ namespace Utils
                 }
         }
 
+        public static void ClearNodes(TreeView tv)
+        {
+            if (tv == null) return;
+            if (tv.InvokeRequired)
+                tv.Invoke(new MethodInvoker(() => tv.Nodes.Clear()));
+            else
+                lock (tv)
+                {
+                    tv.Nodes.Clear();
+                }
+        }
+
         public static void SetFontBold(TreeNode tn, Color color)
         {
             if (tn.TreeView == null) return;

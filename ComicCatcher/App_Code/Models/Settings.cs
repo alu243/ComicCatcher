@@ -88,5 +88,12 @@ namespace Models
             get { return this._backGroundLoadNode ?? false; }
             set { this._backGroundLoadNode = value; }
         }
+
+        private bool? _saveWebSiteName;
+        public bool SaveWebSiteName
+        {
+            get { return this._saveWebSiteName ?? false; }
+            set { this._saveWebSiteName = value; }
+        }
     }
 }

@@ -41,6 +41,36 @@ namespace Utils
             }
         }
 
+        public static string getUtf8Response(string url, int remainTries = 10)
+        {
+            HttpWebRequest request = CreateRequest(url);
+            HttpWebResponse response = CreateResponse(request, remainTries);
+            try
+            {
+                Encoding encode = System.Text.Encoding.UTF8;
+                StreamReader readStream = new StreamReader(response.GetResponseStream(), encode);
+
+                StringBuilder sb = new StringBuilder();
+                Char[] read = new Char[2048];
+                // Reads 256 characters at a time.    
+                int count;
+                while (0 < (count = readStream.Read(read, 0, 2048)))
+                {
+                    // Dumps the 256 characters on a string and displays the string to the console.
+                    sb.Append(new String(read, 0, count));
+                }
+                return sb.ToString();
+                //return readStream.ReadToEnd();
+                //}
+            }
+            finally
+            {
+                if (null != response) response.Close();
+                if (null != request) request.Abort();
+                request = null;
+            }
+        }
+
         public static MemoryStream getPictureResponse(string url, int remainTries = 10)
         {
             HttpWebRequest request = CreateRequest(url);
@@ -76,6 +106,8 @@ namespace Utils
             request = (HttpWebRequest)WebRequest.Create(url);
             request.Referer = url.getRefferString();
             request.CookieContainer = myCookie; // 拿到上次成功連線的 cookie 當作是同一個 session 
+
+            //request.CookieContainer.Add(new Uri("http://www.dm5.com"), new Cookie("isAdult", "1"));
             request.Timeout = 10000;
             //request.Timeout = 10000;
             //request.ContentType = "image/jpeg";
@@ -88,6 +120,15 @@ namespace Utils
 
         private static HttpWebResponse CreateResponse(HttpWebRequest request, int remainTries = 10)
         {
+            if (myCookie.GetCookies(new Uri("http://www.dm5.com")).Count > 0)
+            {
+                Cookie dm5Cookie = new Cookie("isAdult", "1");
+                dm5Cookie.Domain = "www.dm5.com";
+                dm5Cookie.Path = "/";
+                dm5Cookie.Expires = DateTime.Now.AddDays(1);
+                myCookie.Add(dm5Cookie);
+            }
+
             string url = request.RequestUri.ToString();
             HttpWebResponse response = null;
             int maxRemainTreis = remainTries;
@@ -110,6 +151,8 @@ namespace Utils
                 remainTries--;
             }
             if (null == response) throw new NullReferenceException("連線發生錯誤，且重新測試超過" + maxRemainTreis.ToString() + "次！！[" + errMsg + "]");
+
+
             return response;
         }
 

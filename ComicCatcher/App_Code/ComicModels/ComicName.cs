@@ -27,7 +27,7 @@ namespace ComicModels
                     this._isIconDataReaded = true;
                     Thread t1 = new Thread(GetPicture);
                     t1.IsBackground = true;
-                    t1.Start(this);
+                    t1.Start();
                     return null;
                 }
                 else
@@ -43,10 +43,7 @@ namespace ComicModels
             {
                 MemoryStream iconData = null;
                 iconData = ComicUtil.GetPicture(this.IconUrl);
-                lock (this.IconImage)
-                {
-                    this._iconImage = Image.FromStream(iconData);
-                }
+                this._iconImage = Image.FromStream(iconData);
             }
             catch (Exception ex)
             {

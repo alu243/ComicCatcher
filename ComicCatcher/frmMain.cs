@@ -25,7 +25,7 @@ namespace ComicCatcher
 
         private Settings settings = null;
 
-        private IComicCatcher xindm = new Xindm();
+        private IComicCatcher comicSiteCatcher = null;
 
         //private DownloadedList dwnedList = null;
 
@@ -59,8 +59,8 @@ namespace ComicCatcher
 
         private void frmMain_Load(object sender, EventArgs e)
         {
+            //xindm.GetComicPages(new ComicChapter());
 
-            InitialComicRootTree();
             lblUpdateDate.Text = "";
             lblUpdateChapter.Text = "";
             buildLocalComicDirComboBox();
@@ -72,18 +72,27 @@ namespace ComicCatcher
             RenewXML2DB();
             DownloadedList.LoadDB();
             //LoadDownloadList();
+
+            cbComicCatcher.SelectedIndex = 0;
+            //ChangeComicSite(new Xindm());
+        }
+
+        private void ChangeComicSite(IComicCatcher newCatcher)
+        {
+            comicSiteCatcher = newCatcher;
+            InitialComicRootTree();
         }
 
         private void InitialComicRootTree()
         {
-            tvComicTree.Nodes.Clear();
-
-            ComicRoot cr = xindm.GetComicRoot();
+            TreeViewUtil.ClearNodes(tvComicTree);
+            GC.Collect();
+            ComicRoot cr = comicSiteCatcher.GetComicRoot();
             TreeNode root = new TreeNode(cr.WebSiteTitle);
             tvComicTree.Nodes.Add(root);
             root.Tag = cr;
 
-            var groups = xindm.GetComicGroups();
+            var groups = comicSiteCatcher.GetComicGroups();
             groups.ForEach(g =>
             {
                 TreeNode tn = root.Nodes.Add(g.Url, g.Caption);
@@ -246,7 +255,7 @@ namespace ComicCatcher
 
             try
             {
-                DownloadedList.AddDownloaded(xindm.GetComicRoot().WebSiteName, tn.Parent.Text, tn.Text);
+                DownloadedList.AddDownloaded(comicSiteCatcher.GetComicRoot().WebSiteName, tn.Parent.Text, tn.Text);
             }
             catch { }
 
@@ -268,17 +277,19 @@ namespace ComicCatcher
             }
 
             ComicChapter cc = tn.Tag as ComicChapter;
-            List<string> downUrls = xindm.GetComicPages(cc).Select(p => p.Url).ToList(); ;
-            if (true == chkUsingAlternativeUrl.Checked) // 確認是否使用替代網址下載圖片
-            {
-                downUrls.ForEach(p =>
-                {
-                    p = p.Replace(xindm.GetComicRoot().PicHost, xindm.GetComicRoot().PicHostAlternative);
-                });
-            }
+            //List<string> downUrls = xindm.GetComicPages(cc).Select(p => p.Url).ToList(); ;
+            //List<string> downFileNames = xindm.GetComicPages(cc).Select(p => p.PageFileName).ToList(); ;
+            //if (true == chkUsingAlternativeUrl.Checked) // 使用替代網址下載圖片
+            //{
+            //    downUrls.ForEach(p =>
+            //    {
+            //        p = p.Replace(xindm.GetComicRoot().PicHost, xindm.GetComicRoot().PicHostAlternative);
+            //    });
+            //}
 
-            if (true == chkUsingAlternativeUrl.Checked)
-                queue.Enqueue(new Tasker() { name = taskname, downloadPath = localPath, downloadUrls = downUrls });
+            //queue.Enqueue(new Tasker() { name = taskname, downloadPath = localPath, downloadUrls = downUrls, downloadFileNames = downFileNames});
+            queue.Enqueue(new Tasker() { name = taskname, downloadPath = localPath, downloadChapter = cc, downloader = comicSiteCatcher });
+
             NLogger.Info(taskname + " 已加入下載排程！");
             statusMsg.Text = taskname + " 已加入下載排程！";
         }
@@ -308,8 +319,13 @@ namespace ComicCatcher
 
         private void DownloadComic(Tasker task)
         {
+            if (chkSaveWebSiteName.Checked)
+            {
+                string parentPath = Path.GetDirectoryName(task.downloadPath);
+                string currentDir = task.downloadPath.Replace(parentPath, String.Empty).Trim('\\');
+                task.downloadPath = parentPath + "\\" + task.downloader.GetComicRoot().WebSiteName + "_" + currentDir;
+            }
             if (false == Directory.Exists(task.downloadPath)) Directory.CreateDirectory(task.downloadPath);
-            List<string> allPictureUrl = task.downloadUrls;
 
             // 因為 ManuelResetEvent 有 64 個上限限制，所以 thread Pool 手動寫
             //ThreadPool.SetMaxThreads(20, 40);
@@ -324,17 +340,20 @@ namespace ComicCatcher
 
             //WaitHandle.WaitAll(handles);
 
+            var pages = task.downloader.GetComicPages(task.downloadChapter);
+
+
             int threadCount = 40;
             int startPage = 0;
-            int upperPage = (threadCount > allPictureUrl.Count ? allPictureUrl.Count : threadCount); // 一次下載40頁，如果剩不到40頁就下載剩下的頁數
-            while (startPage < allPictureUrl.Count)
+            int upperPage = (threadCount > pages.Count ? pages.Count : threadCount); // 一次下載40頁，如果剩不到40頁就下載剩下的頁數
+            while (startPage < pages.Count)
             {
                 List<Thread> threadPool = new List<Thread>();
                 for (int i = startPage; i < upperPage; ++i)
                 {
                     Thread t = new Thread(new ParameterizedThreadStart(DownloadPicture));
                     t.IsBackground = true;
-                    t.Start(new DownloadPictureScheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = allPictureUrl[i] });
+                    t.Start(new DownloadPictureScheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = pages[i].Url, downloadFileName = pages[i].PageFileName });
                     threadPool.Add(t);
                 }
 
@@ -345,7 +364,7 @@ namespace ComicCatcher
                 //workThreadPool.Clear();
                 threadPool.Clear();
                 startPage = upperPage;
-                upperPage = (upperPage + threadCount > allPictureUrl.Count ? allPictureUrl.Count : upperPage + threadCount);
+                upperPage = (upperPage + threadCount > pages.Count ? pages.Count : upperPage + threadCount);
             }
 
             //statusMsg.Text = "[" + myTask.name + "]已經下載完成";
@@ -358,20 +377,19 @@ namespace ComicCatcher
         {
             string localPath = ((DownloadPictureScheduler)scheduler).downloadPath;
             string pictureUrl = ((DownloadPictureScheduler)scheduler).downloadUrl;
-
+            string pictureName = ((DownloadPictureScheduler)scheduler).downloadFileName;
             // 只拿來顯示訊息用
             string tagname = "[" + ((DownloadPictureScheduler)scheduler).name + "]";
             string ThreadID = " Thread ID=[" + Thread.CurrentThread.GetHashCode().ToString() + "]";
-            string fileName = Path.GetFileName(pictureUrl);
 
-            bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + fileName + "下載中...", infoMsg = tagname + fileName + "下載中..." + ThreadID });
+            bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + pictureName + "下載中...", infoMsg = tagname + pictureName + "下載中..." + "[" + pictureUrl + "]" + ThreadID });
             Thread.Sleep(1);
 
             //Cursor = System.Windows.Forms.Cursors.WaitCursor;
             try
             {
-                string tmpFile = Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".tmp";
-                string cmpFile = Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".cmp";
+                string tmpFile = Path.Combine(localPath, pictureName) + ".tmp";
+                string cmpFile = Path.Combine(localPath, pictureName) + ".cmp";
 
                 DonwloadUtil.donwload(pictureUrl, tmpFile);
 
@@ -385,18 +403,18 @@ namespace ComicCatcher
                         break;
                     else
                     {
-                        bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "", infoMsg = tagname + "檔案：" + fileName + "，比對失敗，重新下載比對！" + ThreadID });
+                        bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "", infoMsg = tagname + "檔案：" + pictureName + "，比對失敗，重新下載比對！" + ThreadID });
                         Thread.Sleep(1);
                     }
                 }
 
                 if (i >= testTimes)
                 {
-                    throw new Exception("檔案：" + fileName + " 不完整(已重新下載了" + i.ToString() + "次)");
+                    throw new Exception("檔案：" + pictureName + " 不完整(已重新下載了" + i.ToString() + "次)");
                 }
                 else
                 {
-                    FileUtil.MoveFile(tmpFile, Path.Combine(localPath, Path.GetFileName(pictureUrl)));
+                    FileUtil.MoveFile(tmpFile, Path.Combine(localPath, pictureName));
                 }
             }
             catch (Exception ex)
@@ -408,7 +426,7 @@ namespace ComicCatcher
             {
                 if (File.Exists(Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".cmp")) File.Delete(Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".cmp");
 
-                bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + fileName + "下載完成...", infoMsg = tagname + fileName + "下載完成..." + ThreadID });
+                bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + pictureName + "下載完成...", infoMsg = tagname + pictureName + "下載完成..." + ThreadID });
                 Thread.Sleep(1);
             }
         }
@@ -686,12 +704,15 @@ namespace ComicCatcher
             setProxyUrl.Text = settings.ProxyUrl;
             setProxyPort.Text = settings.ProxyPort.ToString();
             setBackGroundLoad.Checked = settings.BackGroundLoadNode;
+            setSaveWebSiteName.Checked = settings.SaveWebSiteName;
+
 
             /// 使用畫面
             txtRootPath.Text = settings.LocalPath;
+            chkSaveWebSiteName.Checked = settings.SaveWebSiteName;
             chkLoadPhoto.Checked = settings.LoadAllPicture;
             chkIsUseProxy.Checked = settings.UsingProxy;
-            chkBackGroundLoad.Checked = settings.BackGroundLoadNode;
+            //chkBackGroundLoad.Checked = settings.BackGroundLoadNode;
 
             /// Proxy設定(要在使用畫面設定完成後)
             ProxySetting.isUseProxy = chkIsUseProxy.Checked;
@@ -708,6 +729,7 @@ namespace ComicCatcher
             settings.UsingProxy = setUsingProxy.Checked;
             settings.ProxyUrl = setProxyUrl.Text.Trim();
             settings.BackGroundLoadNode = setBackGroundLoad.Checked;
+            settings.SaveWebSiteName = setSaveWebSiteName.Checked;
 
             if (false == String.IsNullOrEmpty(setProxyPort.Text.Trim()))
                 settings.ProxyPort = int.Parse(setProxyPort.Text.Trim());
@@ -792,16 +814,16 @@ namespace ComicCatcher
         {
             try
             {
-                if (chkBackGroundLoad.Checked)
-                {
-                    Thread t1 = new Thread(buildComicNodeBackground);
-                    t1.IsBackground = true;
-                    t1.Start(currNode);
-                }
-                else
-                {
-                    buildComicNodeForeground(currNode);
-                }
+                //if (chkBackGroundLoad.Checked)
+                //{
+                Thread t1 = new Thread(buildComicNodeBackground);
+                t1.IsBackground = true;
+                t1.Start(currNode);
+                //}
+                //else
+                //{
+                //    buildComicNodeForeground(currNode);
+                //}
             }
             catch (Exception ex)
             {
@@ -886,8 +908,9 @@ namespace ComicCatcher
                 // 產生清單下的漫畫名稱內容子節點
                 //NLogger.Info("********************************************");
                 TreeViewUtil.ClearTreeNode(currNode);
+                GC.Collect();
                 ComicGroup cg = currNode.Tag as ComicGroup;
-                foreach (var comic in xindm.GetComicNames(cg))
+                foreach (var comic in comicSiteCatcher.GetComicNames(cg))
                 {
                     if (chkLoadPhoto.Checked)
                     {
@@ -921,11 +944,12 @@ namespace ComicCatcher
             {
                 // 產生漫畫的回合子節點
                 //NLogger.Info("********************************************");
-                TreeViewUtil.ClearTreeNode(currNode); ;
+                TreeViewUtil.ClearTreeNode(currNode);
+                GC.Collect();
                 ComicName cn = currNode.Tag as ComicName;
-                foreach (var chapter in xindm.GetComicChapters(cn))
+                foreach (var chapter in comicSiteCatcher.GetComicChapters(cn))
                 {
-                    TreeNode chapterNode = TreeViewUtil.BuildNode(chapter, xindm.GetComicRoot().WebSiteName, currNode.Text);
+                    TreeNode chapterNode = TreeViewUtil.BuildNode(chapter, comicSiteCatcher.GetComicRoot().WebSiteName, currNode.Text);
                     lock (currNode)
                     {
                         TreeViewUtil.AddTreeNode(currNode, chapterNode);
@@ -942,5 +966,21 @@ namespace ComicCatcher
             }
         }
         #endregion
+
+        private void cbComicCatcher_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cbComicCatcher.Text.ToUpper() == "XINDM")
+            {
+                chkIsUseProxy.Checked = true;
+                chkIsUseProxy.Enabled = true;
+                ChangeComicSite(new Xindm());
+            }
+            else if (cbComicCatcher.Text.ToUpper() == "DM5")
+            {
+                chkIsUseProxy.Checked = false;
+                chkIsUseProxy.Enabled = false;
+                ChangeComicSite(new Dm5());
+            }
+        }
     }
 }

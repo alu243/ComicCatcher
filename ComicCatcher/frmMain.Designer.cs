@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.chkBackGroundLoad = new System.Windows.Forms.CheckBox();
+            this.cbComicCatcher = new System.Windows.Forms.ComboBox();
             this.chkUsingAlternativeUrl = new System.Windows.Forms.CheckBox();
             this.btnCollapse = new System.Windows.Forms.Button();
             this.chkLoadPhoto = new System.Windows.Forms.CheckBox();
@@ -83,6 +83,8 @@
             this.bgWorker = new System.ComponentModel.BackgroundWorker();
             this.bgWorkMain = new System.ComponentModel.BackgroundWorker();
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
+            this.chkSaveWebSiteName = new System.Windows.Forms.CheckBox();
+            this.setSaveWebSiteName = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -130,7 +132,8 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.splitContainer1.Panel1.Controls.Add(this.chkBackGroundLoad);
+            this.splitContainer1.Panel1.Controls.Add(this.chkSaveWebSiteName);
+            this.splitContainer1.Panel1.Controls.Add(this.cbComicCatcher);
             this.splitContainer1.Panel1.Controls.Add(this.chkUsingAlternativeUrl);
             this.splitContainer1.Panel1.Controls.Add(this.btnCollapse);
             this.splitContainer1.Panel1.Controls.Add(this.chkLoadPhoto);
@@ -162,39 +165,39 @@
             this.splitContainer1.TabIndex = 3;
             this.splitContainer1.TabStop = false;
             // 
-            // chkBackGroundLoad
+            // cbComicCatcher
             // 
-            this.chkBackGroundLoad.AutoSize = true;
-            this.chkBackGroundLoad.Checked = true;
-            this.chkBackGroundLoad.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkBackGroundLoad.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.chkBackGroundLoad.Location = new System.Drawing.Point(352, 488);
-            this.chkBackGroundLoad.Margin = new System.Windows.Forms.Padding(2);
-            this.chkBackGroundLoad.Name = "chkBackGroundLoad";
-            this.chkBackGroundLoad.Size = new System.Drawing.Size(96, 16);
-            this.chkBackGroundLoad.TabIndex = 20;
-            this.chkBackGroundLoad.Text = "自動載入資訊";
-            this.chkBackGroundLoad.UseVisualStyleBackColor = true;
+            this.cbComicCatcher.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbComicCatcher.FormattingEnabled = true;
+            this.cbComicCatcher.Items.AddRange(new object[] {
+            "xindm",
+            "dm5"});
+            this.cbComicCatcher.Location = new System.Drawing.Point(3, 10);
+            this.cbComicCatcher.Name = "cbComicCatcher";
+            this.cbComicCatcher.Size = new System.Drawing.Size(106, 20);
+            this.cbComicCatcher.TabIndex = 3;
+            this.cbComicCatcher.SelectedIndexChanged += new System.EventHandler(this.cbComicCatcher_SelectedIndexChanged);
             // 
             // chkUsingAlternativeUrl
             // 
             this.chkUsingAlternativeUrl.AutoSize = true;
+            this.chkUsingAlternativeUrl.Enabled = false;
             this.chkUsingAlternativeUrl.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.chkUsingAlternativeUrl.Location = new System.Drawing.Point(353, 114);
+            this.chkUsingAlternativeUrl.Location = new System.Drawing.Point(352, 149);
             this.chkUsingAlternativeUrl.Margin = new System.Windows.Forms.Padding(2);
             this.chkUsingAlternativeUrl.Name = "chkUsingAlternativeUrl";
             this.chkUsingAlternativeUrl.Size = new System.Drawing.Size(168, 16);
-            this.chkUsingAlternativeUrl.TabIndex = 18;
+            this.chkUsingAlternativeUrl.TabIndex = 10;
             this.chkUsingAlternativeUrl.Text = "使用替代網址(需關閉Proxy)";
             this.chkUsingAlternativeUrl.UseVisualStyleBackColor = true;
             this.chkUsingAlternativeUrl.CheckedChanged += new System.EventHandler(this.chkUsingAlternativeUrl_CheckedChanged);
             // 
             // btnCollapse
             // 
-            this.btnCollapse.Location = new System.Drawing.Point(410, 82);
+            this.btnCollapse.Location = new System.Drawing.Point(409, 117);
             this.btnCollapse.Name = "btnCollapse";
             this.btnCollapse.Size = new System.Drawing.Size(88, 23);
-            this.btnCollapse.TabIndex = 8;
+            this.btnCollapse.TabIndex = 9;
             this.btnCollapse.TabStop = false;
             this.btnCollapse.Text = "全部收合(C)";
             this.btnCollapse.UseVisualStyleBackColor = true;
@@ -206,11 +209,11 @@
             this.chkLoadPhoto.Checked = true;
             this.chkLoadPhoto.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkLoadPhoto.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.chkLoadPhoto.Location = new System.Drawing.Point(353, 66);
+            this.chkLoadPhoto.Location = new System.Drawing.Point(352, 101);
             this.chkLoadPhoto.Margin = new System.Windows.Forms.Padding(2);
             this.chkLoadPhoto.Name = "chkLoadPhoto";
             this.chkLoadPhoto.Size = new System.Drawing.Size(144, 16);
-            this.chkLoadPhoto.TabIndex = 6;
+            this.chkLoadPhoto.TabIndex = 7;
             this.chkLoadPhoto.Text = "展開頁時載入全部縮圖";
             this.chkLoadPhoto.UseVisualStyleBackColor = true;
             // 
@@ -219,7 +222,7 @@
             this.btnFind.Location = new System.Drawing.Point(491, 39);
             this.btnFind.Name = "btnFind";
             this.btnFind.Size = new System.Drawing.Size(48, 23);
-            this.btnFind.TabIndex = 5;
+            this.btnFind.TabIndex = 6;
             this.btnFind.Text = "尋找";
             this.btnFind.UseVisualStyleBackColor = true;
             this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
@@ -229,13 +232,13 @@
             this.txtFind.Location = new System.Drawing.Point(352, 39);
             this.txtFind.Name = "txtFind";
             this.txtFind.Size = new System.Drawing.Size(133, 22);
-            this.txtFind.TabIndex = 4;
+            this.txtFind.TabIndex = 5;
             this.txtFind.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtFind_KeyPress);
             // 
             // pbIcon
             // 
             this.pbIcon.BackColor = System.Drawing.Color.SaddleBrown;
-            this.pbIcon.Location = new System.Drawing.Point(353, 191);
+            this.pbIcon.Location = new System.Drawing.Point(352, 226);
             this.pbIcon.Margin = new System.Windows.Forms.Padding(5);
             this.pbIcon.Name = "pbIcon";
             this.pbIcon.Padding = new System.Windows.Forms.Padding(2);
@@ -251,10 +254,10 @@
             this.lblUpdateChapter.AutoSize = true;
             this.lblUpdateChapter.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.lblUpdateChapter.ForeColor = System.Drawing.Color.Blue;
-            this.lblUpdateChapter.Location = new System.Drawing.Point(437, 170);
+            this.lblUpdateChapter.Location = new System.Drawing.Point(436, 205);
             this.lblUpdateChapter.Name = "lblUpdateChapter";
             this.lblUpdateChapter.Size = new System.Drawing.Size(118, 16);
-            this.lblUpdateChapter.TabIndex = 16;
+            this.lblUpdateChapter.TabIndex = 14;
             this.lblUpdateChapter.Text = "lblUpdateChapter";
             // 
             // lblUpdateDate
@@ -262,30 +265,30 @@
             this.lblUpdateDate.AutoSize = true;
             this.lblUpdateDate.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.lblUpdateDate.ForeColor = System.Drawing.Color.Red;
-            this.lblUpdateDate.Location = new System.Drawing.Point(437, 143);
+            this.lblUpdateDate.Location = new System.Drawing.Point(436, 178);
             this.lblUpdateDate.Name = "lblUpdateDate";
             this.lblUpdateDate.Size = new System.Drawing.Size(98, 16);
-            this.lblUpdateDate.TabIndex = 15;
+            this.lblUpdateDate.TabIndex = 12;
             this.lblUpdateDate.Text = "lblUpdateDate";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.label2.Location = new System.Drawing.Point(353, 170);
+            this.label2.Location = new System.Drawing.Point(352, 205);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(88, 16);
-            this.label2.TabIndex = 14;
+            this.label2.TabIndex = 13;
             this.label2.Text = "更新回數：";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.label1.Location = new System.Drawing.Point(353, 143);
+            this.label1.Location = new System.Drawing.Point(352, 178);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(88, 16);
-            this.label1.TabIndex = 13;
+            this.label1.TabIndex = 11;
             this.label1.Text = "更新日期：";
             // 
             // chkIsUseProxy
@@ -294,20 +297,20 @@
             this.chkIsUseProxy.Checked = true;
             this.chkIsUseProxy.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkIsUseProxy.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.chkIsUseProxy.Location = new System.Drawing.Point(353, 86);
+            this.chkIsUseProxy.Location = new System.Drawing.Point(352, 121);
             this.chkIsUseProxy.Margin = new System.Windows.Forms.Padding(2);
             this.chkIsUseProxy.Name = "chkIsUseProxy";
             this.chkIsUseProxy.Size = new System.Drawing.Size(52, 16);
-            this.chkIsUseProxy.TabIndex = 7;
+            this.chkIsUseProxy.TabIndex = 8;
             this.chkIsUseProxy.Text = "Proxy";
             this.chkIsUseProxy.UseVisualStyleBackColor = true;
             this.chkIsUseProxy.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // txtUrl
             // 
-            this.txtUrl.Location = new System.Drawing.Point(5, 3);
+            this.txtUrl.Location = new System.Drawing.Point(115, 8);
             this.txtUrl.Name = "txtUrl";
-            this.txtUrl.Size = new System.Drawing.Size(412, 22);
+            this.txtUrl.Size = new System.Drawing.Size(440, 22);
             this.txtUrl.TabIndex = 1;
             // 
             // tvComicTree
@@ -319,12 +322,12 @@
             this.tvComicTree.HideSelection = false;
             this.tvComicTree.Location = new System.Drawing.Point(4, 36);
             this.tvComicTree.Name = "tvComicTree";
-            treeNode1.Name = "http://www.xindm.cn";
-            treeNode1.Text = "新動漫(xindm)";
+            treeNode3.Name = "http://www.xindm.cn";
+            treeNode3.Text = "新動漫(xindm)";
             this.tvComicTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode3});
             this.tvComicTree.Size = new System.Drawing.Size(338, 607);
-            this.tvComicTree.TabIndex = 3;
+            this.tvComicTree.TabIndex = 4;
             this.tvComicTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvComicTree_AfterSelect);
             this.tvComicTree.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tvComicTree_KeyPress);
             this.tvComicTree.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tvComicTree_KeyUp);
@@ -332,7 +335,7 @@
             // 
             // btnDownload
             // 
-            this.btnDownload.Location = new System.Drawing.Point(423, 2);
+            this.btnDownload.Location = new System.Drawing.Point(355, 535);
             this.btnDownload.Name = "btnDownload";
             this.btnDownload.Size = new System.Drawing.Size(75, 23);
             this.btnDownload.TabIndex = 2;
@@ -348,7 +351,7 @@
             this.btnOpenDirectory.Location = new System.Drawing.Point(347, 206);
             this.btnOpenDirectory.Name = "btnOpenDirectory";
             this.btnOpenDirectory.Size = new System.Drawing.Size(29, 102);
-            this.btnOpenDirectory.TabIndex = 17;
+            this.btnOpenDirectory.TabIndex = 7;
             this.btnOpenDirectory.Text = "開啟目錄";
             this.btnOpenDirectory.UseVisualStyleBackColor = true;
             this.btnOpenDirectory.Click += new System.EventHandler(this.OpenDirectory_Click);
@@ -474,6 +477,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.setSaveWebSiteName);
             this.tabPage3.Controls.Add(this.setBackGroundLoad);
             this.tabPage3.Controls.Add(this.gbProxy);
             this.tabPage3.Controls.Add(this.label5);
@@ -598,7 +602,7 @@
             this.setLoadAllPicture.Checked = true;
             this.setLoadAllPicture.CheckState = System.Windows.Forms.CheckState.Checked;
             this.setLoadAllPicture.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.setLoadAllPicture.Location = new System.Drawing.Point(32, 244);
+            this.setLoadAllPicture.Location = new System.Drawing.Point(32, 250);
             this.setLoadAllPicture.Margin = new System.Windows.Forms.Padding(2);
             this.setLoadAllPicture.Name = "setLoadAllPicture";
             this.setLoadAllPicture.Size = new System.Drawing.Size(144, 16);
@@ -673,6 +677,32 @@
             this.bgWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgWorker_DoWork);
             this.bgWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bgWorker_ProgressChanged);
             // 
+            // chkSaveWebSiteName
+            // 
+            this.chkSaveWebSiteName.AutoSize = true;
+            this.chkSaveWebSiteName.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.chkSaveWebSiteName.Location = new System.Drawing.Point(352, 76);
+            this.chkSaveWebSiteName.Margin = new System.Windows.Forms.Padding(2);
+            this.chkSaveWebSiteName.Name = "chkSaveWebSiteName";
+            this.chkSaveWebSiteName.Size = new System.Drawing.Size(120, 16);
+            this.chkSaveWebSiteName.TabIndex = 18;
+            this.chkSaveWebSiteName.Text = "存檔目錄加上前綴";
+            this.chkSaveWebSiteName.UseVisualStyleBackColor = true;
+            // 
+            // setSaveWebSiteName
+            // 
+            this.setSaveWebSiteName.AutoSize = true;
+            this.setSaveWebSiteName.Checked = true;
+            this.setSaveWebSiteName.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.setSaveWebSiteName.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.setSaveWebSiteName.Location = new System.Drawing.Point(32, 224);
+            this.setSaveWebSiteName.Margin = new System.Windows.Forms.Padding(2);
+            this.setSaveWebSiteName.Name = "setSaveWebSiteName";
+            this.setSaveWebSiteName.Size = new System.Drawing.Size(120, 16);
+            this.setSaveWebSiteName.TabIndex = 32;
+            this.setSaveWebSiteName.Text = "存檔目錄加上前綴";
+            this.setSaveWebSiteName.UseVisualStyleBackColor = true;
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -683,7 +713,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.Name = "frmMain";
-            this.Text = "漫畫下載器 2014/01/12 0.0.1.012";
+            this.Text = "漫畫下載器 2014/09/27 0.0.2.001";
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
@@ -758,9 +788,11 @@
         private System.Windows.Forms.TextBox setProxyUrl;
         private System.Windows.Forms.CheckBox setUsingProxy;
         private System.Windows.Forms.CheckBox chkUsingAlternativeUrl;
-        private System.Windows.Forms.CheckBox chkBackGroundLoad;
         private System.Windows.Forms.Button btnOpenDirectory;
         private System.Windows.Forms.CheckBox setBackGroundLoad;
+        private System.Windows.Forms.ComboBox cbComicCatcher;
+        private System.Windows.Forms.CheckBox chkSaveWebSiteName;
+        private System.Windows.Forms.CheckBox setSaveWebSiteName;
 
     }
 }

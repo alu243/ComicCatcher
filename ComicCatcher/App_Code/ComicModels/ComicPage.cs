@@ -15,5 +15,6 @@ namespace ComicModels
     public class ComicPage : ComicNodeBase
     {
         public int PageNumber { get; set; }
+        public string PageFileName { get; set; }
     }
 }

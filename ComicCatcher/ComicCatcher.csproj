@@ -71,6 +71,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\System.Data.SQLite.x86.1.0.90.0\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -106,6 +107,9 @@
     <Compile Include="App_Code\Helpers\ProxySetting.cs" />
     <Compile Include="App_Code\Models\Settings.cs" />
     <Compile Include="App_Code\Models\DownloadedList.cs" />
+    <Compile Include="App_Code\XinDM\Dm5.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="App_Code\XinDM\Xindm.cs" />
     <Compile Include="CustomSort.cs" />
     <Compile Include="frmMain.cs">

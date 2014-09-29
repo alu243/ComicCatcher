@@ -12,7 +12,7 @@ using ComicModels;
 using System.Threading;
 namespace ComicModels
 {
-    interface IComicCatcher : IDisposable
+    public interface IComicCatcher : IDisposable
     {
         ComicRoot GetComicRoot();
         List<ComicGroup> GetComicGroups();
