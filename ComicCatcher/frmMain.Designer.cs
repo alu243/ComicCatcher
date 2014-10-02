@@ -29,11 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.chkSaveWebSiteName = new System.Windows.Forms.CheckBox();
             this.cbComicCatcher = new System.Windows.Forms.ComboBox();
             this.chkUsingAlternativeUrl = new System.Windows.Forms.CheckBox();
             this.btnCollapse = new System.Windows.Forms.Button();
@@ -61,6 +62,7 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.txtInfo = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.setSaveWebSiteName = new System.Windows.Forms.CheckBox();
             this.setBackGroundLoad = new System.Windows.Forms.CheckBox();
             this.gbProxy = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -83,8 +85,7 @@
             this.bgWorker = new System.ComponentModel.BackgroundWorker();
             this.bgWorkMain = new System.ComponentModel.BackgroundWorker();
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
-            this.chkSaveWebSiteName = new System.Windows.Forms.CheckBox();
-            this.setSaveWebSiteName = new System.Windows.Forms.CheckBox();
+            this.btnShowEditModal = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -152,6 +153,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.splitContainer1.Panel2.Controls.Add(this.btnShowEditModal);
             this.splitContainer1.Panel2.Controls.Add(this.btnOpenDirectory);
             this.splitContainer1.Panel2.Controls.Add(this.btnDelete);
             this.splitContainer1.Panel2.Controls.Add(this.btnArchive);
@@ -161,9 +163,21 @@
             this.splitContainer1.Panel2.Controls.Add(this.txtRootPath);
             this.splitContainer1.Panel2.Controls.Add(this.tvFolder);
             this.splitContainer1.Size = new System.Drawing.Size(1031, 647);
-            this.splitContainer1.SplitterDistance = 600;
+            this.splitContainer1.SplitterDistance = 581;
             this.splitContainer1.TabIndex = 3;
             this.splitContainer1.TabStop = false;
+            // 
+            // chkSaveWebSiteName
+            // 
+            this.chkSaveWebSiteName.AutoSize = true;
+            this.chkSaveWebSiteName.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.chkSaveWebSiteName.Location = new System.Drawing.Point(352, 76);
+            this.chkSaveWebSiteName.Margin = new System.Windows.Forms.Padding(2);
+            this.chkSaveWebSiteName.Name = "chkSaveWebSiteName";
+            this.chkSaveWebSiteName.Size = new System.Drawing.Size(120, 16);
+            this.chkSaveWebSiteName.TabIndex = 18;
+            this.chkSaveWebSiteName.Text = "存檔目錄加上前綴";
+            this.chkSaveWebSiteName.UseVisualStyleBackColor = true;
             // 
             // cbComicCatcher
             // 
@@ -322,10 +336,10 @@
             this.tvComicTree.HideSelection = false;
             this.tvComicTree.Location = new System.Drawing.Point(4, 36);
             this.tvComicTree.Name = "tvComicTree";
-            treeNode3.Name = "http://www.xindm.cn";
-            treeNode3.Text = "新動漫(xindm)";
+            treeNode2.Name = "http://www.xindm.cn";
+            treeNode2.Text = "新動漫(xindm)";
             this.tvComicTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode3});
+            treeNode2});
             this.tvComicTree.Size = new System.Drawing.Size(338, 607);
             this.tvComicTree.TabIndex = 4;
             this.tvComicTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvComicTree_AfterSelect);
@@ -348,7 +362,7 @@
             // btnOpenDirectory
             // 
             this.btnOpenDirectory.Font = new System.Drawing.Font("新細明體", 14F);
-            this.btnOpenDirectory.Location = new System.Drawing.Point(347, 206);
+            this.btnOpenDirectory.Location = new System.Drawing.Point(347, 205);
             this.btnOpenDirectory.Name = "btnOpenDirectory";
             this.btnOpenDirectory.Size = new System.Drawing.Size(29, 102);
             this.btnOpenDirectory.TabIndex = 7;
@@ -360,7 +374,7 @@
             // 
             this.btnDelete.Font = new System.Drawing.Font("新細明體", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnDelete.ImageList = this.tvFolderImageList1;
-            this.btnDelete.Location = new System.Drawing.Point(347, 101);
+            this.btnDelete.Location = new System.Drawing.Point(347, 110);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(29, 88);
             this.btnDelete.TabIndex = 6;
@@ -378,9 +392,10 @@
             // 
             // btnArchive
             // 
-            this.btnArchive.Location = new System.Drawing.Point(281, 72);
+            this.btnArchive.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnArchive.Location = new System.Drawing.Point(281, 67);
             this.btnArchive.Name = "btnArchive";
-            this.btnArchive.Size = new System.Drawing.Size(75, 23);
+            this.btnArchive.Size = new System.Drawing.Size(75, 28);
             this.btnArchive.TabIndex = 4;
             this.btnArchive.TabStop = false;
             this.btnArchive.Text = "壓縮(&A)";
@@ -431,7 +446,7 @@
             this.txtRootPath.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.txtRootPath.Location = new System.Drawing.Point(0, 0);
             this.txtRootPath.Name = "txtRootPath";
-            this.txtRootPath.Size = new System.Drawing.Size(427, 27);
+            this.txtRootPath.Size = new System.Drawing.Size(446, 27);
             this.txtRootPath.TabIndex = 1;
             this.txtRootPath.Text = "Q:\\Comic\\ComicShelf";
             this.txtRootPath.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtPath_KeyPress);
@@ -494,6 +509,20 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "設定資料";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // setSaveWebSiteName
+            // 
+            this.setSaveWebSiteName.AutoSize = true;
+            this.setSaveWebSiteName.Checked = true;
+            this.setSaveWebSiteName.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.setSaveWebSiteName.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.setSaveWebSiteName.Location = new System.Drawing.Point(32, 224);
+            this.setSaveWebSiteName.Margin = new System.Windows.Forms.Padding(2);
+            this.setSaveWebSiteName.Name = "setSaveWebSiteName";
+            this.setSaveWebSiteName.Size = new System.Drawing.Size(120, 16);
+            this.setSaveWebSiteName.TabIndex = 32;
+            this.setSaveWebSiteName.Text = "存檔目錄加上前綴";
+            this.setSaveWebSiteName.UseVisualStyleBackColor = true;
             // 
             // setBackGroundLoad
             // 
@@ -677,31 +706,17 @@
             this.bgWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgWorker_DoWork);
             this.bgWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bgWorker_ProgressChanged);
             // 
-            // chkSaveWebSiteName
+            // btnShowEditModal
             // 
-            this.chkSaveWebSiteName.AutoSize = true;
-            this.chkSaveWebSiteName.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.chkSaveWebSiteName.Location = new System.Drawing.Point(352, 76);
-            this.chkSaveWebSiteName.Margin = new System.Windows.Forms.Padding(2);
-            this.chkSaveWebSiteName.Name = "chkSaveWebSiteName";
-            this.chkSaveWebSiteName.Size = new System.Drawing.Size(120, 16);
-            this.chkSaveWebSiteName.TabIndex = 18;
-            this.chkSaveWebSiteName.Text = "存檔目錄加上前綴";
-            this.chkSaveWebSiteName.UseVisualStyleBackColor = true;
-            // 
-            // setSaveWebSiteName
-            // 
-            this.setSaveWebSiteName.AutoSize = true;
-            this.setSaveWebSiteName.Checked = true;
-            this.setSaveWebSiteName.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.setSaveWebSiteName.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.setSaveWebSiteName.Location = new System.Drawing.Point(32, 224);
-            this.setSaveWebSiteName.Margin = new System.Windows.Forms.Padding(2);
-            this.setSaveWebSiteName.Name = "setSaveWebSiteName";
-            this.setSaveWebSiteName.Size = new System.Drawing.Size(120, 16);
-            this.setSaveWebSiteName.TabIndex = 32;
-            this.setSaveWebSiteName.Text = "存檔目錄加上前綴";
-            this.setSaveWebSiteName.UseVisualStyleBackColor = true;
+            this.btnShowEditModal.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnShowEditModal.Location = new System.Drawing.Point(359, 32);
+            this.btnShowEditModal.Name = "btnShowEditModal";
+            this.btnShowEditModal.Size = new System.Drawing.Size(75, 63);
+            this.btnShowEditModal.TabIndex = 17;
+            this.btnShowEditModal.TabStop = false;
+            this.btnShowEditModal.Text = "編輯目錄群組";
+            this.btnShowEditModal.UseVisualStyleBackColor = true;
+            this.btnShowEditModal.Click += new System.EventHandler(this.btnShowEditModal_Click);
             // 
             // frmMain
             // 
@@ -793,6 +808,7 @@
         private System.Windows.Forms.ComboBox cbComicCatcher;
         private System.Windows.Forms.CheckBox chkSaveWebSiteName;
         private System.Windows.Forms.CheckBox setSaveWebSiteName;
+        private System.Windows.Forms.Button btnShowEditModal;
 
     }
 }

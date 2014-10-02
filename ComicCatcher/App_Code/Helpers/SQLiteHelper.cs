@@ -49,6 +49,56 @@ UNIQUE (ComicWeb, ComicName, ComicVolumn) ON CONFLICT REPLACE
             catch { /* doNothing */ }
         }
 
+        public static void CreatePathGroupTableOnFly()
+        {
+            //string sql = @"drop TABLE PathGroup";
+            string sql = @"
+CREATE TABLE PathGroup (
+GroupName NVARCHAR(50) not NULL,
+ComicName1 NVARCHAR(50) not NULL,
+ComicName2 NVARCHAR(50) ,
+ComicName3 NVARCHAR(50) ,
+ComicName4 NVARCHAR(50) ,
+ComicName5 NVARCHAR(50) ,
+ComicName6 NVARCHAR(50) ,
+ComicName7 NVARCHAR(50) ,
+ComicName8 NVARCHAR(50) ,
+ComicName9 NVARCHAR(50) ,
+ComicName10 NVARCHAR(50) ,
+UNIQUE (GroupName) ON CONFLICT REPLACE
+);";
+            try
+            {
+                SqlExecuteNonQuery(sql);
+            }
+            catch { /* doNothing */ }
+
+            sql = "CREATE INDEX IX_PG_GroupName ON PathGroup(GroupName)";
+            try
+            {
+                SqlExecuteNonQuery(sql);
+            }
+            catch { /* doNothing */ }
+        }
+
+
+        public static DataTable GetPathGroup()
+        {
+            string sql = "select * from PathGroup";
+            return SqlSelect(sql);
+        }
+
+        public static SQLiteDataAdapter GetPathGroupAdapter()
+        {
+            SQLiteConnection conn = new SQLiteConnection(connStr);
+            string sql = "select * from PathGroup";
+            SQLiteDataAdapter sda = new SQLiteDataAdapter(sql, conn);
+            SQLiteCommandBuilder builder = new SQLiteCommandBuilder(sda);
+            sda.UpdateCommand = builder.GetUpdateCommand();
+            sda.InsertCommand = builder.GetInsertCommand();
+            sda.DeleteCommand = builder.GetDeleteCommand();
+            return sda;
+        }
 
         public static int SqlExecuteNonQuery(string sql)
         {

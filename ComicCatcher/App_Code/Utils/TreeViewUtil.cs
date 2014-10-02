@@ -89,7 +89,7 @@ namespace Utils
             return tn;
         }
 
-        public static TreeNode BuildNode(ComicModels.ComicName comic, string localComicPath)
+        public static TreeNode BuildNode(ComicModels.ComicName comic, string localComicPath, string groupName)
         {
             TreeNode nameNode = new TreeNode();
             nameNode.Name = comic.Url;
@@ -100,6 +100,11 @@ namespace Utils
             // 如果本地端已有此漫畫的資料夾，改為粗體顯示
             if (Directory.Exists(Path.Combine(localComicPath, nameNode.Text)))
             {
+                nameNode.NodeFont = boldFont;
+            }
+            else if (Directory.Exists(Path.Combine(localComicPath, groupName)))
+            {
+                nameNode.ForeColor = Color.DarkBlue;
                 nameNode.NodeFont = boldFont;
             }
 

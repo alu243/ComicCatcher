@@ -27,6 +27,8 @@ namespace ComicCatcher
 
         private IComicCatcher comicSiteCatcher = null;
 
+        private PathGroup pathGroup = new PathGroup();
+
         //private DownloadedList dwnedList = null;
 
         public frmMain()
@@ -72,6 +74,9 @@ namespace ComicCatcher
             RenewXML2DB();
             DownloadedList.LoadDB();
             //LoadDownloadList();
+
+
+            pathGroup.Load();
 
             cbComicCatcher.SelectedIndex = 0;
             //ChangeComicSite(new Xindm());
@@ -145,11 +150,15 @@ namespace ComicCatcher
                     // 顯示其餘資料
                     try
                     {
+                        string pathGroupName = pathGroup.GetGroupName(tvComicTree.SelectedNode.Text);
+
+
                         txtUrl.Text = tvComicTree.SelectedNode.Name;
                         lblUpdateDate.Text = comicName.LastUpdateDate;
                         lblUpdateChapter.Text = comicName.LastUpdateChapter;
-                        if (false == cbRelateFolders.Items.Contains(tvComicTree.SelectedNode.Text)) cbRelateFolders.Items.Add(tvComicTree.SelectedNode.Text);
-                        cbRelateFolders.Text = tvComicTree.SelectedNode.Text;
+                        if (false == cbRelateFolders.Items.Contains(pathGroupName)) cbRelateFolders.Items.Add(pathGroupName);
+
+                        cbRelateFolders.Text = pathGroupName;
                     }
                     catch (Exception ex)
                     {
@@ -249,7 +258,7 @@ namespace ComicCatcher
             if (false == NodeCheckUtil.IsChapterNode(tvComicTree.SelectedNode)) return;
 
             string taskname = tn.Parent.Text + "/" + tn.Text;
-            string localPath = Path.Combine(Path.Combine(txtRootPath.Text, tn.Parent.Text), tn.Text);
+            string localPath = Path.Combine(Path.Combine(txtRootPath.Text, pathGroup.GetGroupName(tn.Parent.Text)), tn.Text);
 
             string downUrl = tn.Name;
 
@@ -917,7 +926,10 @@ namespace ComicCatcher
                         Image img = comic.IconImage; // 此動作已內建 multithread 了
                     }
 
-                    TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text);
+                    //TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text);
+                    string groupName = pathGroup.GetGroupName(comic.Caption);
+                    TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
+
                     lock (currNode.TreeView)
                     {
                         TreeViewUtil.AddTreeNode(currNode, nameNode);
@@ -981,6 +993,15 @@ namespace ComicCatcher
                 chkIsUseProxy.Enabled = false;
                 ChangeComicSite(new Dm5());
             }
+        }
+
+        private void btnShowEditModal_Click(object sender, EventArgs e)
+        {
+            frmEditPathGroup f = new frmEditPathGroup();
+
+            f.ShowDialog(this);
+
+            this.pathGroup.Load();
         }
     }
 }
