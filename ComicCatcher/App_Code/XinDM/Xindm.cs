@@ -23,12 +23,10 @@ namespace ComicModels
             WebHost = @"http://www.xindm.cn/mh",
             //PicHost = @"http://mh.xindm.cn/", // Old
             IconHost = @"http://www.xindm.cn/",
-            //PicHost = @"http://beiyong.bukamh.com/",
-            PicHost = @"http://imgsxsq.bukamh.com/",
+            PicHost = @"http://beiyong.bukamh.com/",
+            //PicHost = @"http://imgsxsq.bukamh.com/",
             PicHost2 = @"http://mh.xindm.cn/",
-
-
-            PicHostAlternative = @"http://mh2.xindm.cn/"
+            PicHostAlternative = @"http://imgsxsq.bukamh.com/"
         };
 
         public ComicRoot GetComicRoot()
@@ -165,37 +163,38 @@ namespace ComicModels
         public List<ComicPage> GetComicPages(ComicChapter cChapter)
         {
             //Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
-            Regex rJS = new Regex(@"<script language=\""javascript\"">(.|\n)*?</script>", RegexOptions.Compiled);
+            Regex rJS = new Regex(@"<script(.|\n)*?</script>", RegexOptions.Compiled);
             Regex rEval = new Regex(@"eval(.+)", RegexOptions.Compiled);
             //  var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
             Regex rPages = new Regex(@"\'.+?\'", RegexOptions.Compiled);
 
-
             string htmlContent = ComicUtil.GetContent(cChapter.Url);
             //string htmlContent = ComicUtil.GetContent(@"http://www.xindm.cn/mh/Soul%20Catcher/109903.html");
-            string jsCode = rJS.Matches(htmlContent)[0].Groups[0].ToString();
+            string jsCode = String.Join(Environment.NewLine, rJS.Matches(htmlContent).Cast<Match>().ToList().Select(m => m.ToString()).ToArray());
             string evalCode = rEval.Matches(jsCode)[0].ToString();
             evalCode = evalCode.Substring(5, evalCode.Length - 6);
             string photoStr = ComicUtil.EvalJScript("var cs = " + evalCode).ToString();
 
             List<ComicPage> pages = new List<ComicPage>();
+            int i = 1;
             foreach (Match match in rPages.Matches(photoStr))
             {
-                int i = 1;
                 ComicPage page = new ComicPage();
-                string tmp = match.ToString().Trim('\'').Replace("/pic.php?url=http%3A%2F%2Fimages.dmzj.com%2F", "").Replace("+", " ");
+                //string tmp = match.ToString().Trim('\'').Replace("/pic.php?url=http%3A%2F%2Fimages.dmzj.com%2F", "").Replace("+", " ");
+                string tmp = match.ToString().Trim('\'');
                 //tmp = System.Web.HttpUtility.UrlDecode(tmp, System.Text.Encoding.GetEncoding("gb2312"));
                 //tmp = System.Web.HttpUtility.UrlEncode(tmp, System.Text.Encoding.GetEncoding("gb2312"));
-                if (match.ToString().Contains("pic.php"))
-                {
-                    page.Url = new Uri(new Uri(this._cRoot.PicHost), tmp).ToString();
-                }
-                else
-                {
-                    page.Url = new Uri(new Uri(this._cRoot.PicHost2), tmp).ToString();
-                }
+
+                page.Url = GetPageUrl(match.ToString());
+                //page.Url = this._cRoot.PicHost.TrimEnd('/') + "/" + tmp.TrimStart('/');
+
                 page.Caption = "第" + i.ToString().PadLeft(3, '0') + "頁";
-                page.PageFileName = System.IO.Path.GetFileName(System.Web.HttpUtility.UrlDecode(page.Url, System.Text.Encoding.GetEncoding("gb2312")));
+
+                //page.PageFileName = System.IO.Path.GetFileName(System.Web.HttpUtility.UrlDecode(page.Url, System.Text.Encoding.GetEncoding("gb2312")));
+                string pageFile = System.IO.Path.GetFileName(System.Web.HttpUtility.UrlDecode(page.Url, System.Text.Encoding.GetEncoding("gb2312")));
+                page.PageFileName = i.ToString().PadLeft(3, '0') + "." + System.IO.Path.GetExtension(pageFile);
+                page.PageFileName = page.PageFileName.Replace("..", ".");
+
                 pages.Add(page);
                 i++;
             }
@@ -225,6 +224,42 @@ namespace ComicModels
             //}
 
             //return new List<ComicPage>();
+        }
+
+        private string GetPageUrl(string pageUrl)
+        {
+            string url = this._cRoot.PicHost.TrimEnd('/') + "/" + pageUrl.Trim('\'').TrimStart('/');
+            url = System.Web.HttpUtility.UrlDecode(url, System.Text.Encoding.GetEncoding("gb2312"));
+
+            string urlString = url.Substring(0, url.IndexOf("?url="));
+            string queryString = url.Substring(url.IndexOf("?url=") + 1);
+
+            url = urlString + "?url=" + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
+
+            return url;
+
+            ////////if (match.ToString().Contains(".php"))
+            ////////{
+            ////////    page.Url = this._cRoot.PicHost.TrimEnd('/') + "/" + tmp.TrimStart('/');
+
+            ////////    //Regex r = new Regex("")
+
+            ////////    //string decodeUrl = System.Web.HttpUtility.UrlDecode(page.Url, System.Text.Encoding.GetEncoding("gb2312"));
+            ////////    //page.Url = tmp.Replace(this._cRoot.PicHost + "pic.php?url=http%3A%2F%2Fimages.dmzj.com%2F", this._cRoot.PicHostAlternative);
+            ////////    //page.Url = decodeUrl.Replace(this._cRoot.PicHost + "pic.php?url=http://images.dmzj.com/", this._cRoot.PicHostAlternative);
+
+
+            ////////    //string tmp = match.ToString().Trim('\'').Replace("/pic.php?url=", "");
+            ////////    //tmp = System.Web.HttpUtility.UrlDecode(tmp, System.Text.Encoding.GetEncoding("gb2312"));
+            ////////    //tmp = System.Web.HttpUtility.UrlEncode(tmp, System.Text.Encoding.GetEncoding("gb2312"));
+            ////////    //tmp = "pic.php?url=" + tmp;
+            ////////    //page.Url = this._cRoot.PicHost + tmp;
+            ////////}
+            ////////else
+            ////////{
+            ////////    string tmpUrl = match.ToString().Trim('\'').Replace("/pic.php?url=http%3A%2F%2Fimages.dmzj.com%2F", "").Replace("+", " ");
+            ////////    page.Url = new Uri(new Uri(this._cRoot.PicHost2), tmp).ToString();
+            ////////}
         }
         #endregion
     }

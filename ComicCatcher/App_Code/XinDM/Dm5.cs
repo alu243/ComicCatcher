@@ -197,6 +197,7 @@ namespace ComicModels
                 page.Url = photoServer + pageFile + "?cid=" + cid + "&key=" + key;
                 page.Caption = "第" + i.ToString().PadLeft(3, '0') + "頁";
                 page.PageFileName = i.ToString().PadLeft(3, '0') + "." + System.IO.Path.GetExtension(pageFile);
+                page.PageFileName = page.PageFileName.Replace("..", ".");
 
                 pages.Add(page);
             }

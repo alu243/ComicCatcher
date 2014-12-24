@@ -391,14 +391,15 @@ namespace ComicCatcher
             string tagname = "[" + ((DownloadPictureScheduler)scheduler).name + "]";
             string ThreadID = " Thread ID=[" + Thread.CurrentThread.GetHashCode().ToString() + "]";
 
+            string tmpFile = Path.Combine(localPath, pictureName) + ".tmp";
+            string cmpFile = Path.Combine(localPath, pictureName) + ".cmp";
+
             bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + pictureName + "下載中...", infoMsg = tagname + pictureName + "下載中..." + "[" + pictureUrl + "]" + ThreadID });
             Thread.Sleep(1);
 
             //Cursor = System.Windows.Forms.Cursors.WaitCursor;
             try
             {
-                string tmpFile = Path.Combine(localPath, pictureName) + ".tmp";
-                string cmpFile = Path.Combine(localPath, pictureName) + ".cmp";
 
                 DonwloadUtil.donwload(pictureUrl, tmpFile);
 
@@ -433,7 +434,7 @@ namespace ComicCatcher
             }
             finally
             {
-                if (File.Exists(Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".cmp")) File.Delete(Path.Combine(localPath, Path.GetFileName(pictureUrl)) + ".cmp");
+                if (File.Exists(Path.Combine(localPath, cmpFile))) File.Delete(Path.Combine(localPath, cmpFile));
 
                 bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + pictureName + "下載完成...", infoMsg = tagname + pictureName + "下載完成..." + ThreadID });
                 Thread.Sleep(1);
