@@ -15,6 +15,8 @@ namespace ComicModels
             this._cRoot = null;
         }
 
+        string tempHost = String.Empty;
+
         #region Root
         private ComicRoot _cRoot = new ComicRoot()
         {
@@ -28,6 +30,19 @@ namespace ComicModels
             PicHost2 = @"http://mh.xindm.cn/",
             PicHostAlternative = @"http://imgsxsq.bukamh.com/"
         };
+
+        private string GetPicHost()
+        {
+            if (false == string.IsNullOrEmpty(this.tempHost)) return this.tempHost;
+
+            string content = ComicUtil.GetContent("http://www.xindm.cn/skin/v2/2014/js/server.js");
+            Regex rhost = new Regex(@"WebimgServerURL\[0\].*?;", RegexOptions.Compiled);
+            string hostName = rhost.Match(content).Value.Replace("WebimgServerURL[0]", "").Replace(";", "").Replace("=", "")
+                .Trim().Trim('\"').Trim().TrimEnd('/') + "/";
+            this.tempHost = hostName;
+            return this.tempHost;
+        }
+
 
         public ComicRoot GetComicRoot()
         {
@@ -228,11 +243,11 @@ namespace ComicModels
 
         private string GetPageUrl(string pageUrl)
         {
-            string url = this._cRoot.PicHost.TrimEnd('/') + "/" + pageUrl.Trim('\'').TrimStart('/');
+            string url = GetPicHost() + pageUrl.Trim('\'').TrimStart('/');
             url = System.Web.HttpUtility.UrlDecode(url, System.Text.Encoding.GetEncoding("gb2312"));
 
             string urlString = url.Substring(0, url.IndexOf("?url="));
-            string queryString = url.Substring(url.IndexOf("?url=") + 1);
+            string queryString = url.Substring(url.IndexOf("?url=") + 5);
 
             url = urlString + "?url=" + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
 

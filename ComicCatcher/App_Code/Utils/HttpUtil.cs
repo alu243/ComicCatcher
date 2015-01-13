@@ -174,7 +174,7 @@ namespace Utils
                 Cookie dm5Cookie = new Cookie("isAdult", "1");
                 dm5Cookie.Domain = "www.dm5.com";
                 dm5Cookie.Path = "/";
-                dm5Cookie.Expires = DateTime.Now.AddDays(1);
+                dm5Cookie.Expires = DateTime.Now.AddDays(365);
                 myCookie.Add(dm5Cookie);
             }
 
@@ -193,8 +193,11 @@ namespace Utils
                     //if (e.Message.Contains("(403)")) throw;
                     errMsg = e.ToString();
                     NLogger.Error("讀取url內容發生錯誤," + url + Environment.NewLine + e.ToString());
-                    if (response != null) response.Close();
+                    if (e.Message.Contains("作業逾時")) System.Threading.Thread.Sleep(1000);
+                    if (response != null) response.Dispose();
                     if (request != null) request.Abort();
+                    if (e.Message.Contains("作業逾時")) System.Threading.Thread.Sleep(3000);
+                    GC.Collect();
                     request = CreateRequest(url);
                 }
                 remainTries--;
