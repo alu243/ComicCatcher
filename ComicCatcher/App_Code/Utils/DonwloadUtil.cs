@@ -23,7 +23,7 @@ namespace Utils
                 }
 
                 // 如果下載時發生錯誤，重試 10 次
-                using (MemoryStream ms = HttpUtil.getPictureResponse(pictureUrl, 10))
+                using (MemoryStream ms = HttpUtil.getPictureResponse(pictureUrl, 50))
                 {
                     using (FileStream fs = File.OpenWrite(fullFileName))
                     {

@@ -25,8 +25,9 @@ namespace ComicModels
             PicHost = @"",
             PicHost2 = @"",
 
+            PicHostAlternative = @"",
 
-            PicHostAlternative = @""
+            ThreadCount = 40
         };
 
         public ComicRoot GetComicRoot()

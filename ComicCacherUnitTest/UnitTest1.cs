@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace ComicCacherUnitTest
 {
@@ -10,18 +11,42 @@ namespace ComicCacherUnitTest
         [TestMethod]
         public void TestPictureDownload()
         {
-            //////Helpers.ProxySetting.isUseProxy = false;
-            //////string url = "http://beiyong.bukamh.com/pic.php?url=http%3A%2F%2Fimages.dmzj.com%2Fh%2F%BA%FA%CC%D2%B5%C4%CC%C7%B9%FB%2F%B5%DA25%BB%B0%2F002.jpg";
-            ////////string url = "http://beiyong.bukamh.com/pic.php?url=http:%2f%2fimages.dmzj.com%2fh%2f胡桃的糖果%2f第25话%2f海报3-1.jpg";
-            ////////var a = System.Web.HttpUtility.ParseQueryString(url);
-            ////////url = System.Web.HttpUtility.UrlDecode(url, System.Text.Encoding.GetEncoding("GB2312"));
-            //////Utils.HttpUtil.getPictureResponse(url);
+            Helpers.ProxySetting.isUseProxy = false;
+            string url = "http://beiyong.bukamh.com/pic.php?url=http%3A%2F%2Fimages.dmzj.com%2Fh%2F%BA%FA%CC%D2%B5%C4%CC%C7%B9%FB%2F%B5%DA25%BB%B0%2F002.jpg";
+            //string url = "http://beiyong.bukamh.com/pic.php?url=http:%2f%2fimages.dmzj.com%2fh%2f胡桃的糖果%2f第25话%2f海报3-1.jpg";
+            //var a = System.Web.HttpUtility.ParseQueryString(url);
+            //url = System.Web.HttpUtility.UrlDecode(url, System.Text.Encoding.GetEncoding("GB2312"));
+            Utils.HttpUtil.getPictureResponse(url);
 
 
+        }
+
+        [TestMethod]
+        public void TestPictureUrlParse()
+        {
+            Helpers.ProxySetting.isUseProxy = false;
+            string url = "http://sx2.bukamh.com:81/pic.php?url=http:%2f%2fimages.dmzj.com%2fd%2f%B6%AB%BE%A9%86%D0%D6%D6re%2fChapter6%2f09.jpg";
+            //var a = System.Web.HttpUtility.ParseQueryString(url);
+            url = System.Web.HttpUtility.UrlDecode(url, System.Text.Encoding.GetEncoding("GB2312"));
+            //Utils.HttpUtil.getPictureResponse(url);
+            Console.Write(url);
+        }
+
+        [TestMethod]
+        public void TestJavascriptMatchHostValue()
+        {
             string a = "var WebimgServer = new Array();var WebimgServerURL = new Array();WebimgServer[0]=\"秷夔\";WebimgServerURL[0]=\"http://sx2.bukamh.com:81\";//扢离掛華芞督昢var NativePicServer=\"http://mh.xindm.cn\";//扢离煦霜芞督昢var SonPicServer=\"http://sx2.bukamh.com:81\";";
             Regex rhost = new Regex(@"WebimgServerURL\[0\].*?;", RegexOptions.Compiled);
             string b = rhost.Match(a).Value;
             string c = b;
+        }
+
+        [TestMethod]
+        public void TestRedirectUrlParsing()
+        {
+            string redirectUrl = "http://sx2img.bukamh.com:82/d/¶«¾©ÐÖÖre/13/0016.jpg";
+            redirectUrl = Encoding.GetEncoding("GB2312").GetString(Encoding.GetEncoding("ISO-8859-1").GetBytes(redirectUrl));
+            Console.Write(redirectUrl);
         }
     }
 }

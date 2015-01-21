@@ -19,5 +19,7 @@ namespace ComicModels
         public string PicHost2 { get; set; }
         public string PicHostAlternative { get; set; }
         //public bool BackgroundLoadIcon { get; set; }
+
+        public int ThreadCount { get; set; }
     }
 }

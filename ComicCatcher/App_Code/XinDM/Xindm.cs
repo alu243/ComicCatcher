@@ -15,7 +15,9 @@ namespace ComicModels
             this._cRoot = null;
         }
 
-        string tempHost = String.Empty;
+        string webimgServerURL = String.Empty;
+        string nativePicServer = String.Empty;
+        string sonPicServer = String.Empty;
 
         #region Root
         private ComicRoot _cRoot = new ComicRoot()
@@ -28,19 +30,45 @@ namespace ComicModels
             PicHost = @"http://beiyong.bukamh.com/",
             //PicHost = @"http://imgsxsq.bukamh.com/",
             PicHost2 = @"http://mh.xindm.cn/",
-            PicHostAlternative = @"http://imgsxsq.bukamh.com/"
+            PicHostAlternative = @"http://imgsxsq.bukamh.com/",
+
+            ThreadCount = 10
         };
 
-        private string GetPicHost()
+        private string GetWebimgServerURL()
         {
-            if (false == string.IsNullOrEmpty(this.tempHost)) return this.tempHost;
+            if (false == string.IsNullOrEmpty(this.webimgServerURL)) return this.webimgServerURL;
 
             string content = ComicUtil.GetContent("http://www.xindm.cn/skin/v2/2014/js/server.js");
             Regex rhost = new Regex(@"WebimgServerURL\[0\].*?;", RegexOptions.Compiled);
             string hostName = rhost.Match(content).Value.Replace("WebimgServerURL[0]", "").Replace(";", "").Replace("=", "")
                 .Trim().Trim('\"').Trim().TrimEnd('/') + "/";
-            this.tempHost = hostName;
-            return this.tempHost;
+            this.webimgServerURL = hostName;
+            return this.webimgServerURL;
+        }
+
+        private string GetNativePicServer()
+        {
+            if (false == string.IsNullOrEmpty(this.nativePicServer)) return this.nativePicServer;
+
+            string content = ComicUtil.GetContent("http://www.xindm.cn/skin/v2/2014/js/server.js");
+            Regex rhost = new Regex(@"NativePicServer.*?;", RegexOptions.Compiled);
+            string hostName = rhost.Match(content).Value.Replace("NativePicServer", "").Replace(";", "").Replace("=", "")
+                .Trim().Trim('\"').Trim().TrimEnd('/') + "/";
+            this.nativePicServer = hostName;
+            return this.nativePicServer;
+        }
+
+        private string GetSonPicServer()
+        {
+            if (false == string.IsNullOrEmpty(this.sonPicServer)) return this.sonPicServer;
+
+            string content = ComicUtil.GetContent("http://www.xindm.cn/skin/v2/2014/js/server.js");
+            Regex rhost = new Regex(@"SonPicServer.*?;", RegexOptions.Compiled);
+            string hostName = rhost.Match(content).Value.Replace("SonPicServer", "").Replace(";", "").Replace("=", "")
+                .Trim().Trim('\"').Trim().TrimEnd('/') + "/";
+            this.sonPicServer = hostName;
+            return this.sonPicServer;
         }
 
 
@@ -243,15 +271,58 @@ namespace ComicModels
 
         private string GetPageUrl(string pageUrl)
         {
-            string url = GetPicHost() + pageUrl.Trim('\'').TrimStart('/');
-            url = System.Web.HttpUtility.UrlDecode(url, System.Text.Encoding.GetEncoding("gb2312"));
+            string url = String.Empty;
 
-            string urlString = url.Substring(0, url.IndexOf("?url="));
-            string queryString = url.Substring(url.IndexOf("?url=") + 5);
+            if (false == pageUrl.Contains(".php"))
+            {
+                url = GetNativePicServer().TrimEnd('/') + "/" + pageUrl.Trim('\'').TrimStart('/');
+            }
+            else
+            {
+                string urlString = String.Empty;
+                string queryString = String.Empty;
 
-            url = urlString + "?url=" + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
+                pageUrl = pageUrl.Trim('\'').TrimStart('/');
+                pageUrl = System.Web.HttpUtility.UrlDecode(pageUrl, System.Text.Encoding.GetEncoding("gb2312"));
 
+                if (pageUrl.Contains("?url="))
+                {
+                    urlString = pageUrl.Substring(0, pageUrl.IndexOf("?url=")) + "?url=";
+                    queryString = pageUrl.Substring(pageUrl.IndexOf("?url=") + 5);
+                }
+                else
+                {
+                    urlString = String.Empty;
+                    queryString = pageUrl;
+                }
+
+                if (pageUrl.Contains("zhui.php"))
+                {
+                    url = GetSonPicServer() + "/" + urlString + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
+                }
+                else
+                {
+                    url = GetWebimgServerURL() + "/" + urlString + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
+                }
+            }
             return url;
+
+            ////////            var server=getserver();
+            ////////var serverurl=WebimgServerURL[server];
+            ////////if(imageslist[page].indexOf('.php')==-1){
+            ////////    var picurl =NativePicServer+imageslist[page+nextImgsNum];
+            ////////}else{
+            ////////    if(imageslist[page].indexOf('zhui.php')!=-1){
+            ////////    var picurl =SonPicServer+imageslist[page+nextImgsNum];
+            ////////    }else var picurl =serverurl+imageslist[page+nextImgsNum];
+            ////////}
+            ////////document.getElementById("nextimg"+nextImgsNum).src=picurl;
+            ////////nextImgsNum++;
+            //////////晊喧樓婥枑遣湔芞
+
+
+
+
 
             ////////if (match.ToString().Contains(".php"))
             ////////{

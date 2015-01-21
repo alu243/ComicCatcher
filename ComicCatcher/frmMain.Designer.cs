@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -50,6 +50,7 @@
             this.txtUrl = new System.Windows.Forms.TextBox();
             this.tvComicTree = new System.Windows.Forms.TreeView();
             this.btnDownload = new System.Windows.Forms.Button();
+            this.btnShowEditModal = new System.Windows.Forms.Button();
             this.btnOpenDirectory = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.tvFolderImageList1 = new System.Windows.Forms.ImageList(this.components);
@@ -85,7 +86,6 @@
             this.bgWorker = new System.ComponentModel.BackgroundWorker();
             this.bgWorkMain = new System.ComponentModel.BackgroundWorker();
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
-            this.btnShowEditModal = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -336,10 +336,10 @@
             this.tvComicTree.HideSelection = false;
             this.tvComicTree.Location = new System.Drawing.Point(4, 36);
             this.tvComicTree.Name = "tvComicTree";
-            treeNode2.Name = "http://www.xindm.cn";
-            treeNode2.Text = "新動漫(xindm)";
+            treeNode1.Name = "http://www.xindm.cn";
+            treeNode1.Text = "新動漫(xindm)";
             this.tvComicTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
+            treeNode1});
             this.tvComicTree.Size = new System.Drawing.Size(338, 607);
             this.tvComicTree.TabIndex = 4;
             this.tvComicTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvComicTree_AfterSelect);
@@ -358,6 +358,18 @@
             this.btnDownload.UseVisualStyleBackColor = true;
             this.btnDownload.Visible = false;
             this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
+            // 
+            // btnShowEditModal
+            // 
+            this.btnShowEditModal.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnShowEditModal.Location = new System.Drawing.Point(359, 32);
+            this.btnShowEditModal.Name = "btnShowEditModal";
+            this.btnShowEditModal.Size = new System.Drawing.Size(75, 63);
+            this.btnShowEditModal.TabIndex = 17;
+            this.btnShowEditModal.TabStop = false;
+            this.btnShowEditModal.Text = "編輯目錄群組";
+            this.btnShowEditModal.UseVisualStyleBackColor = true;
+            this.btnShowEditModal.Click += new System.EventHandler(this.btnShowEditModal_Click);
             // 
             // btnOpenDirectory
             // 
@@ -706,18 +718,6 @@
             this.bgWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgWorker_DoWork);
             this.bgWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bgWorker_ProgressChanged);
             // 
-            // btnShowEditModal
-            // 
-            this.btnShowEditModal.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.btnShowEditModal.Location = new System.Drawing.Point(359, 32);
-            this.btnShowEditModal.Name = "btnShowEditModal";
-            this.btnShowEditModal.Size = new System.Drawing.Size(75, 63);
-            this.btnShowEditModal.TabIndex = 17;
-            this.btnShowEditModal.TabStop = false;
-            this.btnShowEditModal.Text = "編輯目錄群組";
-            this.btnShowEditModal.UseVisualStyleBackColor = true;
-            this.btnShowEditModal.Click += new System.EventHandler(this.btnShowEditModal_Click);
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -728,7 +728,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.Name = "frmMain";
-            this.Text = "漫畫下載器 2014/09/27 0.0.2.001";
+            this.Text = "漫畫下載器 2015/01/22 0.0.3.001";
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);

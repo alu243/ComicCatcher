@@ -31,6 +31,9 @@ namespace ComicCatcher
 
         //private DownloadedList dwnedList = null;
 
+        private List<Thread> threadPool = new List<Thread>();
+
+
         public frmMain()
         {
             ExportInteropFile();
@@ -352,26 +355,26 @@ namespace ComicCatcher
             var pages = task.downloader.GetComicPages(task.downloadChapter);
 
 
-            int threadCount = 40;
+            int threadCount = comicSiteCatcher.GetComicRoot().ThreadCount;
             int startPage = 0;
-            int upperPage = (threadCount > pages.Count ? pages.Count : threadCount); // 一次下載40頁，如果剩不到40頁就下載剩下的頁數
+            int upperPage = (threadCount > pages.Count ? pages.Count : threadCount); // 一次下載設定的頁數，如果剩不到40頁就下載剩下的頁數
             while (startPage < pages.Count)
             {
-                List<Thread> threadPool = new List<Thread>();
+                List<Thread> comicThreadPool = new List<Thread>();
                 for (int i = startPage; i < upperPage; ++i)
                 {
                     Thread t = new Thread(new ParameterizedThreadStart(DownloadPicture));
                     t.IsBackground = true;
                     t.Start(new DownloadPictureScheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = pages[i].Url, downloadFileName = pages[i].PageFileName });
-                    threadPool.Add(t);
+                    comicThreadPool.Add(t);
                 }
 
-                foreach (var t in threadPool)
+                foreach (var t in comicThreadPool)
                 {
                     t.Join();
                 }
                 //workThreadPool.Clear();
-                threadPool.Clear();
+                comicThreadPool.Clear();
                 startPage = upperPage;
                 upperPage = (upperPage + threadCount > pages.Count ? pages.Count : upperPage + threadCount);
             }
@@ -822,23 +825,25 @@ namespace ComicCatcher
         #region BuildComicNode
         private void buildComicNode(TreeNode currNode)
         {
+            Thread t1 = new Thread(buildComicNodeBackground);
+            t1.IsBackground = true;
             try
             {
-                //if (chkBackGroundLoad.Checked)
+                //lock(threadPool)
                 //{
-                Thread t1 = new Thread(buildComicNodeBackground);
-                t1.IsBackground = true;
+
+                //}
+                
                 t1.Start(currNode);
-                //}
-                //else
-                //{
-                //    buildComicNodeForeground(currNode);
-                //}
             }
             catch (Exception ex)
             {
                 NLogger.Error("buildComicNode," + ex.ToString());
             }
+            //finally
+            //{
+
+            //}
         }
 
         private void buildComicNodeForeground(TreeNode currNode)
