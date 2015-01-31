@@ -46,10 +46,10 @@ namespace Utils
         }
 
 
-        public static string getResponse(string url, int remainTries = 10)
+        public static string getResponse(string url, int remainTries = 50)
         {
             HttpWebRequest request = CreateRequest(url);
-            HttpWebResponse response = CreateResponse(request, remainTries);
+            HttpWebResponse response = CreateResponse(request, url, remainTries);
             try
             {
                 Encoding encode = System.Text.Encoding.GetEncoding("gb2312");
@@ -76,10 +76,10 @@ namespace Utils
             }
         }
 
-        public static string getUtf8Response(string url, int remainTries = 10)
+        public static string getUtf8Response(string url, int remainTries = 50)
         {
             HttpWebRequest request = CreateRequest(url);
-            HttpWebResponse response = CreateResponse(request, remainTries);
+            HttpWebResponse response = CreateResponse(request, url, remainTries);
             try
             {
                 Encoding encode = System.Text.Encoding.UTF8;
@@ -123,7 +123,7 @@ namespace Utils
             //url = url.Replace("http://beiyong.bukamh.com/pic.php?url=http%3A%2F%2Fimages.dmzj.com%2F", "http://imgsxsq.bukamh.com/");
             HttpWebRequest request = CreateRequest(url);
             request.AllowAutoRedirect = false;
-            HttpWebResponse response = CreateResponse(request, remainTries);
+            HttpWebResponse response = CreateResponse(request, url, remainTries);
             if ((int)response.StatusCode >= 300 && (int)response.StatusCode <= 399)
             {
                 string redirectUrl = response.Headers["Location"];
@@ -139,7 +139,7 @@ namespace Utils
                 request = null;
                 GC.Collect();
                 request = CreateRequest(redirectUrl);
-                response = CreateResponse(request, remainTries);
+                response = CreateResponse(request, redirectUrl, remainTries);
             }
 
             try
@@ -199,11 +199,11 @@ namespace Utils
             return request;
         }
 
-        private static HttpWebResponse CreateResponse(HttpWebRequest request, int remainTries = 10)
+        private static HttpWebResponse CreateResponse(HttpWebRequest request, string url, int remainTries = 50)
         {
+            // 因為重新建立一個 request 時，url會被uri破壞，懶得重轉碼，就加入 url 參數使用
             int origTries = remainTries;
 
-            string url = request.RequestUri.ToString();
             HttpWebResponse response = null;
             int maxRemainTreis = remainTries;
             string errMsg = String.Empty;
@@ -219,13 +219,13 @@ namespace Utils
                     errMsg = e.ToString();
 
                     // 重試超過5次才開始記 log (因為半開連線數的限制，多執行緒很容易超過連線數的設定)
-                    if ((origTries - remainTries) >= 5)
+                    if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
                     {
                         NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
                     }
-                    if (e.Message.Contains("作業逾時")) System.Threading.Thread.Sleep(500);
                     if (response != null) response.Dispose();
                     if (request != null) request.Abort();
+                    System.Threading.Thread.Sleep(800);
                     request = null;
                     GC.Collect();
                     if (e.Message.Contains("作業逾時")) System.Threading.Thread.Sleep(1000);

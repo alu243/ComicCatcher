@@ -298,11 +298,11 @@ namespace ComicModels
 
                 if (pageUrl.Contains("zhui.php"))
                 {
-                    url = GetSonPicServer() + "/" + urlString + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
+                    url = GetSonPicServer().TrimEnd('/') + "/" + urlString + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
                 }
                 else
                 {
-                    url = GetWebimgServerURL() + "/" + urlString + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
+                    url = GetWebimgServerURL().TrimEnd('/') + "/" + urlString + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
                 }
             }
             return url;

@@ -177,21 +177,23 @@ namespace ComicModels
             int pageCount = rPageLinkInner.Matches(pageOuter).Count;
 
 
-            Regex rKey = new Regex(@"key="".+?""", RegexOptions.Compiled);
+            Regex rKey = new Regex(@"key=.+?;", RegexOptions.Compiled);
             Regex rPhotoServer = new Regex(@"pix="".+?""", RegexOptions.Compiled);
             Regex rPageFile = new Regex(@"pvalue=\["".+?""", RegexOptions.Compiled);
             List<ComicPage> pages = new List<ComicPage>();
             for (int i = 1; i <= pageCount; i++)
             {
-                string pageFunUrl = this._cRoot.WebHost + "imagefun.ashx?cid=" + cid + "&page=" + i.ToString();
+                //string pageFunUrl = this._cRoot.WebHost + "imagefun.ashx?cid=" + cid + "&page=" + i.ToString();
+                string pageFunUrl = this._cRoot.WebHost + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString();
+
                 string pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl); // 這個得到的是一串 eval(...)字串
                 pageFunContent = pageFunContent.Trim('"').Trim('\n');
                 pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6);
                 string jsCode = ComicUtil.EvalJScript("var cs = " + pageFunContent).ToString();
 
-                string key = rKey.Match(jsCode).Value.Replace("key=", "").Trim('"');
-                string photoServer = rPhotoServer.Match(jsCode).Value.Replace("pix=", "").Trim('"');
-                string pageFile = rPageFile.Match(jsCode).Value.Replace("pvalue=[", "").Trim('"');
+                string key = rKey.Match(jsCode).Value.Replace("key=", "").TrimEnd(';').Trim(new char[] { '"', '\'' });
+                string photoServer = rPhotoServer.Match(jsCode).Value.Replace("pix=", "").Trim(new char[] { '"', '\'' });
+                string pageFile = rPageFile.Match(jsCode).Value.Replace("pvalue=[", "").Trim(new char[] { '"', '\'' });
 
                 ComicPage page = new ComicPage();
                 page.PageNumber = i;

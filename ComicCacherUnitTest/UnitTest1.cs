@@ -48,5 +48,13 @@ namespace ComicCacherUnitTest
             redirectUrl = Encoding.GetEncoding("GB2312").GetString(Encoding.GetEncoding("ISO-8859-1").GetBytes(redirectUrl));
             Console.Write(redirectUrl);
         }
+
+        [TestMethod]
+        public void TestEvalJsCode()
+        {
+            string jsCode = "eval(function(p,a,c,k,e,d){e=function(c){return(c<a?\"\":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('t j(){2 6=3;2 5=\'4\';2 h=\"c://b.e-7-a-9.8.g/k/l/3\";2 1=[\"/o.f\",\"/p.f\"];n(2 i=0;i<1.m;i++){q(i==0){1[i]=\"c://b.e-7-a-9.8.g/k/l/3\"+1[i]+\'?6=3&5=4\';s}1[i]=h+1[i]+\'?6=3&5=4\'}r 1}2 d;d=j();',30,30,'|pvalue|var|189118|ae86e57144025bc1c4ac0777ac7e9c6a|key|cid|181|cdndm5|170|243|manhua1023|http||107|png|com|pix||dm5imagefun|10|9404|length|for|4_8839|5_1778|if|return|continue|function'.split('|'),0,{}))";
+
+
+        }
     }
 }
