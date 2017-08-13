@@ -36,28 +36,36 @@ namespace ComicCatcher
 
         public frmMain()
         {
-            ExportInteropFile();
-            InitializeComponent();
-            NLogger.SetBox(this.txtInfo);
+            try
+            {
+                ExportInteropFile();
+                InitializeComponent();
+                NLogger.SetBox(this.txtInfo);
+            }
+            catch (Exception ex)
+            { MessageBox.Show("錯誤發生" + ex.ToString()); }
         }
 
         private void ExportInteropFile()
         {
-            Assembly asm;
-            Stream asmfs;
-            asm = Assembly.GetExecutingAssembly();
-            asmfs = asm.GetManifestResourceStream("ComicCatcher.x86.System.Data.SQLite.dll");
-            //var files = asm.GetManifestResourceNames();
-
-            using (FileStream fs = new FileStream(@".\System.Data.SQLite.dll", FileMode.Create, FileAccess.Write))
+            if (false == File.Exists(@".\System.Data.SQLite.dll"))
             {
-                asmfs.Position = 0;
-                int length = 4096;
-                byte[] buffer = new Byte[length];
-                int count = 0;
-                while (0 < (count = asmfs.Read(buffer, 0, length)))
+                Assembly asm;
+                Stream asmfs;
+                asm = Assembly.GetExecutingAssembly();
+                asmfs = asm.GetManifestResourceStream("ComicCatcher.x86.System.Data.SQLite.dll");
+                //var files = asm.GetManifestResourceNames();
+
+                using (FileStream fs = new FileStream(@".\System.Data.SQLite.dll", FileMode.Create, FileAccess.Write))
                 {
-                    fs.Write(buffer, 0, count);
+                    asmfs.Position = 0;
+                    int length = 4096;
+                    byte[] buffer = new Byte[length];
+                    int count = 0;
+                    while (0 < (count = asmfs.Read(buffer, 0, length)))
+                    {
+                        fs.Write(buffer, 0, count);
+                    }
                 }
             }
         }
@@ -95,12 +103,12 @@ namespace ComicCatcher
         {
             TreeViewUtil.ClearNodes(tvComicTree);
             GC.Collect();
-            ComicRoot cr = comicSiteCatcher.GetComicRoot();
+            ComicWebRoot cr = comicSiteCatcher.GetComicWebRoot();
             TreeNode root = new TreeNode(cr.WebSiteTitle);
             tvComicTree.Nodes.Add(root);
             root.Tag = cr;
 
-            var groups = comicSiteCatcher.GetComicGroups();
+            var groups = comicSiteCatcher.GetComicWebPages();
             groups.ForEach(g =>
             {
                 TreeNode tn = root.Nodes.Add(g.Url, g.Caption);
@@ -125,7 +133,7 @@ namespace ComicCatcher
                     {
                         pbIcon.Image = null;
                     }
-                    ComicName comicName = tvComicTree.SelectedNode.Tag as ComicName;
+                    ComicNameInWebPage comicName = tvComicTree.SelectedNode.Tag as ComicNameInWebPage;
                     try
                     {
                         lock (pbIcon)
@@ -267,7 +275,7 @@ namespace ComicCatcher
 
             try
             {
-                DownloadedList.AddDownloaded(comicSiteCatcher.GetComicRoot().WebSiteName, tn.Parent.Text, tn.Text);
+                DownloadedList.AddDownloaded(comicSiteCatcher.GetComicWebRoot().WebSiteName, tn.Parent.Text, tn.Text);
             }
             catch { }
 
@@ -288,7 +296,7 @@ namespace ComicCatcher
                 return;
             }
 
-            ComicChapter cc = tn.Tag as ComicChapter;
+            ComicChapterInName cc = tn.Tag as ComicChapterInName;
             //List<string> downUrls = xindm.GetComicPages(cc).Select(p => p.Url).ToList(); ;
             //List<string> downFileNames = xindm.GetComicPages(cc).Select(p => p.PageFileName).ToList(); ;
             //if (true == chkUsingAlternativeUrl.Checked) // 使用替代網址下載圖片
@@ -335,7 +343,7 @@ namespace ComicCatcher
             {
                 string parentPath = Path.GetDirectoryName(task.downloadPath);
                 string currentDir = task.downloadPath.Replace(parentPath, String.Empty).Trim('\\');
-                task.downloadPath = parentPath + "\\" + task.downloader.GetComicRoot().WebSiteName + "_" + currentDir;
+                task.downloadPath = parentPath + "\\" + task.downloader.GetComicWebRoot().WebSiteName + "_" + currentDir;
             }
             if (false == Directory.Exists(task.downloadPath)) Directory.CreateDirectory(task.downloadPath);
 
@@ -355,7 +363,7 @@ namespace ComicCatcher
             var pages = task.downloader.GetComicPages(task.downloadChapter);
 
 
-            int threadCount = comicSiteCatcher.GetComicRoot().ThreadCount;
+            int threadCount = comicSiteCatcher.GetComicWebRoot().ThreadCount;
             int startPage = 0;
             int upperPage = (threadCount > pages.Count ? pages.Count : threadCount); // 一次下載設定的頁數，如果剩不到40頁就下載剩下的頁數
             while (startPage < pages.Count)
@@ -365,7 +373,7 @@ namespace ComicCatcher
                 {
                     Thread t = new Thread(new ParameterizedThreadStart(DownloadPicture));
                     t.IsBackground = true;
-                    t.Start(new DownloadPictureScheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = pages[i].Url, downloadFileName = pages[i].PageFileName });
+                    t.Start(new DownloadPictureScheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = pages[i].Url, downloadFileName = pages[i].PageFileName, reffer = pages[i].Reffer ?? "" });
                     comicThreadPool.Add(t);
                 }
 
@@ -390,6 +398,7 @@ namespace ComicCatcher
             string localPath = ((DownloadPictureScheduler)scheduler).downloadPath;
             string pictureUrl = ((DownloadPictureScheduler)scheduler).downloadUrl;
             string pictureName = ((DownloadPictureScheduler)scheduler).downloadFileName;
+            string reffer = ((DownloadPictureScheduler)scheduler).reffer;
             // 只拿來顯示訊息用
             string tagname = "[" + ((DownloadPictureScheduler)scheduler).name + "]";
             string ThreadID = " Thread ID=[" + Thread.CurrentThread.GetHashCode().ToString() + "]";
@@ -404,13 +413,13 @@ namespace ComicCatcher
             try
             {
 
-                DonwloadUtil.donwload(pictureUrl, tmpFile);
+                DonwloadUtil.donwload(pictureUrl, reffer, tmpFile);
 
                 int i = 0;
                 int testTimes = 50; // 檢查 50 次下載，如果還是都有問題，就跳出錯誤
                 for (i = 0; i < testTimes; ++i)
                 {
-                    DonwloadUtil.donwload(pictureUrl, cmpFile);
+                    DonwloadUtil.donwload(pictureUrl, reffer, cmpFile);
 
                     if (FileUtil.CompareFileByMD5(tmpFile, cmpFile))
                         break;
@@ -616,6 +625,11 @@ namespace ComicCatcher
         private void btnArchive_Click(object sender, EventArgs e)
         {
             ArchiveComic();
+        }
+
+        private void btnBatchArchive_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void ArchiveComic()
@@ -833,7 +847,7 @@ namespace ComicCatcher
                 //{
 
                 //}
-                
+
                 t1.Start(currNode);
             }
             catch (Exception ex)
@@ -924,7 +938,7 @@ namespace ComicCatcher
                 //NLogger.Info("********************************************");
                 TreeViewUtil.ClearTreeNode(currNode);
                 GC.Collect();
-                ComicGroup cg = currNode.Tag as ComicGroup;
+                ComicWebPage cg = currNode.Tag as ComicWebPage;
                 foreach (var comic in comicSiteCatcher.GetComicNames(cg))
                 {
                     if (chkLoadPhoto.Checked)
@@ -964,10 +978,10 @@ namespace ComicCatcher
                 //NLogger.Info("********************************************");
                 TreeViewUtil.ClearTreeNode(currNode);
                 GC.Collect();
-                ComicName cn = currNode.Tag as ComicName;
+                ComicNameInWebPage cn = currNode.Tag as ComicNameInWebPage;
                 foreach (var chapter in comicSiteCatcher.GetComicChapters(cn))
                 {
-                    TreeNode chapterNode = TreeViewUtil.BuildNode(chapter, comicSiteCatcher.GetComicRoot().WebSiteName, currNode.Text);
+                    TreeNode chapterNode = TreeViewUtil.BuildNode(chapter, comicSiteCatcher.GetComicWebRoot().WebSiteName, currNode.Text);
                     lock (currNode)
                     {
                         TreeViewUtil.AddTreeNode(currNode, chapterNode);
@@ -987,17 +1001,23 @@ namespace ComicCatcher
 
         private void cbComicCatcher_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cbComicCatcher.Text.ToUpper() == "XINDM")
+            switch (cbComicCatcher.Text.ToUpper())
             {
-                chkIsUseProxy.Checked = true;
-                chkIsUseProxy.Enabled = true;
-                ChangeComicSite(new Xindm());
-            }
-            else if (cbComicCatcher.Text.ToUpper() == "DM5")
-            {
-                chkIsUseProxy.Checked = false;
-                chkIsUseProxy.Enabled = false;
-                ChangeComicSite(new Dm5());
+                case "XINDM":
+                    chkIsUseProxy.Checked = true;
+                    chkIsUseProxy.Enabled = true;
+                    ChangeComicSite(new Xindm());
+                    break;
+                case "DM5":
+                    chkIsUseProxy.Checked = false;
+                    chkIsUseProxy.Enabled = false;
+                    ChangeComicSite(new Dm5());
+                    break;
+                case "SEEMH":
+                    chkIsUseProxy.Checked = false;
+                    chkIsUseProxy.Enabled = false;
+                    ChangeComicSite(new Dm5());
+                    break;
             }
         }
 
@@ -1009,5 +1029,6 @@ namespace ComicCatcher
 
             this.pathGroup.Load();
         }
+
     }
 }

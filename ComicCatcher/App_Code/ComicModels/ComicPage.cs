@@ -12,9 +12,11 @@ using ComicModels;
 using System.Threading;
 namespace ComicModels
 {
-    public class ComicPage : ComicNodeBase
+    public class ComicPageInChapter : ComicNodeBase
     {
         public int PageNumber { get; set; }
         public string PageFileName { get; set; }
+
+        public string Reffer { get; set; }
     }
 }

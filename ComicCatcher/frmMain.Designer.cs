@@ -50,6 +50,7 @@
             this.txtUrl = new System.Windows.Forms.TextBox();
             this.tvComicTree = new System.Windows.Forms.TreeView();
             this.btnDownload = new System.Windows.Forms.Button();
+            this.btnBatchArchive = new System.Windows.Forms.Button();
             this.btnShowEditModal = new System.Windows.Forms.Button();
             this.btnOpenDirectory = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
@@ -153,6 +154,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.splitContainer1.Panel2.Controls.Add(this.btnBatchArchive);
             this.splitContainer1.Panel2.Controls.Add(this.btnShowEditModal);
             this.splitContainer1.Panel2.Controls.Add(this.btnOpenDirectory);
             this.splitContainer1.Panel2.Controls.Add(this.btnDelete);
@@ -184,8 +186,10 @@
             this.cbComicCatcher.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbComicCatcher.FormattingEnabled = true;
             this.cbComicCatcher.Items.AddRange(new object[] {
+            "dm5",
+            "seemh",
             "xindm",
-            "dm5"});
+            ""});
             this.cbComicCatcher.Location = new System.Drawing.Point(3, 10);
             this.cbComicCatcher.Name = "cbComicCatcher";
             this.cbComicCatcher.Size = new System.Drawing.Size(106, 20);
@@ -359,6 +363,18 @@
             this.btnDownload.Visible = false;
             this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
             // 
+            // btnBatchArchive
+            // 
+            this.btnBatchArchive.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnBatchArchive.Location = new System.Drawing.Point(163, 67);
+            this.btnBatchArchive.Name = "btnBatchArchive";
+            this.btnBatchArchive.Size = new System.Drawing.Size(112, 28);
+            this.btnBatchArchive.TabIndex = 18;
+            this.btnBatchArchive.TabStop = false;
+            this.btnBatchArchive.Text = "批次壓縮";
+            this.btnBatchArchive.UseVisualStyleBackColor = true;
+            this.btnBatchArchive.Click += new System.EventHandler(this.btnBatchArchive_Click);
+            // 
             // btnShowEditModal
             // 
             this.btnShowEditModal.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
@@ -374,7 +390,7 @@
             // btnOpenDirectory
             // 
             this.btnOpenDirectory.Font = new System.Drawing.Font("新細明體", 14F);
-            this.btnOpenDirectory.Location = new System.Drawing.Point(347, 205);
+            this.btnOpenDirectory.Location = new System.Drawing.Point(347, 211);
             this.btnOpenDirectory.Name = "btnOpenDirectory";
             this.btnOpenDirectory.Size = new System.Drawing.Size(29, 102);
             this.btnOpenDirectory.TabIndex = 7;
@@ -386,7 +402,7 @@
             // 
             this.btnDelete.Font = new System.Drawing.Font("新細明體", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnDelete.ImageList = this.tvFolderImageList1;
-            this.btnDelete.Location = new System.Drawing.Point(347, 110);
+            this.btnDelete.Location = new System.Drawing.Point(347, 117);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(29, 88);
             this.btnDelete.TabIndex = 6;
@@ -419,7 +435,7 @@
             this.lblCbMessage.AutoSize = true;
             this.lblCbMessage.Font = new System.Drawing.Font("新細明體", 10F);
             this.lblCbMessage.ForeColor = System.Drawing.Color.Blue;
-            this.lblCbMessage.Location = new System.Drawing.Point(3, 74);
+            this.lblCbMessage.Location = new System.Drawing.Point(1, 93);
             this.lblCbMessage.Name = "lblCbMessage";
             this.lblCbMessage.Size = new System.Drawing.Size(85, 14);
             this.lblCbMessage.TabIndex = 16;
@@ -470,10 +486,10 @@
             this.tvFolder.BackColor = System.Drawing.Color.Honeydew;
             this.tvFolder.ImageIndex = 0;
             this.tvFolder.ImageList = this.tvFolderImageList1;
-            this.tvFolder.Location = new System.Drawing.Point(0, 101);
+            this.tvFolder.Location = new System.Drawing.Point(0, 117);
             this.tvFolder.Name = "tvFolder";
             this.tvFolder.SelectedImageIndex = 0;
-            this.tvFolder.Size = new System.Drawing.Size(341, 546);
+            this.tvFolder.Size = new System.Drawing.Size(341, 530);
             this.tvFolder.TabIndex = 5;
             this.tvFolder.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tvFolder_KeyPress);
             this.tvFolder.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.tvFolder_MouseDoubleClick);
@@ -687,9 +703,9 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusMsg,
             this.statusMsg2});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 680);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 682);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1045, 24);
+            this.statusStrip1.Size = new System.Drawing.Size(1045, 22);
             this.statusStrip1.TabIndex = 3;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -697,13 +713,13 @@
             // 
             this.statusMsg.ForeColor = System.Drawing.Color.Blue;
             this.statusMsg.Name = "statusMsg";
-            this.statusMsg.Size = new System.Drawing.Size(19, 19);
+            this.statusMsg.Size = new System.Drawing.Size(15, 17);
             this.statusMsg.Text = "[]";
             // 
             // statusMsg2
             // 
             this.statusMsg2.Name = "statusMsg2";
-            this.statusMsg2.Size = new System.Drawing.Size(19, 19);
+            this.statusMsg2.Size = new System.Drawing.Size(15, 17);
             this.statusMsg2.Text = "[]";
             // 
             // timer1
@@ -809,6 +825,7 @@
         private System.Windows.Forms.CheckBox chkSaveWebSiteName;
         private System.Windows.Forms.CheckBox setSaveWebSiteName;
         private System.Windows.Forms.Button btnShowEditModal;
+        private System.Windows.Forms.Button btnBatchArchive;
 
     }
 }

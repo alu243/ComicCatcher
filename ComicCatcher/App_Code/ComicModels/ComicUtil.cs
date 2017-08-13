@@ -25,9 +25,9 @@ namespace ComicModels
         }
 
 
-        public static string GetUtf8Content(string url)
+        public static string GetUtf8Content(string url, string reffer = "")
         {
-            return HttpUtil.getUtf8Response(url);
+            return HttpUtil.getUtf8Response(url, reffer);
         }
 
 
@@ -38,7 +38,7 @@ namespace ComicModels
             object Result = null;
             try
             {
-                Result = Eval.JScriptEvaluate(JScript, _vsaEngine);
+                Result = Eval.JScriptEvaluate(JScript, "unsafe", _vsaEngine);
             }
             catch (Exception ex)
             {
@@ -51,46 +51,46 @@ namespace ComicModels
 
 
 
-//        private static object _evaluator = null;
-//        private static Type _evaluatorType = null;
-//        private static readonly string _jscriptSource =
-//            @"package Evaluator
-//            {
-//               class Evaluator
-//               {
-//                  public function Eval(expr : String) : String 
-//                  { 
-//                     return eval(expr); 
-//                  }
-//               }
-//            }";
+        //        private static object _evaluator = null;
+        //        private static Type _evaluatorType = null;
+        //        private static readonly string _jscriptSource =
+        //            @"package Evaluator
+        //            {
+        //               class Evaluator
+        //               {
+        //                  public function Eval(expr : String) : String 
+        //                  { 
+        //                     return eval(expr); 
+        //                  }
+        //               }
+        //            }";
 
 
-//        public static object EvalJScript(string statement)
-//        {
-//            return _evaluatorType.InvokeMember(
-//                        "Eval",
-//                        BindingFlags.InvokeMethod,
-//                        null,
-//                        _evaluator,
-//                        new object[] { statement }
-//                     );
-//        }
+        //        public static object EvalJScript(string statement)
+        //        {
+        //            return _evaluatorType.InvokeMember(
+        //                        "Eval",
+        //                        BindingFlags.InvokeMethod,
+        //                        null,
+        //                        _evaluator,
+        //                        new object[] { statement }
+        //                     );
+        //        }
 
 
-//        static ComicUtil()
-//        {
-//            ICodeCompiler compiler = new JScriptCodeProvider().CreateCompiler();
+        //        static ComicUtil()
+        //        {
+        //            ICodeCompiler compiler = new JScriptCodeProvider().CreateCompiler();
 
-//            CompilerParameters parameters = new CompilerParameters();
-//            parameters.GenerateInMemory = true;
+        //            CompilerParameters parameters = new CompilerParameters();
+        //            parameters.GenerateInMemory = true;
 
-//            CompilerResults results = compiler.CompileAssemblyFromSource(parameters, _jscriptSource);
+        //            CompilerResults results = compiler.CompileAssemblyFromSource(parameters, _jscriptSource);
 
-//            Assembly assembly = results.CompiledAssembly;
-//            _evaluatorType = assembly.GetType("Evaluator.Evaluator");
+        //            Assembly assembly = results.CompiledAssembly;
+        //            _evaluatorType = assembly.GetType("Evaluator.Evaluator");
 
-//            _evaluator = Activator.CreateInstance(_evaluatorType);
-//        }
+        //            _evaluator = Activator.CreateInstance(_evaluatorType);
+        //        }
     }
 }

@@ -12,7 +12,7 @@ using ComicModels;
 using System.Threading;
 namespace ComicModels
 {
-    public class ComicGroup : ComicNodeBase
+    public class ComicWebPage : ComicNodeBase
     {
         public int GroupNumber { get; set; }
     }

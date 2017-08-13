@@ -89,7 +89,7 @@ namespace Utils
             return tn;
         }
 
-        public static TreeNode BuildNode(ComicModels.ComicName comic, string localComicPath, string groupName)
+        public static TreeNode BuildNode(ComicModels.ComicNameInWebPage comic, string localComicPath, string groupName)
         {
             TreeNode nameNode = new TreeNode();
             nameNode.Name = comic.Url;
@@ -111,7 +111,7 @@ namespace Utils
             return nameNode;
         }
 
-        public static TreeNode BuildNode(ComicModels.ComicChapter chapter, string webSiteName, string comicName)
+        public static TreeNode BuildNode(ComicModels.ComicChapterInName chapter, string webSiteName, string comicName)
         {
             TreeNode chapterNode = new TreeNode();
             chapterNode.Name = chapter.Url;

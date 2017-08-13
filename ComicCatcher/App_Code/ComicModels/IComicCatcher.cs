@@ -14,10 +14,10 @@ namespace ComicModels
 {
     public interface IComicCatcher : IDisposable
     {
-        ComicRoot GetComicRoot();
-        List<ComicGroup> GetComicGroups();
-        List<ComicName> GetComicNames(ComicGroup cGroup);
-        List<ComicChapter> GetComicChapters(ComicName cName);
-        List<ComicPage> GetComicPages(ComicChapter cChapter);
+        ComicWebRoot GetComicWebRoot();
+        List<ComicWebPage> GetComicWebPages();
+        List<ComicNameInWebPage> GetComicNames(ComicWebPage cGroup);
+        List<ComicChapterInName> GetComicChapters(ComicNameInWebPage cName);
+        List<ComicPageInChapter> GetComicPages(ComicChapterInName cChapter);
     }
 }

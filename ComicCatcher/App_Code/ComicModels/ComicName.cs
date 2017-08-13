@@ -12,7 +12,7 @@ using ComicModels;
 using System.Threading;
 namespace ComicModels
 {
-    public class ComicName : ComicNodeBase
+    public class ComicNameInWebPage : ComicNodeBase
     {
         public string IconUrl { get; set; }
 

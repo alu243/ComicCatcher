@@ -7,11 +7,12 @@ using System.IO;
 using Helpers;
 using System.Reflection;
 using System.Threading;
+using System.Web;
 namespace Utils
 {
     public static class HttpUtil
     {
-        private static CookieContainer _myCookie = new CookieContainer();
+        private static CookieContainer _myCookie = null;
         private static CookieContainer myCookie
         {
             get
@@ -19,11 +20,12 @@ namespace Utils
                 if (null == _myCookie)
                 {
                     _myCookie = new CookieContainer();
-                }
-
-                if (_myCookie.GetCookies(new Uri("http://www.dm5.com")).Count <= 0)
-                {
-                    _myCookie.Add(GetDm5Cookie());
+                    _myCookie.Add(GetDm5Cookie("isAdult", "1", "www.dm5.com"));
+                    _myCookie.Add(GetDm5Cookie("isAdult", "1", "dm5.com"));
+                    _myCookie.Add(GetDm5Cookie("DM5_MACHINEKEY", "ad2e5ffb-08ac-4746-b023-1b9a7960ac78", "www.dm5.com"));
+                    _myCookie.Add(GetDm5Cookie("DM5_MACHINEKEY", "ad2e5ffb-08ac-4746-b023-1b9a7960ac78", "dm5.com"));
+                    _myCookie.Add(GetDm5Cookie("dm5cookieenabletest", "1", "www.dm5.com"));
+                    _myCookie.Add(GetDm5Cookie("dm5cookieenabletest", "1", "dm5.com"));
                 }
                 return _myCookie;
             }
@@ -32,19 +34,24 @@ namespace Utils
         private static CookieContainer ChangeSession()
         {
             CookieContainer newCookie = new CookieContainer();
-            newCookie.Add(GetDm5Cookie());
+            newCookie.Add(GetDm5Cookie("isAdult", "1", "www.dm5.com"));
+            newCookie.Add(GetDm5Cookie("isAdult", "1", "dm5.com"));
+            newCookie.Add(GetDm5Cookie("DM5_MACHINEKEY", "ad2e5ffb-08ac-4746-b023-1b9a7960ac78", "www.dm5.com"));
+            newCookie.Add(GetDm5Cookie("DM5_MACHINEKEY", "ad2e5ffb-08ac-4746-b023-1b9a7960ac78", "dm5.com"));
+            newCookie.Add(GetDm5Cookie("dm5cookieenabletest", "1", "www.dm5.com"));
+            newCookie.Add(GetDm5Cookie("dm5cookieenabletest", "1", "dm5.com"));
             return newCookie;
         }
-
-        private static Cookie GetDm5Cookie()
+        private static Cookie GetDm5Cookie(string name, string value, string domain)
         {
-            Cookie dm5Cookie = new Cookie("isAdult", "1");
-            dm5Cookie.Domain = "www.dm5.com";
+            Cookie dm5Cookie = new Cookie(name, value);
+            //Cookie dm5Cookie = new Cookie("dm5imgcookie", "461585%7C5");
+
+            dm5Cookie.Domain = domain;
             dm5Cookie.Path = "/";
             dm5Cookie.Expires = DateTime.Now.AddDays(365);
             return dm5Cookie;
         }
-
 
         public static string getResponse(string url, int remainTries = 50)
         {
@@ -70,18 +77,27 @@ namespace Utils
             }
             finally
             {
-                if (null != response) response.Dispose();
+                if (null != response) response.Close();
                 if (null != request) request.Abort();
                 request = null;
             }
         }
 
-        public static string getUtf8Response(string url, int remainTries = 50)
+        public static string getUtf8Response(string url, string reffer, int remainTries = 50)
         {
-            HttpWebRequest request = CreateRequest(url);
+            HttpWebRequest request = CreateRequest(url, reffer);
             HttpWebResponse response = CreateResponse(request, url, remainTries);
             try
             {
+                if (myCookie.GetCookies(new Uri("http://www.dm5.com")).Count <= 3)
+                {
+                    foreach (Cookie cookie in response.Cookies)
+                    {
+                        myCookie.Add(cookie);
+                    }
+                }
+
+
                 Encoding encode = System.Text.Encoding.UTF8;
                 StreamReader readStream = new StreamReader(response.GetResponseStream(), encode);
 
@@ -97,16 +113,19 @@ namespace Utils
                 return sb.ToString();
                 //return readStream.ReadToEnd();
                 //}
+
+                // Add Cookies
+
             }
             finally
             {
-                if (null != response) response.Dispose();
+                if (null != response) response.Close();
                 if (null != request) request.Abort();
                 request = null;
             }
         }
 
-        public static MemoryStream getPictureResponse(string url, int remainTries = 50)
+        public static MemoryStream getPictureResponse(string url, string reffer = "", int remainTries = 50)
         {
             //url = System.Web.HttpUtility.UrlDecode(url, Encoding.GetEncoding("GB2312"));
             //url = url.Split('?')[0] + "?" + System.Web.HttpUtility.UrlEncode(url.Split('?')[1], Encoding.GetEncoding("GB2312"));
@@ -121,7 +140,7 @@ namespace Utils
             //url = url.Split('?')[0] + "?" + Uri.EscapeUriString(url.Split('?')[1]);
             //url = url.Replace("url%3d", "url=");
             //url = url.Replace("http://beiyong.bukamh.com/pic.php?url=http%3A%2F%2Fimages.dmzj.com%2F", "http://imgsxsq.bukamh.com/");
-            HttpWebRequest request = CreateRequest(url);
+            HttpWebRequest request = CreateRequest(url, reffer);
             request.AllowAutoRedirect = false;
             HttpWebResponse response = CreateResponse(request, url, remainTries);
             if ((int)response.StatusCode >= 300 && (int)response.StatusCode <= 399)
@@ -134,7 +153,7 @@ namespace Utils
                 //string queryString = redirectUrl.Substring(redirectUrl.IndexOf("?") + 1);
 
                 //redirectUrl = urlString + "?" + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
-                response.Dispose();
+                response.Close();
                 request.Abort();
                 request = null;
                 GC.Collect();
@@ -159,13 +178,13 @@ namespace Utils
             }
             finally
             {
-                if (null != response) response.Dispose();
+                if (null != response) response.Close();
                 if (null != request) request.Abort();
                 request = null;
             }
         }
 
-        private static HttpWebRequest CreateRequest(string url)
+        private static HttpWebRequest CreateRequest(string url, string reffer = "")
         {
             System.Net.ServicePointManager.DefaultConnectionLimit = 200;
             HttpWebRequest request = null;
@@ -182,15 +201,24 @@ namespace Utils
             request = (HttpWebRequest)WebRequest.Create(uri);
 
             //request.AllowAutoRedirect = false; // 只有在 getPicture 時才會
-            request.Referer = url.getRefferString();
+            if (String.IsNullOrEmpty(reffer))
+            {
+                request.Referer = url.getRefferString();
+            }
+            else
+            {
+                request.Referer = reffer;
+            }
             request.CookieContainer = myCookie; // 拿到上次成功連線的 cookie 當作是同一個 session 
             //request.CookieContainer.Add(new Uri("http://www.dm5.com"), new Cookie("isAdult", "1"));
 
+            request.Headers["Cookie"] = "isAdult=1";
 
-            request.Timeout = 8000;
+            request.Timeout = 16000;
             //request.ContentType = "image/jpeg";
             //request.Referer = url;
             request.Proxy = ProxySetting.getProxy();
+            request.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,zh-CN;q=0.2");
             request.Headers.Add(HttpRequestHeader.AcceptCharset, "GB2312");
             //request.Method = "GET";
             //request.ContentType = "application/x-www-form-urlencoded;charset=gb2312;";
@@ -223,7 +251,7 @@ namespace Utils
                     {
                         NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
                     }
-                    if (response != null) response.Dispose();
+                    if (response != null) response.Close();
                     if (request != null) request.Abort();
                     System.Threading.Thread.Sleep(800);
                     request = null;

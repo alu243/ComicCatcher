@@ -8,7 +8,7 @@ using Utils;
 
 namespace ComicModels
 {
-    public class Dm5 : IComicCatcher
+    public class Seemh : IComicCatcher
     {
         public void Dispose()
         {
@@ -18,9 +18,9 @@ namespace ComicModels
         #region Root
         private ComicWebRoot _cRoot = new ComicWebRoot()
         {
-            WebSiteTitle = "動漫屋(dm5)",
-            WebSiteName = "dm5",
-            WebHost = @"http://www.dm5.com/",
+            WebSiteTitle = "看漫畫(Seemh)",
+            WebSiteName = "seemh",
+            WebHost = @"http://www.seemh.com/",
             IconHost = @"",
             PicHost = @"",
             PicHost2 = @"",
@@ -42,12 +42,14 @@ namespace ComicModels
             List<ComicWebPage> webPages = new List<ComicWebPage>();
             for (int i = 0; i < 300; ++i)
             {
-                // http://www.dm5.com/manhua-list-size60-p1/
+                // http://www.seemh.com/
                 ComicWebPage wp = new ComicWebPage();
                 wp.GroupNumber = i + 1;
                 wp.Caption = "第" + (i + 1).ToString().PadLeft(3, '0') + "頁";
-
-                wp.Url = new Uri(new Uri(this._cRoot.WebHost), ("manhua-list-size60-p" + (i + 1).ToString() + "/")).ToString();
+                if (i <= 6)
+                    wp.Url = new Uri(new Uri(this._cRoot.WebHost), ("update/d7.html")).ToString();
+                else
+                    wp.Url = new Uri(new Uri(this._cRoot.WebHost), ("update/d" + (i + 1).ToString() + ".html")).ToString();
                 webPages.Add(wp);
             }
             return webPages;
@@ -61,7 +63,7 @@ namespace ComicModels
             Regex rUrl = new Regex(@"href=""(.|\n)*?""", RegexOptions.Compiled);
             Regex rCaption = new Regex(@"<strong>(.|\n)*?<", RegexOptions.Compiled);
             string htmlContent = ComicUtil.GetUtf8Content(cGroup.Url);
-
+            htmlContent = RetriveCurrentDateString(htmlContent, cGroup.GroupNumber);
             List<string> comicList = SplitForComicName(htmlContent);
             List<ComicNameInWebPage> result = comicList.Select<string, ComicNameInWebPage>(comic =>
             {
@@ -88,9 +90,15 @@ namespace ComicModels
             return result;
         }
 
+        private string RetriveCurrentDateString(string htmlContent, int groupNumber)
+        {
+            Regex rCurrDate = new Regex(@"<div class=""latest\-list"">(.|\n)*?</div>", RegexOptions.Compiled);
+            return rCurrDate.Matches(htmlContent)[groupNumber - 1].Value;
+        }
+
         private List<string> SplitForComicName(string htmlContent)
         {
-            Regex rComicList = new Regex(@"<li class=""red_lj"">(.|\n)*?</li>", RegexOptions.Compiled);
+            Regex rComicList = new Regex(@"<li>(.|\n)*?</li>", RegexOptions.Compiled);
             return rComicList.Matches(htmlContent).Cast<Match>().Select(p => p.Value).ToList();
         }
 
@@ -221,15 +229,12 @@ namespace ComicModels
 
         public List<ComicPageInChapter> GetComicPages(ComicChapterInName cChapter)
         {
-            // fix by
-            // http://css122.us.cdndm.com/v201708091849/default/js/chapternew_v22.js
             //Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
             string cid = cChapter.Url.Replace(@"http://www.dm5.com/m", "").Trim('/');
             string htmlContent = ComicUtil.GetUtf8Content(cChapter.Url);
-            //Regex rPageLinkOuter = new Regex(@"<select (.|\n)*?id=""pagelist""(.|\n)*?</select>", RegexOptions.Compiled);
-            //Regex rPageLinkInner = new Regex(@"<option {1,}(.|\n)*?</option>", RegexOptions.Compiled);
-            Regex rPageLinkOuter = new Regex(@"<div class=(.|\\){0,1}""pageBar bar up(.|\n)*?</div>", RegexOptions.Compiled);
-            Regex rPageLinkInner = new Regex(@"<a {1,}(.|\n)*?</a>", RegexOptions.Compiled);
+
+            Regex rPageLinkOuter = new Regex(@"<select (.|\n)*?id=""pagelist""(.|\n)*?</select>", RegexOptions.Compiled);
+            Regex rPageLinkInner = new Regex(@"<option {1,}(.|\n)*?</option>", RegexOptions.Compiled);
             string pageOuter = rPageLinkOuter.Matches(htmlContent)[0].Value;
             int pageCount = rPageLinkInner.Matches(pageOuter).Count;
 
@@ -242,24 +247,8 @@ namespace ComicModels
             {
                 //string pageFunUrl = this._cRoot.WebHost + "imagefun.ashx?cid=" + cid + "&page=" + i.ToString();
                 // unpacker test url = 
-                string reffer = this._cRoot.WebHost + "m" + cid + "-p" + i + "/";
-                string pageFunUrl = this._cRoot.WebHost + "m" + cid + "-p" + i + "/" + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString() + "&language=1&gtk=6";
-                string pageFunContent;
-                lock (this)
-                {
-                    pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl, reffer); // 這個得到的是一串 eval(...)字串
-                    for (int j = 0; j <= 50; j++)
-                    {
-                        if (false == String.IsNullOrEmpty(pageFunContent) && false == pageFunContent.Contains("war|jpg"))
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl); // 這個得到的是一串 eval(...)字串
-                        }
-                    }
-                }
+                string pageFunUrl = this._cRoot.WebHost + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString();
+                string pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl); // 這個得到的是一串 eval(...)字串
                 pageFunContent = pageFunContent.Trim('"').Trim('\n');
                 pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6);
                 string jsCode = ComicUtil.EvalJScript("var cs = " + pageFunContent).ToString();
@@ -267,7 +256,6 @@ namespace ComicModels
                 string jsCodePass2 = ComicUtil.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
                 ComicPageInChapter page = new ComicPageInChapter();
                 page.PageNumber = i;
-                page.Reffer = reffer;
                 //page.Url = photoServer + pageFile + "?cid=" + cid + "&key=" + key + "&ak=" + ak;
                 page.Url = jsCodePass2;
                 page.Caption = "第" + i.ToString().PadLeft(3, '0') + "頁";

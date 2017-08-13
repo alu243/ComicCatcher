@@ -9,7 +9,7 @@ using Utils;
 
 namespace ComicModels
 {
-    public class ComicRoot
+    public class ComicWebRoot
     {
         public string WebSiteTitle { get; set; }
         public string WebSiteName { get; set; }

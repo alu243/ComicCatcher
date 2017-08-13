@@ -13,7 +13,7 @@ namespace Utils
         /// 取資料後存檔
         /// </summary>
         /// <param name="path"></param>
-        public static void donwload(string pictureUrl, string fullFileName)
+        public static void donwload(string pictureUrl, string reffer, string fullFileName)
         {
             try
             {
@@ -23,7 +23,7 @@ namespace Utils
                 }
 
                 // 如果下載時發生錯誤，重試 10 次
-                using (MemoryStream ms = HttpUtil.getPictureResponse(pictureUrl, 50))
+                using (MemoryStream ms = HttpUtil.getPictureResponse(pictureUrl, reffer, 50))
                 {
                     using (FileStream fs = File.OpenWrite(fullFileName))
                     {

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ComicCatcher</RootNamespace>
     <AssemblyName>ComicCatcher</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -88,9 +88,9 @@
     <Compile Include="App_Code\ComicModels\ComicUtil.cs" />
     <Compile Include="App_Code\ComicModels\ComicChapter.cs" />
     <Compile Include="App_Code\ComicModels\ComicName.cs" />
-    <Compile Include="App_Code\ComicModels\ComicGroup.cs" />
+    <Compile Include="App_Code\ComicModels\ComicWebPage.cs" />
     <Compile Include="App_Code\ComicModels\ComicNodeBase.cs" />
-    <Compile Include="App_Code\ComicModels\ComicRoot.cs" />
+    <Compile Include="App_Code\ComicModels\ComicWebRoot.cs" />
     <Compile Include="App_Code\Models\DownloadedListOld.cs" />
     <Compile Include="App_Code\Models\Scheduler.cs" />
     <Compile Include="App_Code\Models\WorkerMsg.cs" />
@@ -110,6 +110,7 @@
     <Compile Include="App_Code\Helpers\ProxySetting.cs" />
     <Compile Include="App_Code\Models\Settings.cs" />
     <Compile Include="App_Code\Models\DownloadedList.cs" />
+    <Compile Include="App_Code\XinDM\Seemh.cs" />
     <Compile Include="App_Code\XinDM\Dm5.cs">
       <SubType>Code</SubType>
     </Compile>

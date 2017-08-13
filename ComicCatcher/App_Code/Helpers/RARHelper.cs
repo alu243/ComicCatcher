@@ -12,26 +12,6 @@ namespace Helpers
     {
         string _rarPath = String.Empty;
 
-        //public RARHelper()
-        //{
-        //    //if (File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"WinRAR\WinRAR.exe")))
-        //    //{
-        //    //    _rarPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"WinRAR\WinRAR.exe");
-        //    //}
-        //    //else if (File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"WinRAR\WinRAR.exe")))
-        //    //{
-        //    //    _rarPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"WinRAR\WinRAR.exe");
-        //    //}
-        //    if (File.Exists(Path.Combine(@"C:\Program Files (x86)", @"WinRAR\WinRAR.exe")))
-        //    {
-        //        _rarPath = Path.Combine(@"C:\Program Files (x86)", @"WinRAR\WinRAR.exe");
-        //    }
-        //    else if(File.Exists(Path.Combine(@"C:\Program Files", @"WinRAR\WinRAR.exe")))
-        //    {
-        //        _rarPath = Path.Combine(@"C:\Program Files", @"WinRAR\WinRAR.exe");
-        //    }
-        //}
-
         public RARHelper(string rarPath)
         {
             this._rarPath = rarPath;

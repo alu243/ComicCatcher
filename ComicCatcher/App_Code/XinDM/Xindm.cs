@@ -20,7 +20,7 @@ namespace ComicModels
         string sonPicServer = String.Empty;
 
         #region Root
-        private ComicRoot _cRoot = new ComicRoot()
+        private ComicWebRoot _cRoot = new ComicWebRoot()
         {
             WebSiteTitle = "新動漫(xindm)",
             WebSiteName = "xindm",
@@ -72,30 +72,30 @@ namespace ComicModels
         }
 
 
-        public ComicRoot GetComicRoot()
+        public ComicWebRoot GetComicWebRoot()
         {
             return this._cRoot;
         }
         #endregion
 
         #region Groups
-        public List<ComicGroup> GetComicGroups()
+        public List<ComicWebPage> GetComicWebPages()
         {
-            List<ComicGroup> groupList = new List<ComicGroup>();
+            List<ComicWebPage> webPages = new List<ComicWebPage>();
             for (int i = 0; i < 300; ++i)
             {
-                ComicGroup cg = new ComicGroup();
-                cg.GroupNumber = i + 1;
-                cg.Caption = "第" + (i + 1).ToString().PadLeft(3, '0') + "頁";
-                cg.Url = this._cRoot.WebHost + ("/index_" + (i + 1).ToString() + ".html").Replace("index_1.html", "index.html");
-                groupList.Add(cg);
+                ComicWebPage wp = new ComicWebPage();
+                wp.GroupNumber = i + 1;
+                wp.Caption = "第" + (i + 1).ToString().PadLeft(3, '0') + "頁";
+                wp.Url = this._cRoot.WebHost + ("/index_" + (i + 1).ToString() + ".html").Replace("index_1.html", "index.html");
+                webPages.Add(wp);
             }
-            return groupList;
+            return webPages;
         }
         #endregion
 
         #region Names
-        public List<ComicName> GetComicNames(ComicGroup cGroup)
+        public List<ComicNameInWebPage> GetComicNames(ComicWebPage cGroup)
         {
             Regex rLink = new Regex(@"<a (.|\n)*?>", RegexOptions.Compiled);
             Regex rUrl = new Regex(@"href=""(.|\n)*?""", RegexOptions.Compiled);
@@ -104,10 +104,10 @@ namespace ComicModels
             string htmlContent = ComicUtil.GetContent(cGroup.Url);
 
             List<string> comicList = SplitForComicName(htmlContent);
-            List<ComicName> result = comicList.Select<string, ComicName>(comic =>
+            List<ComicNameInWebPage> result = comicList.Select<string, ComicNameInWebPage>(comic =>
             {
                 string sLink = rLink.Match(comic).Value;
-                ComicName cn = new ComicName()
+                ComicNameInWebPage cn = new ComicNameInWebPage()
                 {
                     IconUrl = RetriveIconUri(comic), // 取得漫畫首頁圖像連結
                     LastUpdateDate = RetriveLastUpdateDate(comic), // 取得最近更新日期
@@ -155,7 +155,7 @@ namespace ComicModels
         #endregion
 
         #region Chapters
-        public List<ComicChapter> GetComicChapters(ComicName cName)
+        public List<ComicChapterInName> GetComicChapters(ComicNameInWebPage cName)
         {
             //Regex rr = new Regex(@"^<table(.+|\n*)</table>$", RegexOptions.Multiline | RegexOptions.IgnoreCase);
             Regex rVolumnList = new Regex(@"<li>(.|\n)*?</li>", RegexOptions.Compiled);
@@ -165,13 +165,13 @@ namespace ComicModels
             Regex rCaption = new Regex(@"<span class=""(black|red)"">.+?</span>", RegexOptions.Compiled);
 
             string htmlContent = ComicUtil.GetContent(cName.Url);
-            List<ComicChapter> result = new List<ComicChapter>();
+            List<ComicChapterInName> result = new List<ComicChapterInName>();
             string tagContent = RetriveHtmlTagContent(htmlContent);
             foreach (Match data in rVolumnList.Matches(tagContent))
             {
                 //string sLink = rLink.Match(data.Value).Value;
                 string sLink = data.Value;
-                ComicChapter cb = new ComicChapter()
+                ComicChapterInName cb = new ComicChapterInName()
                 {
                     Url = rUrl.Match(sLink).Value.Replace("onclick=\"window.open(", "").Trim('\''),
                     //description = CharsetConverter.ToTraditional(rDesc.Match(sLink).Value.Replace(@"<span class=""black"">", "").Replace(@"</span>", "")
@@ -203,7 +203,7 @@ namespace ComicModels
         #endregion
 
         #region Pages
-        public List<ComicPage> GetComicPages(ComicChapter cChapter)
+        public List<ComicPageInChapter> GetComicPages(ComicChapterInName cChapter)
         {
             //Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
             Regex rJS = new Regex(@"<script(.|\n)*?</script>", RegexOptions.Compiled);
@@ -218,11 +218,11 @@ namespace ComicModels
             evalCode = evalCode.Substring(5, evalCode.Length - 6);
             string photoStr = ComicUtil.EvalJScript("var cs = " + evalCode).ToString();
 
-            List<ComicPage> pages = new List<ComicPage>();
+            List<ComicPageInChapter> pages = new List<ComicPageInChapter>();
             int i = 1;
             foreach (Match match in rPages.Matches(photoStr))
             {
-                ComicPage page = new ComicPage();
+                ComicPageInChapter page = new ComicPageInChapter();
                 //string tmp = match.ToString().Trim('\'').Replace("/pic.php?url=http%3A%2F%2Fimages.dmzj.com%2F", "").Replace("+", " ");
                 string tmp = match.ToString().Trim('\'');
                 //tmp = System.Web.HttpUtility.UrlDecode(tmp, System.Text.Encoding.GetEncoding("gb2312"));

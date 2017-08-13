@@ -12,7 +12,7 @@ using ComicModels;
 using System.Threading;
 namespace ComicModels
 {
-    public class ComicChapter : ComicNodeBase
+    public class ComicChapterInName : ComicNodeBase
     {
 
     }

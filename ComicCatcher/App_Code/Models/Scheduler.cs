@@ -9,7 +9,7 @@ namespace Models
     {
         public string name { get; set; }
 
-        public ComicModels.ComicChapter downloadChapter { get; set; }
+        public ComicModels.ComicChapterInName downloadChapter { get; set; }
         //public List<string> downloadUrls { get; set; }
         public string downloadPath { get; set; }
 
@@ -22,5 +22,6 @@ namespace Models
         public string downloadUrl { get; set; }
         public string downloadPath { get; set; }
         public string downloadFileName { get; set; }
+        public string reffer { get; set; }
     }
 }

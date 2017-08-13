@@ -13,15 +13,32 @@ namespace ComicCatcher
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMain());
 
-            try
-            {
-                System.IO.File.Delete(@".\System.Data.SQLite.dll");
-            }
-            catch { /* doNothing */ }
+            //try
+            //{
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+            //}
+            //catch { /* doNothing */ }
+            //try
+            //{
+                Application.Run(new frmMain());
+            //}
+            //catch (Exception ex)
+            //{
+            //    using (System.IO.StreamWriter sw = new System.IO.StreamWriter("error.Log"))
+            //    {
+            //        sw.WriteLine(ex.ToString());
+            //        sw.Flush();
+            //        sw.Close();
+            //    }
+            //}
+
+            //try
+            //{
+            //    System.IO.File.Delete(@".\System.Data.SQLite.dll");
+            //}
+            //catch { /* doNothing */ }
 
         }
     }
