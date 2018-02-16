@@ -75,19 +75,19 @@ namespace Utils
             return childNode;
         }
 
-        public static TreeNode AddTreeNode(TreeNode parentNode, string key, string text)
-        {
-            TreeNode tn = new TreeNode();
-            if (parentNode.TreeView == null) return null;
-            if (parentNode.TreeView.InvokeRequired)
-                parentNode.TreeView.Invoke(new MethodInvoker(() => tn = parentNode.Nodes.Add(key, text)));
-            else
-                lock (parentNode)
-                {
-                    tn = parentNode.Nodes.Add(key, text);
-                }
-            return tn;
-        }
+        //public static TreeNode AddTreeNode(TreeNode parentNode, string key, string text)
+        //{
+        //    TreeNode tn = new TreeNode();
+        //    if (parentNode.TreeView == null) return null;
+        //    if (parentNode.TreeView.InvokeRequired)
+        //        parentNode.TreeView.Invoke(new MethodInvoker(() => tn = parentNode.Nodes.Add(key, text)));
+        //    else
+        //        lock (parentNode)
+        //        {
+        //            tn = parentNode.Nodes.Add(key, text);
+        //        }
+        //    return tn;
+        //}
 
         public static TreeNode BuildNode(ComicModels.ComicNameInWebPage comic, string localComicPath, string groupName)
         {

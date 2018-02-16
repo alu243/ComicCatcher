@@ -125,7 +125,7 @@ namespace Utils
             }
         }
 
-        public static MemoryStream getPictureResponse(string url, string reffer = "", int remainTries = 50)
+        public static MemoryStream getPictureResponse(string url, string reffer = "", int remainTries = 30)
         {
             //url = System.Web.HttpUtility.UrlDecode(url, Encoding.GetEncoding("GB2312"));
             //url = url.Split('?')[0] + "?" + System.Web.HttpUtility.UrlEncode(url.Split('?')[1], Encoding.GetEncoding("GB2312"));
@@ -214,7 +214,7 @@ namespace Utils
 
             request.Headers["Cookie"] = "isAdult=1";
 
-            request.Timeout = 16000;
+            request.Timeout = 5000;
             //request.ContentType = "image/jpeg";
             //request.Referer = url;
             request.Proxy = ProxySetting.getProxy();

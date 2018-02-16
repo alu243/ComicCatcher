@@ -42,12 +42,14 @@ namespace ComicModels
             List<ComicWebPage> webPages = new List<ComicWebPage>();
             for (int i = 0; i < 300; ++i)
             {
-                // http://www.dm5.com/manhua-list-size60-p1/
+                // http://www.dm5.com/manhua-list-p1/
                 ComicWebPage wp = new ComicWebPage();
                 wp.GroupNumber = i + 1;
                 wp.Caption = "第" + (i + 1).ToString().PadLeft(3, '0') + "頁";
 
-                wp.Url = new Uri(new Uri(this._cRoot.WebHost), ("manhua-list-size60-p" + (i + 1).ToString() + "/")).ToString();
+                //wp.Url = new Uri(new Uri(this._cRoot.WebHost), ("manhua-list-p" + (i + 1).ToString() + "/")).ToString();
+                wp.Url = new Uri(new Uri(this._cRoot.WebHost), ("manhua-list-s2-p" + (i + 1).ToString() + "/")).ToString();
+
                 webPages.Add(wp);
             }
             return webPages;
@@ -57,22 +59,23 @@ namespace ComicModels
         #region Names
         public List<ComicNameInWebPage> GetComicNames(ComicWebPage cGroup)
         {
-            Regex rLink = new Regex(@"<a (.|\n)*?<strong>(.|\n)*?</a>", RegexOptions.Compiled);
-            Regex rUrl = new Regex(@"href=""(.|\n)*?""", RegexOptions.Compiled);
-            Regex rCaption = new Regex(@"<strong>(.|\n)*?<", RegexOptions.Compiled);
+            //Regex rLink = new Regex(@"<a (.|\n)*?<strong>(.|\n)*?</a>", RegexOptions.Compiled);
+            //Regex rUrl = new Regex(@"href=""(.|\n)*?""", RegexOptions.Compiled);
+            //Regex rCaption = new Regex(@"<strong>(.|\n)*?<", RegexOptions.Compiled);
             string htmlContent = ComicUtil.GetUtf8Content(cGroup.Url);
-
-            List<string> comicList = SplitForComicName(htmlContent);
+            List<string> comicList = RetriveComicNames(htmlContent);
             List<ComicNameInWebPage> result = comicList.Select<string, ComicNameInWebPage>(comic =>
             {
-                string sLink = rLink.Match(comic).Value;
+                //string sLink = rLink.Match(comic).Value;
                 ComicNameInWebPage cn = new ComicNameInWebPage()
                 {
-                    IconUrl = RetriveIconUri(comic), // 取得漫畫首頁圖像連結
-                    LastUpdateDate = RetriveLastUpdateDate(comic), // 取得最近更新日期
-                    LastUpdateChapter = RetriveLastUpdateInfo(comic), // 取得最近更新回數
-                    Url = rUrl.Match(sLink).Value.Replace("href=", "").Trim('"').Trim(),
-                    Caption = CharsetConvertUtil.ToTraditional(rCaption.Match(sLink).Value.Replace("<strong>", "").Trim('<'))
+                    IconUrl = RetriveComicName_IconUrl(comic), // 取得漫畫首頁圖像連結
+                    LastUpdateDate = RetriveComicName_LastUpdateDate(comic), // 取得最近更新日期
+                    LastUpdateChapter = RetriveComicName_LastUpdateInfo(comic), // 取得最近更新回數
+                    //Url = rUrl.Match(sLink).Value.Replace("href=", "").Trim('"').Trim(),
+                    Url = RetriveComicName_Url(comic),
+                    Caption = RetriveComicName_Caption(comic),
+                    //Caption = CharsetConvertUtil.ToTraditional(rCaption.Match(sLink).Value.Replace("<strong>", "").Trim('<'))
                     //foreach (char c in Path.GetInvalidFileNameChars()) cb.description = cb.description.Replace(c.ToString(), "");
                 };
 
@@ -88,56 +91,88 @@ namespace ComicModels
             return result;
         }
 
-        private List<string> SplitForComicName(string htmlContent)
+        private List<string> RetriveComicNames(string htmlContent)
         {
-            Regex rComicList = new Regex(@"<li class=""red_lj"">(.|\n)*?</li>", RegexOptions.Compiled);
-            return rComicList.Matches(htmlContent).Cast<Match>().Select(p => p.Value).ToList();
+            Regex comicListOuter = new Regex(@"<ul class=""mh-list col7"">(.|\n)*?</ul>", RegexOptions.Compiled);
+            Regex comicListInner = new Regex(@"<li>(.|\n)*?</li>", RegexOptions.Compiled);
+
+            var allInOne = comicListOuter.Matches(htmlContent).Cast<Match>().Select(p => p.Value).First();
+            return comicListInner.Matches(allInOne).Cast<Match>().Select(p => p.Value).ToList();
         }
 
-        private string RetriveIconUri(string matchedData)
+        private string RetriveComicName_IconUrl(string matchedData)
         {
-            Regex rIconUri = new Regex(@"<img src=""(.|\n)*?""", RegexOptions.Compiled);
-            Uri iconUri = new Uri(rIconUri.Match(matchedData).Value.Replace("<img src=", "").Replace(@"""", "").Trim());
+            //  <span>最新</span>
+            //  <a href="/m582240/" title="番外2" target="_blank">番外2 </a>
+            Regex rIconUri = new Regex(@"<p class=""mh-cover"" +style=""background-image: url\((.|\n)*?\)", RegexOptions.Compiled);
+            Uri iconUri = new Uri(rIconUri.Match(matchedData).Value.Replace(@"<p class=""mh-cover""", "").Trim().Replace(@"style=""background-image: url(", "").Replace(@")", "").Trim());
             return iconUri.ToString();
         }
 
-        private string RetriveLastUpdateDate(string matchedData)
+        private string RetriveComicName_LastUpdateDate(string matchedData)
         {
-            Regex rLastUpdateDate = new Regex(@"\d{4}年\d{1,2}月\d{1,2}日：", RegexOptions.Compiled);
-            return rLastUpdateDate.Match(matchedData).Value;
+            //<p class="zl"> 17分钟前更新 </p>
+            //Regex rLastUpdateDate = new Regex(@"\d{4}年\d{1,2}月\d{1,2}日：", RegexOptions.Compiled);
+            Regex rLastUpdateDate = new Regex(@"<p class=""zl"">(.|\n)*?</p>", RegexOptions.Compiled);
+            return rLastUpdateDate.Match(matchedData).Value.Replace(@"<p class=""zl"">", "").Replace("</p>", "").Trim();
         }
 
-        private string RetriveLastUpdateInfo(string matchedData)
+        private string RetriveComicName_LastUpdateInfo(string matchedData)
         {
-            Regex rLastUpdateInfoOuter = new Regex(@"\[(.|\n)*?\]", RegexOptions.Compiled);
+            // <span>最新</span>
+            // <a href="/m582240/" title="番外2" target="_blank">番外2 </a>
+            //Regex rLastUpdateInfoOuter = new Regex(@"\[(.|\n)*?\]", RegexOptions.Compiled);
+            //Regex rLastUpdateInfoInner = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
+            Regex rLastUpdateInfoOuter = new Regex(@"<span>最新(.|\n)*?</a>", RegexOptions.Compiled);
             Regex rLastUpdateInfoInner = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
+
             string simplified = rLastUpdateInfoInner.Match(rLastUpdateInfoOuter.Match(matchedData).Value).Value.Replace("title=", "").Trim('"');
-            return CharsetConvertUtil.ToTraditional(simplified);
+            return CharsetConvertUtil.ToTraditional(simplified.Trim());
         }
 
+        private string RetriveComicName_Url(string matchedData)
+        {
+            //<h2 class="title">
+            //  <a href="/manhua-huanjue-zaiyici/" title="幻觉 再一次">幻觉 再一次</a>
+            //  <span class="mh-star star-4"></span>
+            //</h2>
+            Regex rUrlOuter = new Regex(@"<h2 class=""title"">(.|\n)*?</h2>", RegexOptions.Compiled);
+            Regex rUrlInner = new Regex(@"href=""(.|\n)*?""", RegexOptions.Compiled);
+
+            string result = rUrlInner.Match(rUrlOuter.Match(matchedData).Value).Value.Replace("href=", "").Trim('"');
+            return result;
+        }
+
+        private string RetriveComicName_Caption(string matchedData)
+        {
+            // <h2 class="title">
+            //   <a href="/manhua-lurenshangbanzuhebuliangnvgaozhongsheng/" title="路人上班族和不良女高中生" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">路人上班族和不良女高中生</a>
+            // </h2>
+            Regex rCaptionOuter = new Regex(@"<h2 class=""title"">(.|\n)*?</h2>", RegexOptions.Compiled);
+            Regex rCaptionInner = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
+
+            string simplified = rCaptionInner.Match(rCaptionOuter.Match(matchedData).Value).Value.Replace("title=", "").Trim('"');
+            return CharsetConvertUtil.ToTraditional(simplified.Trim());
+        }
         #endregion
 
         #region Chapters
         public List<ComicChapterInName> GetComicChapters(ComicNameInWebPage cName)
         {
             //Regex rr = new Regex(@"^<table(.+|\n*)</table>$", RegexOptions.Multiline | RegexOptions.IgnoreCase);
-            Regex rVolumnList = new Regex(@"<li {0,}(.|\n)*?</li>", RegexOptions.Compiled);
-            Regex rUrl = new Regex(@"href=""(.|\n)*?""", RegexOptions.Compiled);
-            Regex rCaption = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
+            //Regex rVolumnList = new Regex(@"<li {0,}(.|\n)*?</li>", RegexOptions.Compiled);
+            //Regex rUrl = new Regex(@"href=""(.|\n)*?""", RegexOptions.Compiled);
+            //Regex rCaption = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
 
             string htmlContent = ComicUtil.GetUtf8Content(cName.Url);
             List<ComicChapterInName> result = new List<ComicChapterInName>();
-            string tagContent = RetriveHtmlTagContent(htmlContent);
-            foreach (Match volumn in rVolumnList.Matches(tagContent))
+            var chapters = RetriveChapters(htmlContent);
+            chapters.ForEach(c =>
             {
-                //string sLink = rLink.Match(data.Value).Value;
-                string sLink = volumn.Value;
                 ComicChapterInName cb = new ComicChapterInName()
                 {
-                    Url = rUrl.Match(sLink).Value.Replace("href=", "").Trim('"'),
-                    //description = CharsetConverter.ToTraditional(rDesc.Match(sLink).Value.Replace(@"<span class=""black"">", "").Replace(@"</span>", "")
-                    //.Replace(@"<fontcolor=red>", "").Replace(@"</font>", "").Replace(@"<b>","").Replace(@"</b>","").Trim())
-                    Caption = CharsetConvertUtil.ToTraditional(rCaption.Match(sLink).Value.Replace("title=", "").Trim('"'))
+                    Url = RetriveChapter_Url(c),
+                    Caption = RetriveChapter_Caption(c)
                 };
                 if (Uri.IsWellFormedUriString(cb.Url, UriKind.Absolute) == false) cb.Url = (new Uri(new Uri(this._cRoot.WebHost), cb.Url)).ToString();
 
@@ -146,22 +181,78 @@ namespace ComicModels
                     cb.Caption = cb.Caption.Replace(cName.Caption, String.Empty).Trim();
                     result.Add(cb);
                 }
-            }
+            });
 
+            //string tagContent = RetriveHtmlTagContent(htmlContent);
+            //foreach (Match volumn in rVolumnList.Matches(tagContent))
+            //{
+            //    //string sLink = rLink.Match(data.Value).Value;
+            //    string sLink = volumn.Value;
+            //    ComicChapterInName cb = new ComicChapterInName()
+            //    {
+            //        Url = rUrl.Match(sLink).Value.Replace("href=", "").Trim('"'),
+            //        //description = CharsetConverter.ToTraditional(rDesc.Match(sLink).Value.Replace(@"<span class=""black"">", "").Replace(@"</span>", "")
+            //        //.Replace(@"<fontcolor=red>", "").Replace(@"</font>", "").Replace(@"<b>","").Replace(@"</b>","").Trim())
+            //        Caption = CharsetConvertUtil.ToTraditional(rCaption.Match(sLink).Value.Replace("title=", "").Trim('"'))
+            //    };
+            //    if (Uri.IsWellFormedUriString(cb.Url, UriKind.Absolute) == false) cb.Url = (new Uri(new Uri(this._cRoot.WebHost), cb.Url)).ToString();
+
+            //    if (false == String.IsNullOrEmpty(cb.Caption))
+            //    {
+            //        cb.Caption = cb.Caption.Replace(cName.Caption, String.Empty).Trim();
+            //        result.Add(cb);
+            //    }
+            //}
             return result;
         }
 
-        private string RetriveHtmlTagContent(string htmlContent)
+        private List<string> RetriveChapters(string htmlContent)
         {
-            // <ul class="nr6 lan2" id="cbc_1"> 
-            Regex rVolumnTag = new Regex(@"<ul class=""nr6 lan2"" id=""cbc(.|\n)*?</ul>", RegexOptions.Compiled);
-            StringBuilder sb = new StringBuilder();
-            foreach (Match match in rVolumnTag.Matches(htmlContent))
-            {
-                sb.AppendLine(match.Value);
-            }
-            return sb.ToString();
+            Regex comicListOuter = new Regex(@"<div id=""chapterlistload"">(.|\n)*?</div>", RegexOptions.Compiled);
+            Regex comicListInner = new Regex(@"<li>(.|\n)*?</li>", RegexOptions.Compiled);
+
+            var allInOne = comicListOuter.Matches(htmlContent).Cast<Match>().Select(p => p.Value).First();
+            return comicListInner.Matches(allInOne).Cast<Match>().Select(p => p.Value).ToList();
         }
+
+        private string RetriveChapter_Url(string chapter)
+        {
+            //<li>
+            //  <a href="/m582159/" title="" target="_blank">第103话
+            //    <span>（18P）</span>
+            //  </a>
+            //  <span class="new"></span>
+            //</li>
+            Regex rUrl = new Regex(@"href=""(.|\n)*?""", RegexOptions.Compiled);
+
+            string result = rUrl.Match(chapter).Value.Replace("href=", "").Trim('"');
+            return result;
+        }
+
+        private string RetriveChapter_Caption(string chapter)
+        {
+            //<li>
+            //  <a href="/m582159/" title="" target="_blank">第103话
+            //    <span>（18P）</span>
+            //  </a>
+            //  <span class="new"></span>
+            //</li>
+            Regex rCaption = new Regex(@"target=""_blank"" *?>(.|\n)*?<", RegexOptions.Compiled);
+            string simplified = rCaption.Match(chapter).Value.Replace(@"target=""_blank""", "").Trim().Replace(">", "").Replace(@"<", "").Trim('"').Trim();
+            return CharsetConvertUtil.ToTraditional(simplified.Trim());
+        }
+
+        //private string RetriveHtmlTagContent(string htmlContent)
+        //{
+        //    //// <ul class="nr6 lan2" id="cbc_1"> 
+        //    //Regex rVolumnTag = new Regex(@"<ul class=""nr6 lan2"" id=""cbc(.|\n)*?</ul>", RegexOptions.Compiled);
+        //    StringBuilder sb = new StringBuilder();
+        //    foreach (Match match in rVolumnTag.Matches(htmlContent))
+        //    {
+        //        sb.AppendLine(match.Value);
+        //    }
+        //    return sb.ToString();
+        //}
         #endregion
 
         #region Pages
@@ -224,14 +315,17 @@ namespace ComicModels
             // fix by
             // http://css122.us.cdndm.com/v201708091849/default/js/chapternew_v22.js
             //Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
-            string cid = cChapter.Url.Replace(@"http://www.dm5.com/m", "").Trim('/');
             string htmlContent = ComicUtil.GetUtf8Content(cChapter.Url);
+            string cid = cChapter.Url.Replace(@"http://www.dm5.com/m", "").Trim('/');
+            string mid = RetrivePage_MID(htmlContent);
+            string dt = RetrivePage_VIEWSIGNDT(htmlContent);
+            string sign = RetrivePage_VIEWSIGN(htmlContent);
+            int pageCount = RetrivePage_PageCount(htmlContent);
             //Regex rPageLinkOuter = new Regex(@"<select (.|\n)*?id=""pagelist""(.|\n)*?</select>", RegexOptions.Compiled);
             //Regex rPageLinkInner = new Regex(@"<option {1,}(.|\n)*?</option>", RegexOptions.Compiled);
-            Regex rPageLinkOuter = new Regex(@"<div class=(.|\\){0,1}""pageBar bar up(.|\n)*?</div>", RegexOptions.Compiled);
-            Regex rPageLinkInner = new Regex(@"<a {1,}(.|\n)*?</a>", RegexOptions.Compiled);
-            string pageOuter = rPageLinkOuter.Matches(htmlContent)[0].Value;
-            int pageCount = rPageLinkInner.Matches(pageOuter).Count;
+            //Regex rPageLinkOuter = new Regex(@"<div class=(.|\\){0,1}""pageBar bar up(.|\n)*?</div>", RegexOptions.Compiled);
+            //Regex rPageLinkInner = new Regex(@"<a {1,}(.|\n)*?</a>", RegexOptions.Compiled);
+            //int pageCount = rPageLinkInner.Matches(pageOuter).Count;
 
 
             //string jsCodeWrapper = "; var url = (typeof (hd_c) != \"undefined\" && hd_c.length > 0) ? hd_c[0] : d[0];";
@@ -240,10 +334,11 @@ namespace ComicModels
             List<ComicPageInChapter> pages = new List<ComicPageInChapter>();
             for (int i = 1; i <= pageCount; i++)
             {
-                //string pageFunUrl = this._cRoot.WebHost + "imagefun.ashx?cid=" + cid + "&page=" + i.ToString();
                 // unpacker test url = 
-                string reffer = this._cRoot.WebHost + "m" + cid + "-p" + i + "/";
-                string pageFunUrl = this._cRoot.WebHost + "m" + cid + "-p" + i + "/" + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString() + "&language=1&gtk=6";
+                // url: 'chapterfun.ashx',
+                // data: { cid: DM5_CID, page: DM5_PAGE, key: mkey, language: 1, gtk: 6, _cid: DM5_CID, _mid: DM5_MID, _dt: DM5_VIEWSIGN_DT, _sign: DM5_VIEWSIGN },
+                string reffer = this._cRoot.WebHost + "m" + cid + "/";
+                string pageFunUrl = this._cRoot.WebHost + "m" + cid + "/" + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString() + "&language=1&gtk=6&_cid=" + cid + "&_mid=" + mid + "&_dt=" + dt + "&_sign=" + sign;
                 string pageFunContent;
                 lock (this)
                 {
@@ -284,6 +379,52 @@ namespace ComicModels
         {
             Regex vn = new Regex(variableName + @"=.+?;", RegexOptions.Compiled);
             return vn.Match(jsContent).Value.Replace(variableName + "=", "").TrimEnd(';').Trim(new char[] { '"', '\'' });
+        }
+
+        private int RetrivePage_PageCount(string page)
+        {
+            //<div class="chapterpager" style="display: inline;" id="chapterpager">
+            //  <span class="current">1</span>
+            //  <a href="/m582159-p2/">2</a>
+            //  <a href="/m582159-p3/">3</a>
+            //  <a href="/m582159-p4/">4</a>
+            //  <a href="/m582159-p5/">5</a>
+            //  <a href="/m582159-p6/">6</a>
+            //  <a href="/m582159-p7/">7</a>
+            //  <a href="/m582159-p8/">8</a> ...
+            //  <a href="/m582159-p18/">18</a>
+            //</div>
+            Regex rUrlOuter = new Regex(@"<div class=""chapterpager""(.|\n)*?</div>", RegexOptions.Compiled);
+            Regex rUrlInner = new Regex(@"<a href=""(.|\n)*?</a>", RegexOptions.Compiled);
+            Regex rUrlText = new Regex(@">(.|\n)*?<", RegexOptions.Compiled);
+
+            var lastPageLink = rUrlInner.Matches(rUrlOuter.Match(page).Value).Cast<Match>().Last();
+            string result = rUrlText.Match(lastPageLink.Value).Value.Replace(">", "").Replace("<", "").Trim();
+            int count;
+            int.TryParse(result, out count);
+            return count;
+        }
+
+        private string RetrivePage_MID(string page)
+        {
+            //var DM5_MID=7724; 
+            Regex rMID = new Regex(@"var DM5_MID=(.|\n)*?;", RegexOptions.Compiled);
+            string result = rMID.Match(page).Value.Replace("var DM5_MID=", "").Replace(";", "").Trim();
+            return result;
+        }
+        private string RetrivePage_VIEWSIGNDT(string page)
+        {
+            //var DM5_VIEWSIGN_DT=\"2018-02-16 00:29:55\";
+            Regex rMID = new Regex(@"var DM5_VIEWSIGN_DT=(.|\n)*?;", RegexOptions.Compiled);
+            string result = rMID.Match(page).Value.Replace("var DM5_VIEWSIGN_DT=", "").Replace(";", "").Replace(@"""", "").Trim();
+            return result;
+        }
+        private string RetrivePage_VIEWSIGN(string page)
+        {
+            //var DM5_VIEWSIGN=\"79e225b5839219b02d6b0be3ff815e1c\";
+            Regex rMID = new Regex(@"var DM5_VIEWSIGN=(.|\n)*?;", RegexOptions.Compiled);
+            string result = rMID.Match(page).Value.Replace("var DM5_VIEWSIGN=", "").Replace(";", "").Replace(@"""", "").Trim();
+            return result;
         }
         #endregion
     }

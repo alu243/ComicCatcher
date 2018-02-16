@@ -1030,5 +1030,81 @@ namespace ComicCatcher
             this.pathGroup.Load();
         }
 
+        private void btnAppendTo_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                if (tvComicTree.Nodes != null && tvComicTree.Nodes.Count <= 1)
+                {
+                    tvComicTree.Nodes.Insert(0, "自行添加");
+                    tvComicTree.Nodes[0].Nodes.Insert(0, "第1頁");
+                }
+
+                var urls = tvComicTree.Nodes[0].Nodes[0].Nodes.Cast<TreeNode>().ToList().Select(p => p.Name).ToList();
+                if (false == urls.Any(p => p == txtUrl.Text))
+                {
+                    tvComicTree.Nodes[0].Nodes[0].Nodes.Add(BuildAppendNode(txtUrl.Text));
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("不是有效的url");
+            }
+        }
+
+        private TreeNode BuildAppendNode(string url)
+        {
+            //Caption = "A", IconImage = null, IconUrl = "", LastUpdateChapter = "", LastUpdateDate = "", 
+            string htmlContent = ComicUtil.GetUtf8Content(url);
+
+            // 圣诞迷城"; 
+            Regex rc = new Regex(@"DM5_COMIC_MNAME="".*?""", RegexOptions.Compiled);
+            string caption = rc.Match(htmlContent).Value;
+            if (false == string.IsNullOrEmpty(caption))
+            {
+                caption = caption.Replace(@"DM5_COMIC_MNAME=""", "").Replace(@"""", "");
+            }
+            Regex iconOut = new Regex(@"class=""innr91"".*?</div>", RegexOptions.Compiled);
+            Regex iconInner = new Regex(@"src="".*?""", RegexOptions.Compiled);
+            string iconurl = iconOut.Match(htmlContent).Value;
+            if (false == string.IsNullOrEmpty(iconurl))
+            {
+                iconurl = iconInner.Match(iconurl).Value;
+                if (false == string.IsNullOrEmpty(iconurl))
+                {
+                    iconurl = iconurl.Replace(@"src=""", "").Replace(@"""", "");
+                }
+            }
+            Regex rLastDate = new Regex(@"更新时间：.*?<", RegexOptions.Compiled);
+            string lastUpdateDate = rLastDate.Match(htmlContent).Value;
+            if (false == String.IsNullOrEmpty(lastUpdateDate))
+            {
+                lastUpdateDate = lastUpdateDate.Replace(@"更新时间：", "").Replace(@"<", "");
+            }
+            Regex rLastChapter = new Regex(@"最新章节：.*?<", RegexOptions.Compiled);
+            string lastUpdateChapter = rLastChapter.Match(htmlContent).Value;
+            if (false == String.IsNullOrEmpty(lastUpdateDate))
+            {
+                lastUpdateChapter = lastUpdateChapter.Replace(@"最新章节：", "").Replace(@"<", "");
+            }
+
+            ComicNameInWebPage comic = new ComicNameInWebPage()
+            {
+                IconUrl = iconurl, // 取得漫畫首頁圖像連結
+                LastUpdateDate = lastUpdateDate, // 取得最近更新日期
+                LastUpdateChapter = lastUpdateChapter, // 取得最近更新回數
+                Url = url,
+                Caption = CharsetConvertUtil.ToTraditional(caption)
+            };
+
+            string groupName = pathGroup.GetGroupName(comic.Caption);
+            TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
+
+            return nameNode;
+        }
+
+
+
     }
 }
