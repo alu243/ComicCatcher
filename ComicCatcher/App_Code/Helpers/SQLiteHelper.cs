@@ -51,7 +51,6 @@ UNIQUE (ComicWeb, ComicName, ComicVolumn) ON CONFLICT REPLACE
 
         public static void CreatePathGroupTableOnFly()
         {
-            //string sql = @"drop TABLE PathGroup";
             string sql = @"
 CREATE TABLE PathGroup (
 GroupName NVARCHAR(50) not NULL,
@@ -81,6 +80,34 @@ UNIQUE (GroupName) ON CONFLICT REPLACE
             catch { /* doNothing */ }
         }
 
+        public static void CreateIgnoreComicTableOnFly()
+        {
+            string sql = @"
+CREATE TABLE IgnoreComic (
+ComicUrl NVARCHAR(200) not NULL,
+ComicName NVARCHAR(50) not NULL,
+UNIQUE (ComicUrl) ON CONFLICT REPLACE
+);";
+            try
+            {
+                SqlExecuteNonQuery(sql);
+            }
+            catch { /* doNothing */ }
+        }
+        public static int AddIgnoreComic(string url, string name)
+        {
+            try
+            {
+                string sql = "INSERT INTO IgnoreComic (ComicUrl, ComicName) values ('{0}' , '{1}')";
+                return SqlExecuteNonQuery(string.Format(sql, url, name));
+            }
+            catch (Exception ex) { NLogger.Error("新增例外名單到資料庫時發生錯誤：" + ex.ToString()); return 0; }
+        }
+        public static DataTable GetIgnoreComic()
+        {
+            string sql = "select * from IgnoreComic";
+            return SqlSelect(sql);
+        }
 
         public static DataTable GetPathGroup()
         {
@@ -88,7 +115,19 @@ UNIQUE (GroupName) ON CONFLICT REPLACE
             return SqlSelect(sql);
         }
 
-        public static SQLiteDataAdapter GetPathGroupAdapter()
+        public static SQLiteDataAdapter GetIgnoreComicDataAdapter()
+        {
+            SQLiteConnection conn = new SQLiteConnection(connStr);
+            string sql = "select * from IgnoreComic";
+            SQLiteDataAdapter sda = new SQLiteDataAdapter(sql, conn);
+            SQLiteCommandBuilder builder = new SQLiteCommandBuilder(sda);
+            sda.UpdateCommand = builder.GetUpdateCommand();
+            sda.InsertCommand = builder.GetInsertCommand();
+            sda.DeleteCommand = builder.GetDeleteCommand();
+            return sda;
+        }
+
+        public static SQLiteDataAdapter GetPathGroupDataAdapter()
         {
             SQLiteConnection conn = new SQLiteConnection(connStr);
             string sql = "select * from PathGroup";

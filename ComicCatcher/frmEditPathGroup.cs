@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
+using ComicModels;
 using Helpers;
 namespace ComicCatcher
 {
@@ -16,19 +16,29 @@ namespace ComicCatcher
         private DataTable myTable;
         private SQLiteDataAdapter myAdapter;
 
-        public frmEditPathGroup()
+        public frmEditPathGroup(SettingEnum setting)
         {
+            if (setting == SettingEnum.IgnoreComic)
+            {
+                SQLiteHelper.CreateIgnoreComicTableOnFly();
+                myAdapter = SQLiteHelper.GetIgnoreComicDataAdapter();
+                DataSet ds = new DataSet();
+                myAdapter.Fill(ds);
+                myTable = ds.Tables[0];
+            }
+            else
+            {
+                SQLiteHelper.CreatePathGroupTableOnFly();
+                myAdapter = SQLiteHelper.GetPathGroupDataAdapter();
+                DataSet ds = new DataSet();
+                myAdapter.Fill(ds);
+                myTable = ds.Tables[0];
+            }
             InitializeComponent();
         }
 
         private void frmEditPathGroup_Load(object sender, EventArgs e)
         {
-            SQLiteHelper.CreatePathGroupTableOnFly();
-
-            myAdapter = SQLiteHelper.GetPathGroupAdapter();
-            DataSet ds = new DataSet();
-            myAdapter.Fill(ds);
-            myTable = ds.Tables[0];
 
             bindingSource1.DataSource = myTable;
             dgvPathGroup.DataSource = myTable;
@@ -36,11 +46,10 @@ namespace ComicCatcher
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //var adapter = SQLiteHelper.GetPathGroupAdapter();
             myAdapter.Update(myTable);
         }
 
-        private void txtFilter_TextChanged(object sender, EventArgs e)
+        private void TxtFilter_TextChanged(object sender, EventArgs e)
         {
             if (false == String.IsNullOrEmpty(txtFilter.Text))
             {

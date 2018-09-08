@@ -28,6 +28,7 @@ namespace ComicCatcher
         private IComicCatcher comicSiteCatcher = null;
 
         private PathGroup pathGroup = new PathGroup();
+        private IgnoreComic ignoreComic = new IgnoreComic();
 
         //private DownloadedList dwnedList = null;
 
@@ -88,6 +89,7 @@ namespace ComicCatcher
 
 
             pathGroup.Load();
+            ignoreComic.Load();
 
             cbComicCatcher.SelectedIndex = 0;
             //ChangeComicSite(new Xindm());
@@ -925,6 +927,11 @@ namespace ComicCatcher
                 var names = new List<TreeNode>();
                 foreach (var comic in comicSiteCatcher.GetComicNames(cg))
                 {
+                    if (ignoreComic.ContainsKey(comic.Url))
+                    {
+                        continue;
+                    }
+
                     if (chkLoadPhoto.Checked)
                     {
                         Image img = comic.IconImage; // 此動作已內建 multithread 了
@@ -1005,11 +1012,15 @@ namespace ComicCatcher
 
         private void btnShowEditModal_Click(object sender, EventArgs e)
         {
-            frmEditPathGroup f = new frmEditPathGroup();
-
+            frmEditPathGroup f = new frmEditPathGroup(SettingEnum.PathGroup);
             f.ShowDialog(this);
-
             this.pathGroup.Load();
+        }
+        private void btnShowExceptModal_Click(object sender, EventArgs e)
+        {
+            frmEditPathGroup f = new frmEditPathGroup(SettingEnum.IgnoreComic);
+            f.ShowDialog(this);
+            this.ignoreComic.Load();
         }
 
         private void btnAppendTo_Click(object sender, EventArgs e)
@@ -1031,7 +1042,7 @@ namespace ComicCatcher
             }
             catch (Exception ex)
             {
-                MessageBox.Show("不是有效的url");
+                MessageBox.Show("不是有效的url:" + ex.Message);
             }
         }
 
@@ -1122,7 +1133,25 @@ namespace ComicCatcher
             return cn;
         }
 
+        private void AddIgnoreComic_Click(object sender, EventArgs e)
+        {
+            //MessageBox.Show(tvComicTree.SelectedNode.Name + ":::" + tvComicTree.SelectedNode.Text);
+            ignoreComic.AddIgnoreComic(tvComicTree.SelectedNode.Name, tvComicTree.SelectedNode.Text);
+            tvComicTree.Nodes.Remove(tvComicTree.SelectedNode);
+        }
 
+        private void tvComicTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
 
+                //NodeCheckUtil.IsComicNameNode(tvComicTree.SelectedNode)
+                if (NodeCheckUtil.IsComicNameNode(e.Node) && e.Node == tvComicTree.SelectedNode)
+                {
+                    Point p = MousePosition;//取得滑鼠位置
+                    exceptMenu.Show(p);//顯示右鍵選單
+                }
+            }
+        }
     }
 }

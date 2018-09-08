@@ -83,6 +83,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Code\ComicModels\IgnoreComic.cs" />
+    <Compile Include="App_Code\ComicModels\Enums.cs" />
     <Compile Include="App_Code\ComicModels\PathGroup.cs" />
     <Compile Include="App_Code\ComicModels\ComicPage.cs" />
     <Compile Include="App_Code\ComicModels\ComicUtil.cs" />
