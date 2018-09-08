@@ -890,30 +890,13 @@ namespace ComicCatcher
                 if (NodeCheckUtil.IsListNode(currNode))
                 {
                     buildComicNameNode(currNode);
-                    foreach (TreeNode node in currNode.Nodes)
+                    System.Threading.Tasks.Parallel.ForEach(currNode.Nodes.Cast<TreeNode>().ToList(), node =>
                     {
-                        Thread t2 = new Thread(buildComicChapterNode);
-                        t2.IsBackground = true;
-                        t2.Start(node);
-                    }
+                        buildComicChapterNode(node);
+                    });
                 }
                 else if (NodeCheckUtil.IsComicNameNode(currNode))
                 {
-                    #region Lock的另一種作法
-                    //bool isNotLocked = false;
-                    //try
-                    //{
-                    //    isNotLocked = Monitor.TryEnter(currNode);
-                    //}
-                    //finally
-                    //{
-                    //    if (isNotLocked)
-                    //    {
-                    //        Monitor.Exit(currNode);
-                    //    }
-                    //}
-                    //if (false == isNotLocked) return; 
-                    #endregion
                     Thread t2 = new Thread(buildComicChapterNode);
                     t2.IsBackground = true;
                     t2.Start(currNode);
@@ -939,6 +922,7 @@ namespace ComicCatcher
                 TreeViewUtil.ClearTreeNode(currNode);
                 GC.Collect();
                 ComicWebPage cg = currNode.Tag as ComicWebPage;
+                var names = new List<TreeNode>();
                 foreach (var comic in comicSiteCatcher.GetComicNames(cg))
                 {
                     if (chkLoadPhoto.Checked)
@@ -949,13 +933,11 @@ namespace ComicCatcher
                     //TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text);
                     string groupName = pathGroup.GetGroupName(comic.Caption);
                     TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
-
-                    lock (currNode.TreeView)
-                    {
-                        TreeViewUtil.AddTreeNode(currNode, nameNode);
-                    }
+                    names.Add(nameNode);
                     //NLogger.Info(comic.Caption + "=" + comic.Url);
                 }
+                TreeViewUtil.AddTreeNodes(currNode, names);
+
                 //NLogger.Info("********************************************");
             }
             catch (Exception ex)
@@ -979,15 +961,15 @@ namespace ComicCatcher
                 TreeViewUtil.ClearTreeNode(currNode);
                 GC.Collect();
                 ComicNameInWebPage cn = currNode.Tag as ComicNameInWebPage;
+                var chapters = new List<TreeNode>();
                 foreach (var chapter in comicSiteCatcher.GetComicChapters(cn))
                 {
                     TreeNode chapterNode = TreeViewUtil.BuildNode(chapter, comicSiteCatcher.GetComicWebRoot().WebSiteName, currNode.Text);
-                    lock (currNode)
-                    {
-                        TreeViewUtil.AddTreeNode(currNode, chapterNode);
-                    }
+                    chapters.Add(chapterNode);
                     //NLogger.Info(comic.Caption + "=" + comic.Url);
                 }
+                TreeViewUtil.AddTreeNodes(currNode, chapters);
+
                 //NLogger.Info("********************************************");
             }
             catch (Exception ex)
@@ -1047,7 +1029,7 @@ namespace ComicCatcher
                     tvComicTree.Nodes[0].Nodes[0].Nodes.Add(BuildAppendNode(txtUrl.Text));
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("不是有效的url");
             }
@@ -1057,6 +1039,10 @@ namespace ComicCatcher
         {
             //Caption = "A", IconImage = null, IconUrl = "", LastUpdateChapter = "", LastUpdateDate = "", 
             string htmlContent = ComicUtil.GetUtf8Content(url);
+
+            ComicNameInWebPage comicName = GetComicName(url);
+            var chapters = comicSiteCatcher.GetComicChapters(comicName);
+
 
             // 圣诞迷城"; 
             Regex rc = new Regex(@"DM5_COMIC_MNAME="".*?""", RegexOptions.Compiled);
@@ -1102,6 +1088,38 @@ namespace ComicCatcher
             TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
 
             return nameNode;
+        }
+
+        private ComicNameInWebPage GetComicName(string url)
+        {
+            string htmlContent = ComicUtil.GetUtf8Content(url);
+
+            //string sLink = rLink.Match(comic).Value;
+            Regex rTitle = new Regex(@"<div class=""banner_detail_form"">(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>", RegexOptions.Compiled);
+            Regex rTitle_Caption = new Regex(@"<p class=""title"">(.|\n)*?<", RegexOptions.Compiled);
+            Regex rTitle_IconUrl = new Regex(@"<img src=""(.|\n)*?""", RegexOptions.Compiled);
+            Regex rLastUpdate = new Regex(@"<span class=""s"">(.|\n)*?</span>", RegexOptions.Compiled);
+            Regex rLastUpdate_Date = new Regex(@"</a>&nbsp;(.|\n)*?<", RegexOptions.Compiled);
+            Regex rLastUpdate_Chapter = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
+
+
+            string title = rTitle.Match(htmlContent).Value;
+            string lastUpdate = rLastUpdate.Match(htmlContent).Value;
+            ComicNameInWebPage cn = new ComicNameInWebPage();
+            cn.Caption = CharsetConvertUtil.ToTraditional(rTitle_Caption.Match(title).Value.Replace(@"<p class=""title"">", "").Trim('<').Trim());
+            cn.IconUrl = rTitle_Caption.Match(title).Value.Replace(@"<img src=", "").Trim('"').Trim();
+            cn.LastUpdateDate = CharsetConvertUtil.ToTraditional(rLastUpdate_Date.Match(lastUpdate).Value.Replace("</a>&nbsp;", "").Trim('<').Trim()); // 取得最近更新日期
+            cn.LastUpdateChapter = CharsetConvertUtil.ToTraditional(rLastUpdate_Chapter.Match(lastUpdate).Value.Replace("title=", "").Trim('"').Trim()); // 取得最近更新回數
+            cn.Url = url;
+
+
+            if (false == String.IsNullOrEmpty(cn.LastUpdateChapter))
+            {
+                cn.LastUpdateChapter = cn.LastUpdateChapter.Replace(cn.Caption, String.Empty).Trim();
+            }
+
+            //if (Uri.IsWellFormedUriString(cn.Url, UriKind.Absolute) == false) cn.Url = (new Uri(new Uri(this._cRoot.WebHost), cn.Url)).ToString();
+            return cn;
         }
 
 

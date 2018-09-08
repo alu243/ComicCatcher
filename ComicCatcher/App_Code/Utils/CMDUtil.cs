@@ -20,6 +20,7 @@ namespace Utils
                 // and then exit.
                 //System.Diagnostics.ProcessStartInfo procStartInfo =
                 //    new System.Diagnostics.ProcessStartInfo("cmd.exe", "/c " + (command as string));
+                string arguments = Encoding.Default.GetString(Encoding.GetEncoding(65000).GetBytes((command as CommandObj).arguments));
                 System.Diagnostics.ProcessStartInfo procStartInfo =
                     new System.Diagnostics.ProcessStartInfo((command as CommandObj).fileName, (command as CommandObj).arguments);
 
@@ -31,6 +32,7 @@ namespace Utils
                 procStartInfo.UseShellExecute = false;
                 // Do not create the black window.
                 procStartInfo.CreateNoWindow = true;
+
                 if (false == String.IsNullOrEmpty((command as CommandObj).workdir))
                     procStartInfo.WorkingDirectory = (command as CommandObj).workdir;
 
@@ -62,6 +64,7 @@ namespace Utils
                 //Set the Priority of the thread.
                 objThread.Priority = ThreadPriority.Normal;
                 //Start the thread.
+
                 objThread.Start(command);
             }
             catch (ThreadStartException objException)

@@ -75,6 +75,21 @@ namespace Utils
             return childNode;
         }
 
+        public static List<TreeNode> AddTreeNodes(TreeNode parentNode, List<TreeNode> childNodes)
+        {
+            if (parentNode.TreeView == null) return null;
+            if (parentNode.TreeView.InvokeRequired)
+                parentNode.TreeView.Invoke(new MethodInvoker(() => parentNode.Nodes.AddRange(childNodes.ToArray())));
+            else
+                lock (parentNode)
+                {
+                    parentNode.TreeView.BeginUpdate();
+                    parentNode.Nodes.AddRange(childNodes.ToArray());
+                    parentNode.TreeView.EndUpdate();
+                }
+            return childNodes;
+        }
+
         //public static TreeNode AddTreeNode(TreeNode parentNode, string key, string text)
         //{
         //    TreeNode tn = new TreeNode();

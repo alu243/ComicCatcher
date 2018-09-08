@@ -43,6 +43,14 @@ namespace Utils
         {
             String tTarget = new String(' ', pSource.Length);
             int tReturn = LCMapString(LOCALE_SYSTEM_DEFAULT, LCMAP_TRADITIONAL_CHINESE, pSource, pSource.Length, tTarget, pSource.Length);
+            if (false == string.IsNullOrEmpty(tTarget))
+            {
+                 tTarget = tTarget.Replace("①","1").Replace("②","2").Replace("③","3")
+                     .Replace("④", "4").Replace("⑤", "5").Replace("⑥", "6").Replace("⑦", "7")
+                     .Replace("⑧", "8").Replace("⑨", "9").Replace("⑩", "10");
+                     
+                
+            }
             return tTarget;
         }
     }

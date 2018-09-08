@@ -256,60 +256,6 @@ namespace ComicModels
         #endregion
 
         #region Pages
-        //////public List<ComicPage> GetComicPages(ComicChapter cChapter)
-        //////{
-        //////    //Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
-        //////    string cid = cChapter.Url.Replace(@"http://www.dm5.com/m", "").Trim('/');
-        //////    string htmlContent = ComicUtil.GetUtf8Content(cChapter.Url);
-
-        //////    Regex rPageLinkOuter = new Regex(@"<select (.|\n)*?id=""pagelist""(.|\n)*?</select>", RegexOptions.Compiled);
-        //////    Regex rPageLinkInner = new Regex(@"<option {1,}(.|\n)*?</option>", RegexOptions.Compiled);
-        //////    string pageOuter = rPageLinkOuter.Matches(htmlContent)[0].Value;
-        //////    int pageCount = rPageLinkInner.Matches(pageOuter).Count;
-
-
-        //////    //Regex rKey = new Regex(@"key=.+?;", RegexOptions.Compiled);
-        //////    //Regex rPhotoServer = new Regex(@"pix="".+?""", RegexOptions.Compiled);
-        //////    Regex rPageFile = new Regex(@"pvalue=\["".+?""", RegexOptions.Compiled);
-        //////    List<ComicPage> pages = new List<ComicPage>();
-        //////    for (int i = 1; i <= pageCount; i++)
-        //////    {
-        //////        //string pageFunUrl = this._cRoot.WebHost + "imagefun.ashx?cid=" + cid + "&page=" + i.ToString();
-        //////        string pageFunUrl = this._cRoot.WebHost + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString();
-
-        //////        string pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl); // 這個得到的是一串 eval(...)字串
-        //////        pageFunContent = pageFunContent.Trim('"').Trim('\n');
-        //////        pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6);
-        //////        string jsCode = ComicUtil.EvalJScript("var cs = " + pageFunContent).ToString();
-
-        //////        //string key = rKey.Match(jsCode).Value.Replace("key=", "").Trim(new char[] { '"', '\'' });
-        //////        //string photoServer = rPhotoServer.Match(jsCode).Value.Replace("pix=", "").Trim(new char[] { '"', '\'' });
-        //////        string pageFile = rPageFile.Match(jsCode).Value.Replace("pvalue=[", "").Trim(new char[] { '"', '\'' });
-
-        //////        string key = GetJSVariableValue(jsCode, "key");
-        //////        string photoServer = GetJSVariableValue(jsCode, "pix");
-        //////        string ak = GetJSVariableValue(jsCode, "ak");
-
-        //////        ComicPage page = new ComicPage();
-        //////        page.PageNumber = i;
-        //////        page.Url = photoServer + pageFile + "?cid=" + cid + "&key=" + key + "&ak=" + ak;
-        //////        page.Caption = "第" + i.ToString().PadLeft(3, '0') + "頁";
-        //////        page.PageFileName = i.ToString().PadLeft(3, '0') + "." + System.IO.Path.GetExtension(pageFile);
-        //////        page.PageFileName = page.PageFileName.Replace("..", ".");
-
-        //////        pages.Add(page);
-        //////    }
-        //////    Regex rInvalidFileName = new Regex(string.Format("[{0}]", Regex.Escape(new String(System.IO.Path.GetInvalidFileNameChars()))));
-        //////    return pages;
-        //////}
-
-        //////private string GetJSVariableValue(string jsContent, string variableName)
-        //////{
-        //////    Regex vn = new Regex(variableName + @"=.+?;", RegexOptions.Compiled);
-        //////    return vn.Match(jsContent).Value.Replace(variableName + "=", "").TrimEnd(';').Trim(new char[] { '"', '\'' });
-        //////}
-
-
         public List<ComicPageInChapter> GetComicPages(ComicChapterInName cChapter)
         {
             // fix by
@@ -321,55 +267,76 @@ namespace ComicModels
             string dt = RetrivePage_VIEWSIGNDT(htmlContent);
             string sign = RetrivePage_VIEWSIGN(htmlContent);
             int pageCount = RetrivePage_PageCount(htmlContent);
-            //Regex rPageLinkOuter = new Regex(@"<select (.|\n)*?id=""pagelist""(.|\n)*?</select>", RegexOptions.Compiled);
-            //Regex rPageLinkInner = new Regex(@"<option {1,}(.|\n)*?</option>", RegexOptions.Compiled);
-            //Regex rPageLinkOuter = new Regex(@"<div class=(.|\\){0,1}""pageBar bar up(.|\n)*?</div>", RegexOptions.Compiled);
-            //Regex rPageLinkInner = new Regex(@"<a {1,}(.|\n)*?</a>", RegexOptions.Compiled);
-            //int pageCount = rPageLinkInner.Matches(pageOuter).Count;
 
 
             //string jsCodeWrapper = "; var url = (typeof (hd_c) != \"undefined\" && hd_c.length > 0) ? hd_c[0] : d[0];";
             //string jsCodeWrapper = "; d[0];";
             string jsCodeWrapper = ";var url = (typeof (isrevtt) != \"undefined\" && isrevtt) ? hd_c[0] : d[0];";
             List<ComicPageInChapter> pages = new List<ComicPageInChapter>();
-            for (int i = 1; i <= pageCount; i++)
+            if (pageCount > 0)
             {
-                // unpacker test url = 
-                // url: 'chapterfun.ashx',
-                // data: { cid: DM5_CID, page: DM5_PAGE, key: mkey, language: 1, gtk: 6, _cid: DM5_CID, _mid: DM5_MID, _dt: DM5_VIEWSIGN_DT, _sign: DM5_VIEWSIGN },
-                string reffer = this._cRoot.WebHost + "m" + cid + "/";
-                string pageFunUrl = this._cRoot.WebHost + "m" + cid + "/" + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString() + "&language=1&gtk=6&_cid=" + cid + "&_mid=" + mid + "&_dt=" + dt + "&_sign=" + sign;
-                string pageFunContent;
-                lock (this)
+                for (int i = 1; i <= pageCount; i++)
                 {
-                    pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl, reffer); // 這個得到的是一串 eval(...)字串
-                    for (int j = 0; j <= 50; j++)
+                    // unpacker test url = 
+                    // url: 'chapterfun.ashx',
+                    // data: { cid: DM5_CID, page: DM5_PAGE, key: mkey, language: 1, gtk: 6, _cid: DM5_CID, _mid: DM5_MID, _dt: DM5_VIEWSIGN_DT, _sign: DM5_VIEWSIGN },
+                    string reffer = this._cRoot.WebHost + "m" + cid + "/";
+                    string pageFunUrl = this._cRoot.WebHost + "m" + cid + "/" + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString() + "&language=1&gtk=6&_cid=" + cid + "&_mid=" + mid + "&_dt=" + dt + "&_sign=" + sign;
+                    string pageFunContent;
+                    lock (this)
                     {
-                        if (false == String.IsNullOrEmpty(pageFunContent) && false == pageFunContent.Contains("war|jpg"))
+                        pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl, reffer); // 這個得到的是一串 eval(...)字串
+                        for (int j = 0; j <= 20; j++)
                         {
-                            break;
-                        }
-                        else
-                        {
-                            pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl); // 這個得到的是一串 eval(...)字串
+                            if (false == String.IsNullOrEmpty(pageFunContent) && false == pageFunContent.Contains("war|jpg"))
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl); // 這個得到的是一串 eval(...)字串
+                            }
                         }
                     }
+                    pageFunContent = pageFunContent.Trim('"').Trim('\n');
+                    pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6);
+                    string jsCode = ComicUtil.EvalJScript("var cs = " + pageFunContent).ToString();
+
+                    string jsCodePass2 = ComicUtil.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
+                    ComicPageInChapter page = new ComicPageInChapter();
+                    page.PageNumber = i;
+                    page.Reffer = reffer;
+                    //page.Url = photoServer + pageFile + "?cid=" + cid + "&key=" + key + "&ak=" + ak;
+                    page.Url = jsCodePass2;
+                    page.Caption = "第" + i.ToString().PadLeft(3, '0') + "頁";
+                    page.PageFileName = i.ToString().PadLeft(3, '0') + "." + System.IO.Path.GetExtension(page.Url.Substring(0, page.Url.IndexOf("?"))).TrimStart('.');
+                    page.PageFileName = page.PageFileName.Replace("..", ".");
+
+                    pages.Add(page);
                 }
-                pageFunContent = pageFunContent.Trim('"').Trim('\n');
-                pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6);
-                string jsCode = ComicUtil.EvalJScript("var cs = " + pageFunContent).ToString();
+            }
+            else
+            {
+                var pageUrls = RetrivePage_PageCount_Type2(htmlContent);
+                for (int i = 1; i <= pageUrls.Count; i++)
+                {
+                    //string reffer = "";
+                    //try
+                    //{
+                    //    reffer = new Uri(pageUrls[i - 1]).Authority;
+                    //}
+                    //catch { }
+                    string reffer = this._cRoot.WebHost + "m" + cid + "/";
+                    ComicPageInChapter page = new ComicPageInChapter();
+                    page.PageNumber = i;
+                    page.Reffer = reffer;
+                    page.Url = pageUrls[i - 1];
+                    page.Caption = "第" + i.ToString().PadLeft(3, '0') + "頁";
+                    page.PageFileName = i.ToString().PadLeft(3, '0') + "." + System.IO.Path.GetExtension(page.Url.Substring(0, page.Url.IndexOf("?"))).TrimStart('.');
+                    page.PageFileName = page.PageFileName.Replace("..", ".");
 
-                string jsCodePass2 = ComicUtil.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
-                ComicPageInChapter page = new ComicPageInChapter();
-                page.PageNumber = i;
-                page.Reffer = reffer;
-                //page.Url = photoServer + pageFile + "?cid=" + cid + "&key=" + key + "&ak=" + ak;
-                page.Url = jsCodePass2;
-                page.Caption = "第" + i.ToString().PadLeft(3, '0') + "頁";
-                page.PageFileName = i.ToString().PadLeft(3, '0') + "." + System.IO.Path.GetExtension(page.Url.Substring(0, page.Url.IndexOf("?"))).TrimStart('.');
-                page.PageFileName = page.PageFileName.Replace("..", ".");
-
-                pages.Add(page);
+                    pages.Add(page);
+                }
             }
             Regex rInvalidFileName = new Regex(string.Format("[{0}]", Regex.Escape(new String(System.IO.Path.GetInvalidFileNameChars()))));
             return pages;
@@ -394,15 +361,35 @@ namespace ComicModels
             //  <a href="/m582159-p8/">8</a> ...
             //  <a href="/m582159-p18/">18</a>
             //</div>
-            Regex rUrlOuter = new Regex(@"<div class=""chapterpager""(.|\n)*?</div>", RegexOptions.Compiled);
-            Regex rUrlInner = new Regex(@"<a href=""(.|\n)*?</a>", RegexOptions.Compiled);
-            Regex rUrlText = new Regex(@">(.|\n)*?<", RegexOptions.Compiled);
+            Regex rPageCountOuter = new Regex(@"<div class=""chapterpager""(.|\n)*?</div>", RegexOptions.Compiled);
+            Regex rPageCountInner = new Regex(@"<a href=""(.|\n)*?</a>", RegexOptions.Compiled);
+            Regex rPageCountText = new Regex(@">(.|\n)*?<", RegexOptions.Compiled);
 
-            var lastPageLink = rUrlInner.Matches(rUrlOuter.Match(page).Value).Cast<Match>().Last();
-            string result = rUrlText.Match(lastPageLink.Value).Value.Replace(">", "").Replace("<", "").Trim();
+            var lastPageLink = rPageCountInner.Matches(rPageCountOuter.Match(page).Value).Cast<Match>().LastOrDefault();
+            if (lastPageLink == null) return 0;
+            string result = rPageCountText.Match(lastPageLink.Value).Value.Replace(">", "").Replace("<", "").Trim();
             int count;
             int.TryParse(result, out count);
             return count;
+        }
+
+        private List<string> RetrivePage_PageCount_Type2(string page)
+        {
+            //<div id="barChapter" oncontextmenu="return false;" style="margin-top: 5px;">         
+            //  <p id="imgloading" style="color: rgb(102, 102, 102);margin: 400px 0;text-align: center;"><img style="margin-right:10px;" oncontextmenu="return false;" src="http://css119.test.cdndm.com/v201709131619/dm5/images/loading.gif" />加载中<br /></p>           
+            //  <img src="" class="load-src" data-src="http://manhua1032-107-181-243-170.cdndm5.com/22/21840/562747/1_2217.jpg?cid=562747&key=66c590d453e57ca375f7dd5196ca9f7d&type=1" onclick="ShowEnd();" style="cursor:pointer;display:none;margin:0 auto;max-width:100%;width:850px;" />                
+            //  <img src="" class="load-src" data-src="http://manhua1032-107-181-243-170.cdndm5.com/22/21840/562747/2_3047.jpg?cid=562747&key=66c590d453e57ca375f7dd5196ca9f7d&type=1" onclick="ShowEnd();" style="cursor:pointer;display:none;margin:0 auto;max-width:100%;width:850px;" />               
+            //  <img src="" class="load-src" data-src="http://manhua1032-107-181-243-170.cdndm5.com/22/21840/562747/3_5895.jpg?cid=562747&key=66c590d453e57ca375f7dd5196ca9f7d&type=1" onclick="ShowEnd();" style="cursor:pointer;display:none;margin:0 auto;max-width:100%;width:850px;" />
+            //  <img src="" class="load-src" data-src="http://manhua1032-107-181-243-170.cdndm5.com/22/21840/562747/4_1869.jpg?cid=562747&key=66c590d453e57ca375f7dd5196ca9f7d&type=1" onclick="ShowEnd();" style="cursor:pointer;display:none;margin:0 auto;max-width:100%;width:850px;" />      
+            //  ...
+            //</div>
+            Regex rPageCountOuter = new Regex(@"<div id=""barChapter""(.|\n)*?</div>", RegexOptions.Compiled);
+            Regex rPageCountInner = new Regex(@"data-src=""(.|\n)*?""", RegexOptions.Compiled);
+
+            var pageLinks = rPageCountOuter.Match(page).Value;
+            var results = rPageCountInner.Matches(pageLinks).Cast<Match>().Select(p => p.Value).ToList();
+            results = results.Select(p => p.Replace("data-src=", "").Trim().Trim('"').Trim()).ToList();
+            return results;
         }
 
         private string RetrivePage_MID(string page)
