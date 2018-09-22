@@ -163,6 +163,16 @@ UNIQUE (ComicUrl) ON CONFLICT REPLACE
             }
         }
 
+        public static void VACCUM()
+        {
+            try
+            {
+                string sql = "VACUUM";
+                SqlExecuteNonQuery(sql);
+            }
+            catch (Exception ex) { NLogger.Error("清除空間時發生錯誤：" + ex.ToString()); }
+        }
+
         public static int InsertComicVolumn(string comicWeb, string comicName, string comicVolumn)
         {
             try

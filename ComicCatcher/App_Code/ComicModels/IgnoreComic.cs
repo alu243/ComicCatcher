@@ -32,6 +32,7 @@ namespace ComicModels
         {
             try
             {
+                SQLiteHelper.CreateIgnoreComicTableOnFly();
                 DataTable result = SQLiteHelper.GetIgnoreComic();
                 this.Clear();
                 foreach (DataRow row in result.Rows)

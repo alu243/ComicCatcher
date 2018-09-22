@@ -490,7 +490,8 @@ namespace ComicCatcher
                 string subPath = Path.Combine(txtRootPath.Text, cbRelateFolders.Text);
                 if (false == Directory.Exists(subPath))
                 {
-                    lblCbMessage.Text = "路徑：" + subPath + " 不存在！";
+                    //lblCbMessage.Text = "路徑：" + subPath + " 不存在！";
+
                 }
                 else
                 {
@@ -658,8 +659,16 @@ namespace ComicCatcher
         {
             try
             {
-                string myPath = Path.Combine(txtRootPath.Text, cbRelateFolders.Text, tvFolder.SelectedNode.Text);
-                if (System.Windows.Forms.DialogResult.Yes == MessageBox.Show("是否確定刪除" + myPath + "？", "刪除", MessageBoxButtons.YesNo))
+                string myPath = "";
+                if (tvFolder.SelectedNode.Level == 0)
+                {
+                    myPath = Path.Combine(txtRootPath.Text, cbRelateFolders.Text);
+                }
+                else
+                {
+                    myPath = Path.Combine(txtRootPath.Text, cbRelateFolders.Text, tvFolder.SelectedNode.Text);
+                }
+                if (DialogResult.Yes == MessageBox.Show("是否確定刪除" + myPath + "？", "刪除", MessageBoxButtons.YesNo))
                 {
                     if (0 == String.Compare(Path.GetExtension(myPath), ".RAR", true))
                     {
@@ -671,10 +680,18 @@ namespace ComicCatcher
                         {
                             Directory.Delete(myPath, true);
                         }
+                        else if (tvFolder.SelectedNode.Level == 0)
+                        {
+                            Directory.Delete(myPath, true);
+                        }
                         else
                         {
                             throw new Exception("目錄底下還有目錄");
                         }
+                    }
+                    if (tvFolder.SelectedNode.Level == 0)
+                    {
+                        SQLiteHelper.VACCUM();
                     }
                     MessageBox.Show("刪除完成！");
                     buildLocalComicTreeView();
@@ -845,21 +862,12 @@ namespace ComicCatcher
             t1.IsBackground = true;
             try
             {
-                //lock(threadPool)
-                //{
-
-                //}
-
                 t1.Start(currNode);
             }
             catch (Exception ex)
             {
                 NLogger.Error("buildComicNode," + ex.ToString());
             }
-            //finally
-            //{
-
-            //}
         }
 
         private void buildComicNodeForeground(TreeNode currNode)
