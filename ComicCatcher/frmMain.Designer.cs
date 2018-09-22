@@ -287,7 +287,7 @@
             // lblUpdateChapter
             // 
             this.lblUpdateChapter.AutoSize = true;
-            this.lblUpdateChapter.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.lblUpdateChapter.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.lblUpdateChapter.ForeColor = System.Drawing.Color.Blue;
             this.lblUpdateChapter.Location = new System.Drawing.Point(436, 205);
             this.lblUpdateChapter.Name = "lblUpdateChapter";
@@ -298,7 +298,7 @@
             // lblUpdateDate
             // 
             this.lblUpdateDate.AutoSize = true;
-            this.lblUpdateDate.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.lblUpdateDate.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.lblUpdateDate.ForeColor = System.Drawing.Color.Red;
             this.lblUpdateDate.Location = new System.Drawing.Point(436, 178);
             this.lblUpdateDate.Name = "lblUpdateDate";
@@ -309,7 +309,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.label2.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.label2.Location = new System.Drawing.Point(352, 205);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(88, 16);
@@ -319,7 +319,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.label1.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.label1.Location = new System.Drawing.Point(352, 178);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(88, 16);
@@ -353,7 +353,7 @@
             this.tvComicTree.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.tvComicTree.BackColor = System.Drawing.SystemColors.InactiveBorder;
-            this.tvComicTree.Font = new System.Drawing.Font("新細明體", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.tvComicTree.Font = new System.Drawing.Font("微軟雅黑體", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.tvComicTree.HideSelection = false;
             this.tvComicTree.Location = new System.Drawing.Point(4, 36);
             this.tvComicTree.Name = "tvComicTree";
@@ -383,7 +383,7 @@
             // 
             // btnShowExceptModal
             // 
-            this.btnShowExceptModal.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnShowExceptModal.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnShowExceptModal.Location = new System.Drawing.Point(359, 66);
             this.btnShowExceptModal.Name = "btnShowExceptModal";
             this.btnShowExceptModal.Size = new System.Drawing.Size(82, 29);
@@ -395,7 +395,7 @@
             // 
             // btnBatchArchive
             // 
-            this.btnBatchArchive.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnBatchArchive.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnBatchArchive.Location = new System.Drawing.Point(163, 67);
             this.btnBatchArchive.Name = "btnBatchArchive";
             this.btnBatchArchive.Size = new System.Drawing.Size(112, 28);
@@ -407,7 +407,7 @@
             // 
             // btnShowEditModal
             // 
-            this.btnShowEditModal.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnShowEditModal.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnShowEditModal.Location = new System.Drawing.Point(359, 32);
             this.btnShowEditModal.Name = "btnShowEditModal";
             this.btnShowEditModal.Size = new System.Drawing.Size(82, 29);
@@ -419,7 +419,7 @@
             // 
             // btnOpenDirectory
             // 
-            this.btnOpenDirectory.Font = new System.Drawing.Font("新細明體", 14F);
+            this.btnOpenDirectory.Font = new System.Drawing.Font("微軟雅黑體", 14F);
             this.btnOpenDirectory.Location = new System.Drawing.Point(347, 211);
             this.btnOpenDirectory.Name = "btnOpenDirectory";
             this.btnOpenDirectory.Size = new System.Drawing.Size(29, 102);
@@ -430,7 +430,7 @@
             // 
             // btnDelete
             // 
-            this.btnDelete.Font = new System.Drawing.Font("新細明體", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnDelete.Font = new System.Drawing.Font("微軟雅黑體", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnDelete.ImageList = this.tvFolderImageList1;
             this.btnDelete.Location = new System.Drawing.Point(347, 117);
             this.btnDelete.Name = "btnDelete";
@@ -450,7 +450,7 @@
             // 
             // btnArchive
             // 
-            this.btnArchive.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnArchive.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnArchive.Location = new System.Drawing.Point(281, 66);
             this.btnArchive.Name = "btnArchive";
             this.btnArchive.Size = new System.Drawing.Size(75, 29);
@@ -463,7 +463,7 @@
             // lblCbMessage
             // 
             this.lblCbMessage.AutoSize = true;
-            this.lblCbMessage.Font = new System.Drawing.Font("新細明體", 10F);
+            this.lblCbMessage.Font = new System.Drawing.Font("微軟雅黑體", 10F);
             this.lblCbMessage.ForeColor = System.Drawing.Color.Blue;
             this.lblCbMessage.Location = new System.Drawing.Point(1, 93);
             this.lblCbMessage.Name = "lblCbMessage";
@@ -476,7 +476,7 @@
             this.cbRelateFolders.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.cbRelateFolders.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.cbRelateFolders.BackColor = System.Drawing.Color.Lavender;
-            this.cbRelateFolders.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.cbRelateFolders.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.cbRelateFolders.FormattingEnabled = true;
             this.cbRelateFolders.Location = new System.Drawing.Point(4, 34);
             this.cbRelateFolders.Name = "cbRelateFolders";
@@ -487,7 +487,7 @@
             // 
             // btnRefresh
             // 
-            this.btnRefresh.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnRefresh.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnRefresh.Location = new System.Drawing.Point(281, 32);
             this.btnRefresh.Name = "btnRefresh";
             this.btnRefresh.Size = new System.Drawing.Size(75, 29);
@@ -501,7 +501,7 @@
             // 
             this.txtRootPath.BackColor = System.Drawing.Color.Honeydew;
             this.txtRootPath.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtRootPath.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.txtRootPath.Font = new System.Drawing.Font("微軟雅黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.txtRootPath.Location = new System.Drawing.Point(0, 0);
             this.txtRootPath.Name = "txtRootPath";
             this.txtRootPath.Size = new System.Drawing.Size(446, 27);

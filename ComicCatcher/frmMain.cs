@@ -33,6 +33,7 @@ namespace ComicCatcher
         //private DownloadedList dwnedList = null;
 
         private List<Thread> threadPool = new List<Thread>();
+        private Dictionary<string, bool> lockNodes = new Dictionary<string, bool>();
 
 
         public frmMain()
@@ -74,7 +75,7 @@ namespace ComicCatcher
         private void frmMain_Load(object sender, EventArgs e)
         {
             //xindm.GetComicPages(new ComicChapter());
-
+            lblCbMessage.Text = "";
             lblUpdateDate.Text = "";
             lblUpdateChapter.Text = "";
             buildLocalComicDirComboBox();
@@ -117,15 +118,20 @@ namespace ComicCatcher
                 tn.Tag = g;
             });
             tvComicTree.ExpandAll();
+            for (int i = 0; i < 5; i++)
+            {
+                tvComicTree.SelectedNode = tvComicTree.Nodes[0].Nodes[i];
+            }
+            tvComicTree.SelectedNode = tvComicTree.Nodes[0];
         }
 
         private void tvComicTree_AfterSelect(object sender, TreeViewEventArgs e)
         {
             Cursor = System.Windows.Forms.Cursors.WaitCursor;
+            if (null == tvComicTree.SelectedNode) return;
             //Application.DoEvents();
             try
             {
-                if (null == tvComicTree.SelectedNode) return;
 
                 #region IsComicNameNode
                 if (NodeCheckUtil.IsComicNameNode(tvComicTree.SelectedNode))
@@ -490,8 +496,10 @@ namespace ComicCatcher
                 string subPath = Path.Combine(txtRootPath.Text, cbRelateFolders.Text);
                 if (false == Directory.Exists(subPath))
                 {
-                    //lblCbMessage.Text = "路徑：" + subPath + " 不存在！";
-
+                    lblCbMessage.Text = "路徑：" + cbRelateFolders.Text + " 不存在！";
+                    tvFolder.Nodes.Clear();
+                    TreeNode root = new TreeNode(cbRelateFolders.Text, 0, 0);
+                    tvFolder.Nodes.Add(root);
                 }
                 else
                 {
@@ -692,6 +700,10 @@ namespace ComicCatcher
                     if (tvFolder.SelectedNode.Level == 0)
                     {
                         SQLiteHelper.VACCUM();
+                        if (cbRelateFolders.Text == tvComicTree.SelectedNode.Text)
+                        {
+                            TreeViewUtil.SetFontRegular(tvComicTree.SelectedNode);
+                        }
                     }
                     MessageBox.Show("刪除完成！");
                     buildLocalComicTreeView();
@@ -894,9 +906,10 @@ namespace ComicCatcher
 
         private void buildComicNodeBackground(object objNode)
         {
+            TreeNode currNode = objNode as TreeNode;
+            if (currNode == null) return;
             try
             {
-                TreeNode currNode = objNode as TreeNode;
                 if (NodeCheckUtil.IsListNode(currNode))
                 {
                     buildComicNameNode(currNode);
@@ -927,6 +940,9 @@ namespace ComicCatcher
 
             try
             {
+                if (lockNodes.ContainsKey(currNode.FullPath)) return;
+                lockNodes.Add(currNode.FullPath, true);
+
                 // 產生清單下的漫畫名稱內容子節點
                 //NLogger.Info("********************************************");
                 TreeViewUtil.ClearTreeNode(currNode);
@@ -961,6 +977,13 @@ namespace ComicCatcher
                 NLogger.Error(ex.ToString());
                 TreeViewUtil.SetFontBold(currNode, Color.Red);
             }
+            finally
+            {
+                if (lockNodes.ContainsKey(currNode.FullPath))
+                {
+                    lockNodes.Remove(currNode.FullPath);
+                }
+            }
         }
 
         public void buildComicChapterNode(object nameNode)
@@ -971,6 +994,9 @@ namespace ComicCatcher
 
             try
             {
+                if (lockNodes.ContainsKey(currNode.FullPath)) return;
+                lockNodes.Add(currNode.FullPath, true);
+
                 // 產生漫畫的回合子節點
                 //NLogger.Info("********************************************");
                 TreeViewUtil.ClearTreeNode(currNode);
@@ -992,6 +1018,13 @@ namespace ComicCatcher
                 NLogger.Error("產生漫畫回數節點錯誤:" + currNode.Name);
                 NLogger.Error(ex.ToString());
                 TreeViewUtil.SetFontBold(currNode, Color.Red);
+            }
+            finally
+            {
+                if (lockNodes.ContainsKey(currNode.FullPath))
+                {
+                    lockNodes.Remove(currNode.FullPath);
+                }
             }
         }
         #endregion

@@ -10,8 +10,8 @@ namespace Utils
 {
     public static class TreeViewUtil
     {
-        private static Font boldFont = new Font("新細明體", 10, FontStyle.Bold);
-        public static void SetFontBold(TreeNode tn)
+        private static Font boldFont = new Font("微軟雅黑體", 10, FontStyle.Bold);
+        public static void SetFontRegular(TreeNode tn)
         {
             if (tn.TreeView == null) return;
             if (tn.TreeView.InvokeRequired)
@@ -19,7 +19,27 @@ namespace Utils
             else
                 lock (tn)
                 {
-                    tn.NodeFont = boldFont;
+                    if (true == tn.NodeFont.Bold)
+                    {
+                        tn.NodeFont = new Font("微軟雅黑體", 10, FontStyle.Regular);
+                        tn.Text = tn.Text;
+                    }
+                }
+        }
+
+        public static void SetFontBold(TreeNode tn)
+        {
+            if (tn.TreeView == null) return;
+            if (tn.TreeView.InvokeRequired)
+                tn.TreeView.Invoke(new MethodInvoker(() => { if (false == tn.NodeFont.Bold) { tn.NodeFont = boldFont; } }));
+            else
+                lock (tn)
+                {
+                    if (false == tn.NodeFont.Bold)
+                    {
+                        tn.NodeFont = boldFont;
+                        tn.Text = tn.Text;
+                    }
                 }
         }
 
