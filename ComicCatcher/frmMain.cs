@@ -116,6 +116,8 @@ namespace ComicCatcher
             {
                 TreeNode tn = root.Nodes.Add(g.Url, g.Caption);
                 tn.Tag = g;
+                tn.ImageIndex = 3;
+                tn.SelectedImageIndex = 3;
             });
             tvComicTree.ExpandAll();
             for (int i = 0; i < 5; i++)
@@ -964,6 +966,8 @@ namespace ComicCatcher
                     //TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text);
                     string groupName = pathGroup.GetGroupName(comic.Caption);
                     TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
+                    //nameNode.ImageIndex = 4;
+                    //nameNode.SelectedImageIndex = 4;
                     names.Add(nameNode);
                     //NLogger.Info(comic.Caption + "=" + comic.Url);
                 }
@@ -1006,6 +1010,8 @@ namespace ComicCatcher
                 foreach (var chapter in comicSiteCatcher.GetComicChapters(cn))
                 {
                     TreeNode chapterNode = TreeViewUtil.BuildNode(chapter, comicSiteCatcher.GetComicWebRoot().WebSiteName, currNode.Text);
+                    //chapterNode.ImageIndex = 5;
+                    //chapterNode.SelectedImageIndex = 5;
                     chapters.Add(chapterNode);
                     //NLogger.Info(comic.Caption + "=" + comic.Url);
                 }
@@ -1193,6 +1199,111 @@ namespace ComicCatcher
                     exceptMenu.Show(p);//顯示右鍵選單
                 }
             }
+        }
+
+        private readonly Size CHECK_BOX_SIZE = new Size(13, 13);
+        private readonly Size IMAGE_SIZE = new Size(16, 16);
+        private void tvComicTree_DrawNode(object sender, DrawTreeNodeEventArgs e)
+        {
+            var font = e.Node.NodeFont == null ? (sender as TreeView).Font : e.Node.NodeFont;
+            if (e.Node.ImageIndex == 99) // if there is no image
+            {
+                //int imagewidths = 16;
+                //int textheight = 16;
+                //int x = e.Node.Bounds.Left - 3 - imagewidths / 2;
+                //int y = (e.Bounds.Top + e.Bounds.Bottom) / 2 + 1;
+                //Point point = new Point(x - imagewidths / 2, y - textheight / 2); // the new location for the text to be drawn
+
+
+                Rectangle textRect = e.Node.Bounds;
+                textRect.Offset(new Point(-18));
+                textRect.Offset(1, 1);
+                textRect.Width -= 2;
+                textRect.Height -= 2;
+
+
+                TextRenderer.DrawText(e.Graphics, e.Node.Text, font, textRect, e.Node.ForeColor);
+                e.DrawDefault = false;
+            }
+            else
+                e.DrawDefault = true;
+                // drawn at the default location
+                //TextRenderer.DrawText(e.Graphics, e.Node.Text, font, e.Bounds, e.Node.ForeColor);
+
+
+
+
+
+
+            //            //Get the backcolor and forecolor
+            //            Color backColor, foreColor;
+
+            //if ((e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected)
+            //{
+            //    backColor = SystemColors.Highlight;
+            //    foreColor = SystemColors.HighlightText;
+            //}
+
+            //else if ((e.State & TreeNodeStates.Hot) == TreeNodeStates.Hot)
+            //{
+            //    backColor = SystemColors.HotTrack;
+            //    foreColor = SystemColors.HighlightText;
+            //}
+            //else
+            //{
+            //    backColor = e.Node.BackColor;
+            //    foreColor = e.Node.ForeColor;
+            //}
+
+            ////Calculate the text rectangle.
+            //Rectangle textRect = e.Node.Bounds;
+            ////textRect.Offset(new Point(-IMAGE_SIZE.Width - 3));
+            //textRect.Offset(new Point(-18));
+            //textRect.Offset(1, 1);
+            //textRect.Width -= 2;
+            //textRect.Height -= 2;
+
+            ////The first level nodes has images but no checkboxes.
+            ////The second level nodes has checkboxes but no images.
+            ////The other level nodes is drawn by default.
+            //if (e.Node.Level >= 2 && e.Node.ImageIndex == 99)
+            //{
+            //    try
+            //    {
+            //        //Draw the background.
+            //        //using (SolidBrush brush = new SolidBrush(backColor))
+            //        //{
+            //        //    e.Graphics.FillRectangle(brush, textRect);
+            //        //}
+
+            //        //Draw the image.
+            //        //if (e.Node.TreeView.ImageList != null && e.Node.ImageIndex >= 0
+            //        //    && e.Node.ImageIndex < e.Node.TreeView.ImageList.Images.Count)
+            //        //{
+            //        //    Image img = this.tvComicTree.ImageList.Images[e.Node.ImageIndex];
+            //        //    if (img != null)
+            //        //        e.Graphics.DrawImage(img, new Point(textRect.X - img.Width - 1, textRect.Y + 1));
+            //        //}
+
+            //        //Draw the text.
+            //        TextRenderer.DrawText(e.Graphics, e.Node.Text, e.Node.NodeFont, textRect, foreColor, backColor);
+            //        //Draw the focused rectangle.
+            //        if ((e.State & TreeNodeStates.Focused) == TreeNodeStates.Focused)
+            //        {
+            //            ControlPaint.DrawFocusRectangle(e.Graphics, textRect, foreColor, backColor);
+            //        }
+            //    }
+            //    catch (Exception exp)
+            //    {
+            //        Console.WriteLine(exp.ToString());
+            //    }
+
+            //    e.DrawDefault = false;
+            //}
+            //else
+            //{
+            //    e.DrawDefault = true;
+            //}
         }
     }
 }

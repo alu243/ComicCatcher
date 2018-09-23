@@ -163,6 +163,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="bookicon.ico" />
+    <Content Include="icons\book.png" />
+    <Content Include="icons\bookicon.ico" />
+    <Content Include="icons\bookicon.png" />
+    <Content Include="icons\books.png" />
+    <Content Include="icons\chapter.png" />
+    <Content Include="icons\digital-comics-icon.ico" />
+    <Content Include="icons\my_computer2.png" />
+    <Content Include="icons\winrar-icon-small.png" />
+    <Content Include="icons\未命名.png" />
     <EmbeddedResource Include="x86\System.Data.SQLite.dll" />
   </ItemGroup>
   <ItemGroup>
