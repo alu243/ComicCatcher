@@ -95,5 +95,12 @@ namespace Models
             get { return this._saveWebSiteName ?? false; }
             set { this._saveWebSiteName = value; }
         }
+
+        private bool? _srchiveDownloadedFile;
+        public bool ArchiveDownloadedFile
+        {
+            get { return this._srchiveDownloadedFile ?? false; }
+            set { this._srchiveDownloadedFile = value; }
+        }
     }
 }

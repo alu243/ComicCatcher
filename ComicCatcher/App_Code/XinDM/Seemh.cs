@@ -238,7 +238,7 @@ namespace ComicModels
             string pageOuter = rPageLinkOuter.Matches(htmlContent)[0].Value;
             int pageCount = rPageLinkInner.Matches(pageOuter).Count;
 
-
+            ComicUtil util = new ComicUtil();
             //string jsCodeWrapper = "; var url = (typeof (hd_c) != \"undefined\" && hd_c.length > 0) ? hd_c[0] : d[0];";
             //string jsCodeWrapper = "; d[0];";
             string jsCodeWrapper = ";var url = (typeof (isrevtt) != \"undefined\" && isrevtt) ? hd_c[0] : d[0];";
@@ -251,9 +251,9 @@ namespace ComicModels
                 string pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl); // 這個得到的是一串 eval(...)字串
                 pageFunContent = pageFunContent.Trim('"').Trim('\n');
                 pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6);
-                string jsCode = ComicUtil.EvalJScript("var cs = " + pageFunContent).ToString();
+                string jsCode = util.EvalJScript("var cs = " + pageFunContent).ToString();
 
-                string jsCodePass2 = ComicUtil.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
+                string jsCodePass2 = util.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
                 ComicPageInChapter page = new ComicPageInChapter();
                 page.PageNumber = i;
                 //page.Url = photoServer + pageFile + "?cid=" + cid + "&key=" + key + "&ak=" + ak;

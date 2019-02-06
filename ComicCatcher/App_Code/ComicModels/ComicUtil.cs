@@ -32,13 +32,17 @@ namespace ComicModels
 
 
 
-        private static VsaEngine _vsaEngine = VsaEngine.CreateEngine();
-        public static object EvalJScript(string JScript)
+        private VsaEngine engine = null;
+        public ComicUtil()
+        {
+            engine = VsaEngine.CreateEngine();
+        }
+        public object EvalJScript(string JScript)
         {
             object Result = null;
             try
             {
-                Result = Eval.JScriptEvaluate(JScript, "unsafe", _vsaEngine);
+                Result = Eval.JScriptEvaluate(JScript, "unsafe", engine);
             }
             catch (Exception ex)
             {

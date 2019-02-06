@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("新動漫(xindm)");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -37,7 +37,7 @@
             this.btnAppendTo = new System.Windows.Forms.Button();
             this.chkSaveWebSiteName = new System.Windows.Forms.CheckBox();
             this.cbComicCatcher = new System.Windows.Forms.ComboBox();
-            this.chkUsingAlternativeUrl = new System.Windows.Forms.CheckBox();
+            this.chkArchiveDownloadedFile = new System.Windows.Forms.CheckBox();
             this.btnCollapse = new System.Windows.Forms.Button();
             this.chkLoadPhoto = new System.Windows.Forms.CheckBox();
             this.btnFind = new System.Windows.Forms.Button();
@@ -91,6 +91,7 @@
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
             this.exceptMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.AddIgnoreComic = new System.Windows.Forms.ToolStripMenuItem();
+            this.setArchiveDownloadedFile = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -142,7 +143,7 @@
             this.splitContainer1.Panel1.Controls.Add(this.btnAppendTo);
             this.splitContainer1.Panel1.Controls.Add(this.chkSaveWebSiteName);
             this.splitContainer1.Panel1.Controls.Add(this.cbComicCatcher);
-            this.splitContainer1.Panel1.Controls.Add(this.chkUsingAlternativeUrl);
+            this.splitContainer1.Panel1.Controls.Add(this.chkArchiveDownloadedFile);
             this.splitContainer1.Panel1.Controls.Add(this.btnCollapse);
             this.splitContainer1.Panel1.Controls.Add(this.chkLoadPhoto);
             this.splitContainer1.Panel1.Controls.Add(this.btnFind);
@@ -213,19 +214,20 @@
             this.cbComicCatcher.TabIndex = 3;
             this.cbComicCatcher.SelectedIndexChanged += new System.EventHandler(this.cbComicCatcher_SelectedIndexChanged);
             // 
-            // chkUsingAlternativeUrl
+            // chkArchiveDownloadedFile
             // 
-            this.chkUsingAlternativeUrl.AutoSize = true;
-            this.chkUsingAlternativeUrl.Enabled = false;
-            this.chkUsingAlternativeUrl.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.chkUsingAlternativeUrl.Location = new System.Drawing.Point(352, 149);
-            this.chkUsingAlternativeUrl.Margin = new System.Windows.Forms.Padding(2);
-            this.chkUsingAlternativeUrl.Name = "chkUsingAlternativeUrl";
-            this.chkUsingAlternativeUrl.Size = new System.Drawing.Size(247, 22);
-            this.chkUsingAlternativeUrl.TabIndex = 10;
-            this.chkUsingAlternativeUrl.Text = "使用替代網址(需關閉Proxy)";
-            this.chkUsingAlternativeUrl.UseVisualStyleBackColor = true;
-            this.chkUsingAlternativeUrl.CheckedChanged += new System.EventHandler(this.chkUsingAlternativeUrl_CheckedChanged);
+            this.chkArchiveDownloadedFile.AutoSize = true;
+            this.chkArchiveDownloadedFile.Checked = true;
+            this.chkArchiveDownloadedFile.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkArchiveDownloadedFile.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.chkArchiveDownloadedFile.Location = new System.Drawing.Point(352, 149);
+            this.chkArchiveDownloadedFile.Margin = new System.Windows.Forms.Padding(2);
+            this.chkArchiveDownloadedFile.Name = "chkArchiveDownloadedFile";
+            this.chkArchiveDownloadedFile.Size = new System.Drawing.Size(124, 22);
+            this.chkArchiveDownloadedFile.TabIndex = 10;
+            this.chkArchiveDownloadedFile.Text = "下載後壓縮";
+            this.chkArchiveDownloadedFile.UseVisualStyleBackColor = true;
+            this.chkArchiveDownloadedFile.CheckedChanged += new System.EventHandler(this.chkArchiveDownloadedFile_CheckedChanged);
             // 
             // btnCollapse
             // 
@@ -357,10 +359,10 @@
             this.tvComicTree.HideSelection = false;
             this.tvComicTree.Location = new System.Drawing.Point(4, 36);
             this.tvComicTree.Name = "tvComicTree";
-            treeNode1.Name = "http://www.xindm.cn";
-            treeNode1.Text = "新動漫(xindm)";
+            treeNode3.Name = "http://www.xindm.cn";
+            treeNode3.Text = "新動漫(xindm)";
             this.tvComicTree.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode3});
             this.tvComicTree.Size = new System.Drawing.Size(338, 601);
             this.tvComicTree.TabIndex = 4;
             this.tvComicTree.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvComicTree_DrawNode);
@@ -555,6 +557,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.setArchiveDownloadedFile);
             this.tabPage3.Controls.Add(this.setSaveWebSiteName);
             this.tabPage3.Controls.Add(this.setBackGroundLoad);
             this.tabPage3.Controls.Add(this.gbProxy);
@@ -785,6 +788,20 @@
             this.AddIgnoreComic.Text = "加入例外網頁(不顯示)";
             this.AddIgnoreComic.Click += new System.EventHandler(this.AddIgnoreComic_Click);
             // 
+            // setArchiveDownloadedFile
+            // 
+            this.setArchiveDownloadedFile.AutoSize = true;
+            this.setArchiveDownloadedFile.Checked = true;
+            this.setArchiveDownloadedFile.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.setArchiveDownloadedFile.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.setArchiveDownloadedFile.Location = new System.Drawing.Point(313, 224);
+            this.setArchiveDownloadedFile.Margin = new System.Windows.Forms.Padding(2);
+            this.setArchiveDownloadedFile.Name = "setArchiveDownloadedFile";
+            this.setArchiveDownloadedFile.Size = new System.Drawing.Size(124, 22);
+            this.setArchiveDownloadedFile.TabIndex = 33;
+            this.setArchiveDownloadedFile.Text = "下載後壓縮";
+            this.setArchiveDownloadedFile.UseVisualStyleBackColor = true;
+            // 
             // frmMain
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -869,7 +886,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox setProxyUrl;
         private System.Windows.Forms.CheckBox setUsingProxy;
-        private System.Windows.Forms.CheckBox chkUsingAlternativeUrl;
+        private System.Windows.Forms.CheckBox chkArchiveDownloadedFile;
         private System.Windows.Forms.Button btnOpenDirectory;
         private System.Windows.Forms.CheckBox setBackGroundLoad;
         private System.Windows.Forms.ComboBox cbComicCatcher;
@@ -881,6 +898,7 @@
         private System.Windows.Forms.Button btnShowExceptModal;
         private System.Windows.Forms.ContextMenuStrip exceptMenu;
         private System.Windows.Forms.ToolStripMenuItem AddIgnoreComic;
+        private System.Windows.Forms.CheckBox setArchiveDownloadedFile;
     }
 }
 

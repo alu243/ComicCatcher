@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Utils;
 
 namespace ComicModels
@@ -267,52 +268,69 @@ namespace ComicModels
             string dt = RetrivePage_VIEWSIGNDT(htmlContent);
             string sign = RetrivePage_VIEWSIGN(htmlContent);
             int pageCount = RetrivePage_PageCount(htmlContent);
+            ComicUtil util = new ComicUtil();
 
 
             //string jsCodeWrapper = "; var url = (typeof (hd_c) != \"undefined\" && hd_c.length > 0) ? hd_c[0] : d[0];";
             //string jsCodeWrapper = "; d[0];";
-            string jsCodeWrapper = ";var url = (typeof (isrevtt) != \"undefined\" && isrevtt) ? hd_c[0] : d[0];";
             List<ComicPageInChapter> pages = new List<ComicPageInChapter>();
             if (pageCount > 0)
             {
-                for (int i = 1; i <= pageCount; i++)
+                int threadCount = this._cRoot.ThreadCount;
+                int startPage = 1;
+                int upperPage = (threadCount > pageCount ? pageCount : threadCount); // 一次下載設定的頁數，如果剩不到40頁就下載剩下的頁數
+                while (startPage <= pageCount)
                 {
-                    // unpacker test url = 
-                    // url: 'chapterfun.ashx',
-                    // data: { cid: DM5_CID, page: DM5_PAGE, key: mkey, language: 1, gtk: 6, _cid: DM5_CID, _mid: DM5_MID, _dt: DM5_VIEWSIGN_DT, _sign: DM5_VIEWSIGN },
-                    string reffer = this._cRoot.WebHost + "m" + cid + "/";
-                    string pageFunUrl = this._cRoot.WebHost + "m" + cid + "/" + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString() + "&language=1&gtk=6&_cid=" + cid + "&_mid=" + mid + "&_dt=" + dt + "&_sign=" + sign;
-                    string pageFunContent;
-                    lock (this)
+                    List<Task<ComicPageInChapter>> tasks = new List<Task<ComicPageInChapter>>();
+                    for (int i = startPage; i <= upperPage; i++)
                     {
-                        pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl, reffer); // 這個得到的是一串 eval(...)字串
-                        for (int j = 0; j <= 20; j++)
+                        string r = this._cRoot.WebHost + "m" + cid + "/";
+                        string p = this._cRoot.WebHost + "m" + cid + "/" + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString() + "&language=1&gtk=6&_cid=" + cid + "&_mid=" + mid + "&_dt=" + dt + "&_sign=" + sign;
+                        Task<ComicPageInChapter> task = Task.Factory.StartNew((object para) =>
                         {
-                            if (false == String.IsNullOrEmpty(pageFunContent) && false == pageFunContent.Contains("war|jpg"))
+                            var data = (GetPagePara)para;
+                            // unpacker test url = 
+                            // url: 'chapterfun.ashx',
+                            // data: { cid: DM5_CID, page: DM5_PAGE, key: mkey, language: 1, gtk: 6, _cid: DM5_CID, _mid: DM5_MID, _dt: DM5_VIEWSIGN_DT, _sign: DM5_VIEWSIGN },
+                            string jsCodeWrapper = ";var url = (typeof (isrevtt) != \"undefined\" && isrevtt) ? hd_c[0] : d[0];";
+                            string pageFunContent = ComicUtil.GetUtf8Content(data.pageFunUrl.ToString(), data.reffer.ToString()); // 這個得到的是一串 eval(...)字串
+                            for (int j = 0; j <= 20; j++)
                             {
-                                break;
+                                if (false == String.IsNullOrEmpty(pageFunContent) && false == pageFunContent.Contains("war|jpg"))
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    pageFunContent = ComicUtil.GetUtf8Content(data.pageFunUrl); // 這個得到的是一串 eval(...)字串
+                                }
                             }
-                            else
+                            pageFunContent = pageFunContent.Trim('"').Trim('\n');
+                            pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6) + ";";
+                            string jsCode;
+                            string jsCodePass2;
+                            lock (util)
                             {
-                                pageFunContent = ComicUtil.GetUtf8Content(pageFunUrl); // 這個得到的是一串 eval(...)字串
+                                jsCode = util.EvalJScript("var cs = " + pageFunContent).ToString();
+                                jsCodePass2 = util.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
                             }
-                        }
+                            ComicPageInChapter page = new ComicPageInChapter();
+                            page.PageNumber = data.i;
+                            page.Reffer = data.reffer;
+                            //page.Url = photoServer + pageFile + "?cid=" + cid + "&key=" + key + "&ak=" + ak;
+                            page.Url = jsCodePass2;
+                            page.Caption = "第" + data.i.ToString().PadLeft(3, '0') + "頁";
+                            page.PageFileName = data.i.ToString().PadLeft(3, '0') + "." + System.IO.Path.GetExtension(page.Url.Substring(0, page.Url.IndexOf("?"))).TrimStart('.');
+                            page.PageFileName = page.PageFileName.Replace("..", ".");
+                            return page;
+                        }, new GetPagePara() { reffer = r, pageFunUrl = p, i = i });
+                        tasks.Add(task);
                     }
-                    pageFunContent = pageFunContent.Trim('"').Trim('\n');
-                    pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6);
-                    string jsCode = ComicUtil.EvalJScript("var cs = " + pageFunContent).ToString();
-
-                    string jsCodePass2 = ComicUtil.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
-                    ComicPageInChapter page = new ComicPageInChapter();
-                    page.PageNumber = i;
-                    page.Reffer = reffer;
-                    //page.Url = photoServer + pageFile + "?cid=" + cid + "&key=" + key + "&ak=" + ak;
-                    page.Url = jsCodePass2;
-                    page.Caption = "第" + i.ToString().PadLeft(3, '0') + "頁";
-                    page.PageFileName = i.ToString().PadLeft(3, '0') + "." + System.IO.Path.GetExtension(page.Url.Substring(0, page.Url.IndexOf("?"))).TrimStart('.');
-                    page.PageFileName = page.PageFileName.Replace("..", ".");
-
-                    pages.Add(page);
+                    Task.WaitAll(tasks.ToArray());
+                    pages.AddRange(tasks.Select(p => p.Result).ToArray());
+                    tasks.Clear();
+                    startPage = upperPage + 1;
+                    upperPage = (upperPage + threadCount > pageCount ? pageCount : upperPage + threadCount);
                 }
             }
             else
@@ -340,6 +358,13 @@ namespace ComicModels
             }
             Regex rInvalidFileName = new Regex(string.Format("[{0}]", Regex.Escape(new String(System.IO.Path.GetInvalidFileNameChars()))));
             return pages;
+        }
+
+        class GetPagePara
+        {
+            public string pageFunUrl { get; set; }
+            public string reffer { get; set; }
+            public int i { get; set; }
         }
 
         private string GetJSVariableValue(string jsContent, string variableName)

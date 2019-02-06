@@ -154,6 +154,6 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
-/packages/ILMerge.MSBuild.Tasks.1.0.0.3
-/packages/System.Data.SQLite.x86.1.0.90.0
 /.vs/ComicCatcher/v15/Server/sqlite3
+/packages
+/ComicCatcher2

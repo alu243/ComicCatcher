@@ -17,6 +17,8 @@ using Helpers;
 using Utils;
 using Models;
 using ComicModels;
+using System.Threading.Tasks;
+
 namespace ComicCatcher
 {
     public partial class frmMain : Form
@@ -82,7 +84,7 @@ namespace ComicCatcher
 
 
             ConfigureSettings();
-            GetSettings();
+            GetSettingsToView();
 
             RenewXML2DB();
             DownloadedList.LoadDB();
@@ -173,9 +175,16 @@ namespace ComicCatcher
                     {
                         string pathGroupName = pathGroup.GetGroupName(tvComicTree.SelectedNode.Text);
 
+                        string today = DateTime.Today.ToString("MM月dd号");
+                        string yestoday = DateTime.Today.AddDays(-1).ToString("MM月dd号");
+                        string beforeYestoday = DateTime.Today.AddDays(-2).ToString("MM月dd号");
 
                         txtUrl.Text = tvComicTree.SelectedNode.Name;
-                        lblUpdateDate.Text = comicName.LastUpdateDate;
+                        lblUpdateDate.Text = comicName.LastUpdateDate.Replace("今天", today).Replace("昨天", yestoday).Replace("前天", beforeYestoday);
+                        if (lblUpdateDate.Text.Contains("分钟前更新"))
+                        {
+                            lblUpdateDate.Text = today + lblUpdateDate.Text;
+                        }
                         lblUpdateChapter.Text = comicName.LastUpdateChapter;
                         if (false == cbRelateFolders.Items.Contains(pathGroupName)) cbRelateFolders.Items.Add(pathGroupName);
 
@@ -369,8 +378,9 @@ namespace ComicCatcher
             //} // end of foreach
 
             //WaitHandle.WaitAll(handles);
-
+            bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "[" + task.name + "]準備開始下載", infoMsg = "[" + task.name + "]準備開始下載" });
             var pages = task.downloader.GetComicPages(task.downloadChapter);
+            bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "[" + task.name + "]準備開始下載", infoMsg = "[" + task.name + "]，共" + pages.Count + "頁" });
 
 
             int threadCount = comicSiteCatcher.GetComicWebRoot().ThreadCount;
@@ -399,6 +409,23 @@ namespace ComicCatcher
 
             //statusMsg.Text = "[" + myTask.name + "]已經下載完成";
             bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "[" + task.name + "]已經下載完成", infoMsg = "[" + task.name + "]已經下載完成" });
+            if (chkArchiveDownloadedFile.Checked)
+            {
+                RARHelper rar = null;
+                try
+                {
+                    rar = new RARHelper(settings.WinRARPath);
+                    rar.archiveDirectory(task.downloadPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+                finally
+                {
+                    rar = null;
+                }
+            }
             Thread.Sleep(1);
 
         }
@@ -416,7 +443,8 @@ namespace ComicCatcher
             string tmpFile = Path.Combine(localPath, pictureName) + ".tmp";
             string cmpFile = Path.Combine(localPath, pictureName) + ".cmp";
 
-            bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + pictureName + "下載中...", infoMsg = tagname + pictureName + "下載中..." + "[" + pictureUrl + "]" + ThreadID });
+            //bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + pictureName + "下載中...", infoMsg = tagname + pictureName + "下載中..." + "[" + pictureUrl + "]" + ThreadID });
+            NLogger.Info(tagname + pictureName + "下載中..." + "[" + pictureUrl + "]" + ThreadID);
             Thread.Sleep(1);
 
             //Cursor = System.Windows.Forms.Cursors.WaitCursor;
@@ -426,17 +454,17 @@ namespace ComicCatcher
                 DonwloadUtil.donwload(pictureUrl, reffer, tmpFile);
 
                 int i = 0;
-                int testTimes = 50; // 檢查 50 次下載，如果還是都有問題，就跳出錯誤
+                int testTimes = 20; // 檢查 20 次下載，如果還是都有問題，就跳出錯誤
                 for (i = 0; i < testTimes; ++i)
                 {
                     DonwloadUtil.donwload(pictureUrl, reffer, cmpFile);
-
+                    Application.DoEvents();
                     if (FileUtil.CompareFileByMD5(tmpFile, cmpFile))
                         break;
                     else
                     {
                         bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "", infoMsg = tagname + "檔案：" + pictureName + "，比對失敗，重新下載比對！" + ThreadID });
-                        Thread.Sleep(1);
+                        Application.DoEvents();
                     }
                 }
 
@@ -452,6 +480,7 @@ namespace ComicCatcher
             catch (Exception ex)
             {
                 bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "", infoMsg = tagname + "下載失敗" + ThreadID + "，原因：" + ex.ToString() });
+                Application.DoEvents();
                 Thread.Sleep(1);
             }
             finally
@@ -719,9 +748,10 @@ namespace ComicCatcher
         #endregion
 
         #region Settings Function
-        private void chkUsingAlternativeUrl_CheckedChanged(object sender, EventArgs e)
+        private void chkArchiveDownloadedFile_CheckedChanged(object sender, EventArgs e)
         {
-            chkIsUseProxy.Checked = false;
+            //chkIsUseProxy.Checked = false;
+
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -730,7 +760,7 @@ namespace ComicCatcher
             {
                 LoadSettingsFromSettingTab();
                 settings.save();
-                GetSettings();
+                GetSettingsToView();
                 MessageBox.Show("儲存完成");
             }
             catch (Exception ex)
@@ -753,7 +783,7 @@ namespace ComicCatcher
             settings.save();
         }
 
-        private void GetSettings()
+        private void GetSettingsToView()
         {
             /// 設定畫面
             setPhotoProgramPath.Text = settings.PhotoProgramPath;
@@ -765,13 +795,14 @@ namespace ComicCatcher
             setProxyPort.Text = settings.ProxyPort.ToString();
             setBackGroundLoad.Checked = settings.BackGroundLoadNode;
             setSaveWebSiteName.Checked = settings.SaveWebSiteName;
-
+            setArchiveDownloadedFile.Checked = settings.ArchiveDownloadedFile;
 
             /// 使用畫面
             txtRootPath.Text = settings.LocalPath;
             chkSaveWebSiteName.Checked = settings.SaveWebSiteName;
             chkLoadPhoto.Checked = settings.LoadAllPicture;
             chkIsUseProxy.Checked = settings.UsingProxy;
+            chkArchiveDownloadedFile.Checked = settings.ArchiveDownloadedFile;
             //chkBackGroundLoad.Checked = settings.BackGroundLoadNode;
 
             /// Proxy設定(要在使用畫面設定完成後)
@@ -790,6 +821,7 @@ namespace ComicCatcher
             settings.ProxyUrl = setProxyUrl.Text.Trim();
             settings.BackGroundLoadNode = setBackGroundLoad.Checked;
             settings.SaveWebSiteName = setSaveWebSiteName.Checked;
+            settings.ArchiveDownloadedFile = setArchiveDownloadedFile.Checked;
 
             if (false == String.IsNullOrEmpty(setProxyPort.Text.Trim()))
                 settings.ProxyPort = int.Parse(setProxyPort.Text.Trim());
@@ -872,11 +904,9 @@ namespace ComicCatcher
         #region BuildComicNode
         private void buildComicNode(TreeNode currNode)
         {
-            Thread t1 = new Thread(buildComicNodeBackground);
-            t1.IsBackground = true;
             try
             {
-                t1.Start(currNode);
+                var t = Task.Factory.StartNew((node) => { buildComicNodeBackground(node); }, currNode);
             }
             catch (Exception ex)
             {
@@ -915,21 +945,20 @@ namespace ComicCatcher
                 if (NodeCheckUtil.IsListNode(currNode))
                 {
                     buildComicNameNode(currNode);
-                    System.Threading.Tasks.Parallel.ForEach(currNode.Nodes.Cast<TreeNode>().ToList(), node =>
+                    var nodeList = currNode.Nodes.Cast<TreeNode>().ToList();
+                    Parallel.ForEach(nodeList, node =>
                     {
                         buildComicChapterNode(node);
                     });
                 }
                 else if (NodeCheckUtil.IsComicNameNode(currNode))
                 {
-                    Thread t2 = new Thread(buildComicChapterNode);
-                    t2.IsBackground = true;
-                    t2.Start(currNode);
+                    buildComicChapterNode(currNode);
                 }
             }
             catch (Exception ex)
             {
-                NLogger.Error("buildComicNodeForeground," + ex.ToString());
+                NLogger.Error("buildComicNodeBackground," + ex.ToString());
                 throw ex;
             }
         }
@@ -942,8 +971,17 @@ namespace ComicCatcher
 
             try
             {
-                if (lockNodes.ContainsKey(currNode.FullPath)) return;
-                lockNodes.Add(currNode.FullPath, true);
+                if (currNode != null)
+                {
+                    lock (currNode)
+                    {
+                        if (lockNodes.ContainsKey(currNode.FullPath)) return;
+                        lock (lockNodes)
+                        {
+                            lockNodes.Add(currNode.FullPath, true);
+                        }
+                    }
+                }
 
                 // 產生清單下的漫畫名稱內容子節點
                 //NLogger.Info("********************************************");
@@ -983,9 +1021,18 @@ namespace ComicCatcher
             }
             finally
             {
-                if (lockNodes.ContainsKey(currNode.FullPath))
+                if (currNode != null)
                 {
-                    lockNodes.Remove(currNode.FullPath);
+                    lock (currNode)
+                    {
+                        if (lockNodes.ContainsKey(currNode.FullPath))
+                        {
+                            lock (lockNodes)
+                            {
+                                lockNodes.Remove(currNode.FullPath);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -998,9 +1045,6 @@ namespace ComicCatcher
 
             try
             {
-                if (lockNodes.ContainsKey(currNode.FullPath)) return;
-                lockNodes.Add(currNode.FullPath, true);
-
                 // 產生漫畫的回合子節點
                 //NLogger.Info("********************************************");
                 TreeViewUtil.ClearTreeNode(currNode);
@@ -1027,10 +1071,7 @@ namespace ComicCatcher
             }
             finally
             {
-                if (lockNodes.ContainsKey(currNode.FullPath))
-                {
-                    lockNodes.Remove(currNode.FullPath);
-                }
+
             }
         }
         #endregion
@@ -1182,9 +1223,20 @@ namespace ComicCatcher
 
         private void AddIgnoreComic_Click(object sender, EventArgs e)
         {
-            //MessageBox.Show(tvComicTree.SelectedNode.Name + ":::" + tvComicTree.SelectedNode.Text);
-            ignoreComic.AddIgnoreComic(tvComicTree.SelectedNode.Name, tvComicTree.SelectedNode.Text);
-            tvComicTree.Nodes.Remove(tvComicTree.SelectedNode);
+            try
+            {
+                ignoreComic.AddIgnoreComic(tvComicTree.SelectedNode.Name, tvComicTree.SelectedNode.Text);
+                if (lockNodes.ContainsKey(tvComicTree.SelectedNode.FullPath))
+                {
+                    lockNodes.Remove(tvComicTree.SelectedNode.FullPath);
+                }
+                TreeViewUtil.ClearTreeNode(tvComicTree.SelectedNode);
+                tvComicTree.Nodes.Remove(tvComicTree.SelectedNode);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
 
         private void tvComicTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
@@ -1227,8 +1279,8 @@ namespace ComicCatcher
             }
             else
                 e.DrawDefault = true;
-                // drawn at the default location
-                //TextRenderer.DrawText(e.Graphics, e.Node.Text, font, e.Bounds, e.Node.ForeColor);
+            // drawn at the default location
+            //TextRenderer.DrawText(e.Graphics, e.Node.Text, font, e.Bounds, e.Node.ForeColor);
 
 
 
