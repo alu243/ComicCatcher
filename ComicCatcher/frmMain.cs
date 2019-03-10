@@ -191,8 +191,6 @@ namespace ComicCatcher
 
                         // 章節在另一個 treeview 顯示
                         string fullPath = tvComicTree.SelectedNode.FullPath;
-                        treeViewnComicName.Nodes.Clear();
-                        treeViewnComicName.BeginUpdate();
                         TreeNode nd = new TreeNode("站");
                         nd.Nodes.Add("頁");
                         nd.Nodes[0].Nodes.Add(tvComicTree.SelectedNode.Text);
@@ -200,6 +198,8 @@ namespace ComicCatcher
                         {
                             nd.Nodes[0].Nodes[0].Nodes.AddRange(comicNodes[fullPath].ToArray());
                         }
+                        treeViewnComicName.Nodes.Clear();
+                        treeViewnComicName.BeginUpdate();
                         treeViewnComicName.Nodes.Add(nd);
                         treeViewnComicName.ExpandAll();
                         treeViewnComicName.EndUpdate();
@@ -213,11 +213,14 @@ namespace ComicCatcher
                 }
                 #endregion
 
-                // 如果沒有子節點，就產生子節點
-                if (tvComicTree.SelectedNode.Nodes.Count <= 0)
+                //清單如果沒有子節點，就產生子節點
+                if (NodeCheckUtil.IsListNode(tvComicTree.SelectedNode))
                 {
-                    buildComicNode(tvComicTree.SelectedNode);
-                    tvComicTree.SelectedNode.Expand();
+                    if (tvComicTree.SelectedNode.Nodes.Count <= 0)
+                    {
+                        buildComicNode(tvComicTree.SelectedNode);
+                        tvComicTree.SelectedNode.Expand();
+                    }
                 }
             }
             catch (Exception ex)
@@ -418,8 +421,8 @@ namespace ComicCatcher
                 {
                     t.Join();
                 }
-                //workThreadPool.Clear();
                 comicThreadPool.Clear();
+                GC.Collect();
                 startPage = upperPage;
                 upperPage = (upperPage + threadCount > pages.Count ? pages.Count : upperPage + threadCount);
             }
@@ -462,50 +465,23 @@ namespace ComicCatcher
 
             //bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + pictureName + "下載中...", infoMsg = tagname + pictureName + "下載中..." + "[" + pictureUrl + "]" + ThreadID });
             NLogger.Info(tagname + pictureName + "下載中..." + "[" + pictureUrl + "]" + ThreadID);
-            Thread.Sleep(1);
 
             //Cursor = System.Windows.Forms.Cursors.WaitCursor;
+            Stopwatch sw = new Stopwatch();
             try
             {
-
-                DonwloadUtil.donwload(pictureUrl, reffer, tmpFile);
-
-                int i = 0;
-                int testTimes = 20; // 檢查 20 次下載，如果還是都有問題，就跳出錯誤
-                for (i = 0; i < testTimes; ++i)
-                {
-                    DonwloadUtil.donwload(pictureUrl, reffer, cmpFile);
-                    Application.DoEvents();
-                    if (FileUtil.CompareFileByMD5(tmpFile, cmpFile))
-                        break;
-                    else
-                    {
-                        bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "", infoMsg = tagname + "檔案：" + pictureName + "，比對失敗，重新下載比對！" + ThreadID });
-                        Application.DoEvents();
-                    }
-                }
-
-                if (i >= testTimes)
-                {
-                    throw new Exception("檔案：" + pictureName + " 不完整(已重新下載了" + i.ToString() + "次)");
-                }
-                else
-                {
-                    FileUtil.MoveFile(tmpFile, Path.Combine(localPath, pictureName));
-                }
+                sw.Start();
+                DonwloadUtil.donwload(pictureUrl, reffer, Path.Combine(localPath, pictureName));
+                sw.Stop();
             }
             catch (Exception ex)
             {
-                bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "", infoMsg = tagname + "下載失敗" + ThreadID + "，原因：" + ex.ToString() });
-                Application.DoEvents();
-                Thread.Sleep(1);
+                sw.Stop();
+                bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "", infoMsg = tagname + "下載失敗" + ThreadID + "，原因：" + ex.ToString() + string.Format("({0}ms)", sw.ElapsedMilliseconds) });
             }
             finally
             {
-                if (File.Exists(Path.Combine(localPath, cmpFile))) File.Delete(Path.Combine(localPath, cmpFile));
-
-                bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + pictureName + "下載完成...", infoMsg = tagname + pictureName + "下載完成..." + ThreadID });
-                Thread.Sleep(1);
+                bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + pictureName + "下載完成...", infoMsg = tagname + pictureName + "下載完成..." + ThreadID + string.Format("({0}ms)", sw.ElapsedMilliseconds) });
             }
         }
         #endregion

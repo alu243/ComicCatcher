@@ -16,7 +16,7 @@ namespace ComicCacherUnitTest
             //string url = "http://beiyong.bukamh.com/pic.php?url=http:%2f%2fimages.dmzj.com%2fh%2f胡桃的糖果%2f第25话%2f海报3-1.jpg";
             //var a = System.Web.HttpUtility.ParseQueryString(url);
             //url = System.Web.HttpUtility.UrlDecode(url, System.Text.Encoding.GetEncoding("GB2312"));
-            Utils.HttpUtil.getPictureResponse(url);
+            Utils.HttpUtil.getFileResponse(url, "", "test");
 
 
         }

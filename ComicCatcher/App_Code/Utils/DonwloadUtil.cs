@@ -5,6 +5,8 @@ using System.Text;
 
 using System.IO;
 using Utils;
+using ComicModels;
+
 namespace Utils
 {
     public class DonwloadUtil
@@ -22,16 +24,11 @@ namespace Utils
                     Directory.CreateDirectory(Path.GetDirectoryName(fullFileName));
                 }
 
-                // 如果下載時發生錯誤，重試 10 次
-                using (MemoryStream ms = HttpUtil.getPictureResponse(pictureUrl, reffer, 50))
+                using (MemoryStream ms = ComicUtil.GetPicture(pictureUrl, reffer, Path.GetFileName(fullFileName)))
                 {
-                    using (FileStream fs = File.OpenWrite(fullFileName))
+                    using (FileStream fs = new FileStream(fullFileName, FileMode.Create))
                     {
-                        if (ms.Length > 0)
-                        {
-                            ms.Position = 0;
-                            fs.Write(ms.GetBuffer(), 0, Convert.ToInt32(ms.Length));
-                        }
+                        ms.CopyTo(fs);
                     }
                 }
             }

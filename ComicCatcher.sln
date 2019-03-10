@@ -19,8 +19,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{74EE5F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComicCacherUnitTest", "ComicCacherUnitTest\ComicCacherUnitTest.csproj", "{A5C80A7B-5832-47BE-8067-6DC1D40E33C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComicCatcher2", "ComicCatcher2\ComicCatcher2.csproj", "{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,18 +69,6 @@ Global
 		{A5C80A7B-5832-47BE-8067-6DC1D40E33C6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A5C80A7B-5832-47BE-8067-6DC1D40E33C6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A5C80A7B-5832-47BE-8067-6DC1D40E33C6}.Release|x86.ActiveCfg = Release|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Debug|x86.Build.0 = Debug|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Release|x86.ActiveCfg = Release|Any CPU
-		{CFED08BE-04BE-4E0E-9A5A-6E371FA51A81}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

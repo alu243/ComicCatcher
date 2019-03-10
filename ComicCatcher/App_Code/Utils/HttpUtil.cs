@@ -53,69 +53,34 @@ namespace Utils
             return dm5Cookie;
         }
 
-        public static string getResponse(string url, int remainTries = 50)
+        public static string getResponse(string url)
         {
-            HttpWebRequest request = CreateRequest(url);
-            HttpWebResponse response = CreateResponse(request, url, remainTries);
-            try
-            {
-                Encoding encode = System.Text.Encoding.GetEncoding("gb2312");
-                StreamReader readStream = new StreamReader(response.GetResponseStream(), encode);
-
-                StringBuilder sb = new StringBuilder();
-                Char[] read = new Char[2048];
-                // Reads 256 characters at a time.    
-                int count;
-                while (0 < (count = readStream.Read(read, 0, 2048)))
-                {
-                    // Dumps the 256 characters on a string and displays the string to the console.
-                    sb.Append(new String(read, 0, count));
-                }
-                return sb.ToString();
-                //return readStream.ReadToEnd();
-                //}
-            }
-            finally
-            {
-                if (null != response) response.Close();
-                if (null != request) request.Abort();
-                request = null;
-            }
+            Encoding encode = System.Text.Encoding.GetEncoding("gb2312");
+            return getResponseString(url, encode, "");
         }
 
-        public static string getUtf8Response(string url, string reffer, int remainTries = 50)
+        public static string getUtf8Response(string url, string reffer)
+        {
+            Encoding encode = System.Text.Encoding.UTF8;
+            return getResponseString(url, encode, reffer);
+        }
+
+        private static string getResponseString(string url, Encoding encoding, string reffer)
         {
             HttpWebRequest request = CreateRequest(url, reffer);
-            HttpWebResponse response = CreateResponse(request, url, remainTries);
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             try
             {
-                if (myCookie.GetCookies(new Uri("http://www.dm5.com")).Count <= 3)
-                {
-                    foreach (Cookie cookie in response.Cookies)
-                    {
-                        myCookie.Add(cookie);
-                    }
-                }
-
-
-                Encoding encode = System.Text.Encoding.UTF8;
-                StreamReader readStream = new StreamReader(response.GetResponseStream(), encode);
+                StreamReader readStream = new StreamReader(response.GetResponseStream(), encoding);
 
                 StringBuilder sb = new StringBuilder();
                 Char[] read = new Char[2048];
-                // Reads 256 characters at a time.    
                 int count;
                 while (0 < (count = readStream.Read(read, 0, 2048)))
                 {
-                    // Dumps the 256 characters on a string and displays the string to the console.
                     sb.Append(new String(read, 0, count));
                 }
                 return sb.ToString();
-                //return readStream.ReadToEnd();
-                //}
-
-                // Add Cookies
-
             }
             finally
             {
@@ -125,68 +90,71 @@ namespace Utils
             }
         }
 
-        public static MemoryStream getPictureResponse(string url, string reffer = "", int remainTries = 30)
+
+        public static MemoryStream getFileResponse(string url, string reffer, string fileName)
         {
-            //url = System.Web.HttpUtility.UrlDecode(url, Encoding.GetEncoding("GB2312"));
-            //url = url.Split('?')[0] + "?" + System.Web.HttpUtility.UrlEncode(url.Split('?')[1], Encoding.GetEncoding("GB2312"));
-            //url = url.Split('?')[0] + "?" + System.Web.HttpUtility.UrlEncode(url.Split('?')[1], Encoding.UTF8);
-            //url = url.Split('?')[0] + "?" + System.Web.HttpUtility.UrlEncode(url.Split('?')[1], Encoding.UTF7);
-            //url = url.Split('?')[0] + "?" + System.Web.HttpUtility.UrlPathEncode(url.Split('?')[1]);
-
-            //url = System.Web.HttpUtility.UrlDecode(url, Encoding.GetEncoding(950));
-            //url = url.Split('?')[0] + "?" + System.Web.HttpUtility.UrlEncode(url.Split('?')[1], Encoding.UTF8);
-
-
-            //url = url.Split('?')[0] + "?" + Uri.EscapeUriString(url.Split('?')[1]);
-            //url = url.Replace("url%3d", "url=");
-            //url = url.Replace("http://beiyong.bukamh.com/pic.php?url=http%3A%2F%2Fimages.dmzj.com%2F", "http://imgsxsq.bukamh.com/");
+            //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            //sw.Start();
             HttpWebRequest request = CreateRequest(url, reffer);
             request.AllowAutoRedirect = false;
-            HttpWebResponse response = CreateResponse(request, url, remainTries);
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             if ((int)response.StatusCode >= 300 && (int)response.StatusCode <= 399)
             {
                 string redirectUrl = response.Headers["Location"];
                 redirectUrl = Encoding.GetEncoding("GB2312").GetString(Encoding.GetEncoding("ISO-8859-1").GetBytes(redirectUrl));
                 //Encoding.GetEncoding("GB2312").GetString(Encoding.GetEncoding(1252).GetBytes(redirectUrl));
-
                 //string urlString = redirectUrl.Substring(0, redirectUrl.IndexOf("?"));
                 //string queryString = redirectUrl.Substring(redirectUrl.IndexOf("?") + 1);
-
                 //redirectUrl = urlString + "?" + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
                 response.Close();
-                request.Abort();
                 request = null;
                 GC.Collect();
-                request = CreateRequest(redirectUrl);
-                response = CreateResponse(request, redirectUrl, remainTries);
+                request = CreateRequest(redirectUrl, reffer);
+                response = (HttpWebResponse)request.GetResponse();
             }
 
             try
             {
+                int size;
+                int.TryParse(response.Headers["Content-Length"], out size);
                 using (Stream receiveStream = response.GetResponseStream())
                 {
                     MemoryStream ms = new MemoryStream();
-                    //ms.Write(br.ReadBytes(Convert.ToInt32(response.ContentLength)), 0, Convert.ToInt32(response.ContentLength));
-                    byte[] buffer = new byte[1024];
+
+                    byte[] buffer = new byte[4096];
                     int bytesRead = 0;
                     while (0 < (bytesRead = receiveStream.Read(buffer, 0, buffer.Length)))
                     {
                         ms.Write(buffer, 0, bytesRead);
                     }
-                    return ms;
+
+                    //sw.Stop();
+                    //NLogger.Info(string.Format("{0}讀取完成(Thread ID=({1})({2}ms)", fileName, Thread.CurrentThread.GetHashCode(), sw.ElapsedMilliseconds));
+
+                    ms.Position = 0;
+                    if (size > 0 && ms.Length != size)
+                    {
+                        throw new WebException(String.Format("下載的檔案({0})大小不合，應為{1}，實際{2}", url, size, ms.Length));
+                    }
+                    else
+                    {
+                        return ms;
+                    }
                 }
             }
             finally
             {
                 if (null != response) response.Close();
-                if (null != request) request.Abort();
+                response = null;
                 request = null;
             }
         }
 
         private static HttpWebRequest CreateRequest(string url, string reffer = "")
         {
+            System.GC.Collect();
             System.Net.ServicePointManager.DefaultConnectionLimit = 200;
+            //System.Net.ServicePointManager.DefaultNonPersistentConnectionLimit = 200;
             HttpWebRequest request = null;
             //if (url.Split('?').Length > 1)
             //{
@@ -199,6 +167,11 @@ namespace Utils
             Uri uri = new Uri(url);
 
             request = (HttpWebRequest)WebRequest.Create(uri);
+            //request.ServicePoint.ConnectionLimit = 512;
+            //request.ServicePoint.Expect100Continue = false;
+            //request.ServicePoint.UseNagleAlgorithm = false;
+            //request.AllowWriteStreamBuffering = false;
+
 
             //request.AllowAutoRedirect = false; // 只有在 getPicture 時才會
             if (String.IsNullOrEmpty(reffer))
@@ -215,9 +188,10 @@ namespace Utils
             request.Headers["Cookie"] = "isAdult=1";
 
             request.Timeout = 5000;
+            request.ReadWriteTimeout = 30000;
             //request.ContentType = "image/jpeg";
             //request.Referer = url;
-            request.Proxy = ProxySetting.getProxy();
+            request.Proxy = null;//ProxySetting.getProxy();
             request.Headers.Add(HttpRequestHeader.AcceptLanguage, "zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,zh-CN;q=0.2");
             request.Headers.Add(HttpRequestHeader.AcceptCharset, "GB2312");
             //request.Method = "GET";
@@ -225,47 +199,6 @@ namespace Utils
             request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
             request.KeepAlive = false;
             return request;
-        }
-
-        private static HttpWebResponse CreateResponse(HttpWebRequest request, string url, int remainTries = 50)
-        {
-            // 因為重新建立一個 request 時，url會被uri破壞，懶得重轉碼，就加入 url 參數使用
-            int origTries = remainTries;
-
-            HttpWebResponse response = null;
-            int maxRemainTreis = remainTries;
-            string errMsg = String.Empty;
-            while (null == response && remainTries >= 0)
-            {
-                try
-                {
-                    response = (HttpWebResponse)request.GetResponse();
-                }
-                catch (Exception e)
-                {
-                    //if (e.Message.Contains("(403)")) throw;
-                    errMsg = e.ToString();
-
-                    // 重試超過5次才開始記 log (因為半開連線數的限制，多執行緒很容易超過連線數的設定)
-                    if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
-                    {
-                        NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
-                    }
-                    if (response != null) response.Close();
-                    if (request != null) request.Abort();
-                    System.Threading.Thread.Sleep(800);
-                    request = null;
-                    GC.Collect();
-                    if (e.Message.Contains("作業逾時")) System.Threading.Thread.Sleep(1000);
-                    request = CreateRequest(url);
-                    request.CookieContainer = ChangeSession();
-                }
-                remainTries--;
-            }
-            if (null == response) throw new NullReferenceException("連線發生錯誤，且重新測試超過" + maxRemainTreis.ToString() + "次！！[" + errMsg + "]");
-
-
-            return response;
         }
     }
 
