@@ -978,8 +978,6 @@ namespace ComicCatcher
                         }
                     }
 
-
-
                     if (lockNodes.ContainsKey(currNode.FullPath)) return;
 
                     lock (lockNodes)
@@ -1009,8 +1007,6 @@ namespace ComicCatcher
                     //TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text);
                     string groupName = pathGroup.GetGroupName(comic.Caption);
                     TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
-                    //nameNode.ImageIndex = 4;
-                    //nameNode.SelectedImageIndex = 4;
                     names.Add(nameNode);
                     //NLogger.Info(comic.Caption + "=" + comic.Url);
                 }
@@ -1134,7 +1130,10 @@ namespace ComicCatcher
                 var urls = tvComicTree.Nodes[0].Nodes[0].Nodes.Cast<TreeNode>().ToList().Select(p => p.Name).ToList();
                 if (false == urls.Any(p => p == txtUrl.Text))
                 {
-                    tvComicTree.Nodes[0].Nodes[0].Nodes.Add(BuildAppendNode(txtUrl.Text));
+                    var nameNode = BuildComicNameNode(txtUrl.Text);
+                    tvComicTree.Nodes[0].Nodes[0].Nodes.Add(nameNode);
+                    tvComicTree.Nodes[0].ExpandAll();
+                    buildComicChapterNode(nameNode);
                 }
             }
             catch (Exception ex)
@@ -1143,91 +1142,56 @@ namespace ComicCatcher
             }
         }
 
-        private TreeNode BuildAppendNode(string url)
+        private TreeNode BuildComicNameNode(string url)
         {
             //Caption = "A", IconImage = null, IconUrl = "", LastUpdateChapter = "", LastUpdateDate = "", 
             string htmlContent = ComicUtil.GetUtf8Content(url);
-
-            ComicNameInWebPage comicName = GetComicName(url);
-            var chapters = comicSiteCatcher.GetComicChapters(comicName);
-
-
-            // 圣诞迷城"; 
-            Regex rc = new Regex(@"DM5_COMIC_MNAME="".*?""", RegexOptions.Compiled);
-            string caption = rc.Match(htmlContent).Value;
-            if (false == string.IsNullOrEmpty(caption))
-            {
-                caption = caption.Replace(@"DM5_COMIC_MNAME=""", "").Replace(@"""", "");
-            }
-            Regex iconOut = new Regex(@"class=""innr91"".*?</div>", RegexOptions.Compiled);
-            Regex iconInner = new Regex(@"src="".*?""", RegexOptions.Compiled);
-            string iconurl = iconOut.Match(htmlContent).Value;
-            if (false == string.IsNullOrEmpty(iconurl))
-            {
-                iconurl = iconInner.Match(iconurl).Value;
-                if (false == string.IsNullOrEmpty(iconurl))
-                {
-                    iconurl = iconurl.Replace(@"src=""", "").Replace(@"""", "");
-                }
-            }
-            Regex rLastDate = new Regex(@"更新时间：.*?<", RegexOptions.Compiled);
-            string lastUpdateDate = rLastDate.Match(htmlContent).Value;
-            if (false == String.IsNullOrEmpty(lastUpdateDate))
-            {
-                lastUpdateDate = lastUpdateDate.Replace(@"更新时间：", "").Replace(@"<", "");
-            }
-            Regex rLastChapter = new Regex(@"最新章节：.*?<", RegexOptions.Compiled);
-            string lastUpdateChapter = rLastChapter.Match(htmlContent).Value;
-            if (false == String.IsNullOrEmpty(lastUpdateDate))
-            {
-                lastUpdateChapter = lastUpdateChapter.Replace(@"最新章节：", "").Replace(@"<", "");
-            }
-
-            ComicNameInWebPage comic = new ComicNameInWebPage()
-            {
-                IconUrl = iconurl, // 取得漫畫首頁圖像連結
-                LastUpdateDate = lastUpdateDate, // 取得最近更新日期
-                LastUpdateChapter = lastUpdateChapter, // 取得最近更新回數
-                Url = url,
-                Caption = CharsetConvertUtil.ToTraditional(caption)
-            };
-
+            Dm5 dm5 = new Dm5();
+            ComicNameInWebPage comic = dm5.GetComicName(url);
             string groupName = pathGroup.GetGroupName(comic.Caption);
             TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
-
             return nameNode;
-        }
-
-        private ComicNameInWebPage GetComicName(string url)
-        {
-            string htmlContent = ComicUtil.GetUtf8Content(url);
-
-            //string sLink = rLink.Match(comic).Value;
-            Regex rTitle = new Regex(@"<div class=""banner_detail_form"">(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>", RegexOptions.Compiled);
-            Regex rTitle_Caption = new Regex(@"<p class=""title"">(.|\n)*?<", RegexOptions.Compiled);
-            Regex rTitle_IconUrl = new Regex(@"<img src=""(.|\n)*?""", RegexOptions.Compiled);
-            Regex rLastUpdate = new Regex(@"<span class=""s"">(.|\n)*?</span>", RegexOptions.Compiled);
-            Regex rLastUpdate_Date = new Regex(@"</a>&nbsp;(.|\n)*?<", RegexOptions.Compiled);
-            Regex rLastUpdate_Chapter = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
 
 
-            string title = rTitle.Match(htmlContent).Value;
-            string lastUpdate = rLastUpdate.Match(htmlContent).Value;
-            ComicNameInWebPage cn = new ComicNameInWebPage();
-            cn.Caption = CharsetConvertUtil.ToTraditional(rTitle_Caption.Match(title).Value.Replace(@"<p class=""title"">", "").Trim('<').Trim());
-            cn.IconUrl = rTitle_Caption.Match(title).Value.Replace(@"<img src=", "").Trim('"').Trim();
-            cn.LastUpdateDate = CharsetConvertUtil.ToTraditional(rLastUpdate_Date.Match(lastUpdate).Value.Replace("</a>&nbsp;", "").Trim('<').Trim()); // 取得最近更新日期
-            cn.LastUpdateChapter = CharsetConvertUtil.ToTraditional(rLastUpdate_Chapter.Match(lastUpdate).Value.Replace("title=", "").Trim('"').Trim()); // 取得最近更新回數
-            cn.Url = url;
+            //// 圣诞迷城"; 
+            //Regex rc = new Regex(@"DM5_COMIC_MNAME="".*?""", RegexOptions.Compiled);
+            //string caption = rc.Match(htmlContent).Value;
+            //if (false == string.IsNullOrEmpty(caption))
+            //{
+            //    caption = caption.Replace(@"DM5_COMIC_MNAME=""", "").Replace(@"""", "");
+            //}
+            //Regex iconOut = new Regex(@"class=""innr91"".*?</div>", RegexOptions.Compiled);
+            //Regex iconInner = new Regex(@"src="".*?""", RegexOptions.Compiled);
+            //string iconurl = iconOut.Match(htmlContent).Value;
+            //if (false == string.IsNullOrEmpty(iconurl))
+            //{
+            //    iconurl = iconInner.Match(iconurl).Value;
+            //    if (false == string.IsNullOrEmpty(iconurl))
+            //    {
+            //        iconurl = iconurl.Replace(@"src=""", "").Replace(@"""", "");
+            //    }
+            //}
+            //Regex rLastDate = new Regex(@"更新时间：.*?<", RegexOptions.Compiled);
+            //string lastUpdateDate = rLastDate.Match(htmlContent).Value;
+            //if (false == String.IsNullOrEmpty(lastUpdateDate))
+            //{
+            //    lastUpdateDate = lastUpdateDate.Replace(@"更新时间：", "").Replace(@"<", "");
+            //}
+            //Regex rLastChapter = new Regex(@"最新章节：.*?<", RegexOptions.Compiled);
+            //string lastUpdateChapter = rLastChapter.Match(htmlContent).Value;
+            //if (false == String.IsNullOrEmpty(lastUpdateDate))
+            //{
+            //    lastUpdateChapter = lastUpdateChapter.Replace(@"最新章节：", "").Replace(@"<", "");
+            //}
 
-
-            if (false == String.IsNullOrEmpty(cn.LastUpdateChapter))
-            {
-                cn.LastUpdateChapter = cn.LastUpdateChapter.Replace(cn.Caption, String.Empty).Trim();
-            }
-
-            //if (Uri.IsWellFormedUriString(cn.Url, UriKind.Absolute) == false) cn.Url = (new Uri(new Uri(this._cRoot.WebHost), cn.Url)).ToString();
-            return cn;
+            //ComicNameInWebPage comic = new ComicNameInWebPage()
+            //{
+            //    IconUrl = iconurl, // 取得漫畫首頁圖像連結
+            //    LastUpdateDate = lastUpdateDate, // 取得最近更新日期
+            //    LastUpdateChapter = lastUpdateChapter, // 取得最近更新回數
+            //    Url = url,
+            //    Caption = CharsetConvertUtil.ToTraditional(caption)
+            //};
         }
 
         private void AddIgnoreComic_Click(object sender, EventArgs e)

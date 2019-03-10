@@ -58,6 +58,38 @@ namespace ComicModels
         #endregion
 
         #region Names
+        public ComicNameInWebPage GetComicName(string url)
+        {
+            string htmlContent = ComicUtil.GetUtf8Content(url);
+
+            //string sLink = rLink.Match(comic).Value;
+            Regex rTitle = new Regex(@"<div class=""banner_detail_form"">(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>", RegexOptions.Compiled);
+            Regex rTitle_Caption = new Regex(@"<p class=""title"">(.|\n)*?<", RegexOptions.Compiled);
+            Regex rTitle_IconUrl = new Regex(@"<img src=""(.|\n)*?""", RegexOptions.Compiled);
+            Regex rLastUpdate = new Regex(@"<span class=""s"">(.|\n)*?</span>", RegexOptions.Compiled);
+            Regex rLastUpdate_Date = new Regex(@"</a>&nbsp;(.|\n)*?<", RegexOptions.Compiled);
+            Regex rLastUpdate_Chapter = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
+
+
+            string title = rTitle.Match(htmlContent).Value;
+            string lastUpdate = rLastUpdate.Match(htmlContent).Value;
+            ComicNameInWebPage cn = new ComicNameInWebPage();
+            cn.Caption = CharsetConvertUtil.ToTraditional(rTitle_Caption.Match(title).Value.Replace(@"<p class=""title"">", "").Trim('<').Trim());
+            cn.IconUrl = rTitle_IconUrl.Match(title).Value.Replace(@"<img src=", "").Trim('"').Trim();
+            cn.LastUpdateDate = CharsetConvertUtil.ToTraditional(rLastUpdate_Date.Match(lastUpdate).Value.Replace("</a>&nbsp;", "").Trim('<').Trim()); // 取得最近更新日期
+            cn.LastUpdateChapter = CharsetConvertUtil.ToTraditional(rLastUpdate_Chapter.Match(lastUpdate).Value.Replace("title=", "").Trim('"').Trim()); // 取得最近更新回數
+            cn.Url = url;
+
+
+            if (false == String.IsNullOrEmpty(cn.LastUpdateChapter))
+            {
+                cn.LastUpdateChapter = cn.LastUpdateChapter.Replace(cn.Caption, String.Empty).Trim();
+            }
+
+            //if (Uri.IsWellFormedUriString(cn.Url, UriKind.Absolute) == false) cn.Url = (new Uri(new Uri(this._cRoot.WebHost), cn.Url)).ToString();
+            return cn;
+        }
+
         public List<ComicNameInWebPage> GetComicNames(ComicWebPage cGroup)
         {
             //Regex rLink = new Regex(@"<a (.|\n)*?<strong>(.|\n)*?</a>", RegexOptions.Compiled);
