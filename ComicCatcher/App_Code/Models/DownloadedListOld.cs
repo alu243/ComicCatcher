@@ -151,8 +151,8 @@ namespace Models
         {
             try
             {
-                comicName = comicName.Replace("'", "''");
-                comicVolumn = comicVolumn.Replace("'", "''");
+                comicName = comicName.Replace("'", "");
+                comicVolumn = comicVolumn.Replace("'", "");
                 SQLiteHelper.InsertComicVolumn(comicWeb, comicName, comicVolumn);
             }
             catch (Exception ex)

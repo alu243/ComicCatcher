@@ -18,7 +18,7 @@ namespace Helpers
         }
 
 
-        public void archiveDirectory(string path)
+        public void ArchiveDirectory(string path)
         {
             if (false == Directory.Exists(path)) return; // 目錄不存在
             string[] dirs = Directory.GetDirectories(path);

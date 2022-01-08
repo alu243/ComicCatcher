@@ -435,7 +435,7 @@ namespace ComicCatcher
                 try
                 {
                     rar = new RARHelper(settings.WinRARPath);
-                    rar.archiveDirectory(task.downloadPath);
+                    rar.ArchiveDirectory(task.downloadPath);
                 }
                 catch (Exception ex)
                 {
@@ -673,7 +673,7 @@ namespace ComicCatcher
             try
             {
                 rar = new RARHelper(settings.WinRARPath);
-                rar.archiveDirectory(Path.Combine(txtRootPath.Text, cbRelateFolders.Text, tvFolder.SelectedNode.Text));
+                rar.ArchiveDirectory(Path.Combine(txtRootPath.Text, cbRelateFolders.Text, tvFolder.SelectedNode.Text));
             }
             catch (Exception ex)
             {
