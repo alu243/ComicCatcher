@@ -71,22 +71,31 @@ namespace Utils
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             try
             {
-                StreamReader readStream = new StreamReader(response.GetResponseStream(), encoding);
-
-                StringBuilder sb = new StringBuilder();
-                Char[] read = new Char[2048];
-                int count;
-                while (0 < (count = readStream.Read(read, 0, 2048)))
+                var stream = response.GetResponseStream();
+                var readStream = new StreamReader(stream, encoding);
+                try
                 {
-                    sb.Append(new String(read, 0, count));
+                    StringBuilder sb = new StringBuilder();
+                    Char[] read = new Char[2048];
+                    int count;
+                    while (0 < (count = readStream.Read(read, 0, 2048)))
+                    {
+                        sb.Append(new String(read, 0, count));
+                    }
+                    return sb.ToString();
                 }
-                return sb.ToString();
+                finally
+                {
+                    stream.Dispose();
+                    readStream.Dispose();
+                }
             }
             finally
             {
                 if (null != response) response.Close();
                 if (null != request) request.Abort();
                 request = null;
+                response.Dispose();
             }
         }
 
@@ -106,7 +115,7 @@ namespace Utils
                 //string urlString = redirectUrl.Substring(0, redirectUrl.IndexOf("?"));
                 //string queryString = redirectUrl.Substring(redirectUrl.IndexOf("?") + 1);
                 //redirectUrl = urlString + "?" + System.Web.HttpUtility.UrlEncode(queryString, Encoding.GetEncoding("gb2312"));
-                response.Close();
+                response.Dispose();
                 request = null;
                 GC.Collect();
                 request = CreateRequest(redirectUrl, reffer);
@@ -152,7 +161,6 @@ namespace Utils
 
         private static HttpWebRequest CreateRequest(string url, string reffer = "")
         {
-            System.GC.Collect();
             System.Net.ServicePointManager.DefaultConnectionLimit = 200;
             //System.Net.ServicePointManager.DefaultNonPersistentConnectionLimit = 200;
             HttpWebRequest request = null;

@@ -32,7 +32,7 @@ namespace Models
             }
             catch (Exception ex)
             {
-                NLogger.Error("查詢資料庫時發生錯誤，" + comicName + comicVolumn);
+                NLogger.Error($"查詢資料庫時發生錯誤，{comicName}:{comicVolumn}:{ex.Message}");
                 return false;
             }
             //if (null == myList) return false;
@@ -51,7 +51,7 @@ namespace Models
                 comicVolumn = comicVolumn.Replace("'", "''");
                 SQLiteHelper.InsertComicVolumn(comicWeb, comicName, comicVolumn);
             }
-            catch (Exception ex)
+            catch
             {
                 NLogger.Error("資料已存在資料庫中，" + comicName + comicVolumn);
             }

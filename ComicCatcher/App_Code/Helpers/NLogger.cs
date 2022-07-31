@@ -40,7 +40,7 @@ namespace Helpers
 
         public static void Info(string msg)
         {
-            appendText(msg);
+            //appendText(msg);
             //if (null != logger) ((NLog.Logger)logger).Info(msg);
         }
 

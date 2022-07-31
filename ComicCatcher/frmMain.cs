@@ -18,6 +18,7 @@ using Utils;
 using Models;
 using ComicModels;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace ComicCatcher
 {
@@ -45,6 +46,7 @@ namespace ComicCatcher
                 ExportInteropFile();
                 InitializeComponent();
                 NLogger.SetBox(this.txtInfo);
+                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
             }
             catch (Exception ex)
             { MessageBox.Show("錯誤發生" + ex.ToString()); }
@@ -422,10 +424,10 @@ namespace ComicCatcher
                     t.Join();
                 }
                 comicThreadPool.Clear();
-                GC.Collect();
                 startPage = upperPage;
                 upperPage = (upperPage + threadCount > pages.Count ? pages.Count : upperPage + threadCount);
             }
+            GC.Collect();
 
             //statusMsg.Text = "[" + myTask.name + "]已經下載完成";
             bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "[" + task.name + "]已經下載完成", infoMsg = "[" + task.name + "]已經下載完成" });

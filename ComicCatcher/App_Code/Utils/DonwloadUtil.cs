@@ -29,6 +29,7 @@ namespace Utils
                     using (FileStream fs = new FileStream(fullFileName, FileMode.Create))
                     {
                         ms.CopyTo(fs);
+                        fs.Close();
                     }
                 }
             }
