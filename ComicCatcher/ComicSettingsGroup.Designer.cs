@@ -1,6 +1,6 @@
 ﻿namespace ComicCatcher
 {
-    partial class frmEditPathGroup
+    partial class ComicSettingsGroup
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmEditPathGroup));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ComicSettingsGroup));
             this.dgvPathGroup = new System.Windows.Forms.DataGridView();
             this.bnPathGroup = new System.Windows.Forms.BindingNavigator(this.components);
             this.bindingNavigatorAddNewItem = new System.Windows.Forms.ToolStripButton();

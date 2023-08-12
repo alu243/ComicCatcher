@@ -5,7 +5,7 @@ using System.Reflection;
 namespace Models
 {
     [Serializable]
-    public class Settings
+    public class SettingsOld
     {
         private static string filename { get { return @"settings.xml"; } }
         public void save()
@@ -13,20 +13,20 @@ namespace Models
             using (FileStream fs = new FileStream(filename, FileMode.Create))
             {
                 //Console.WriteLine("準備序列化物件");
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(Settings));
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(SettingsOld));
                 xmlSerializer.Serialize(fs, this);
                 fs.Close();
             }
         }
 
-        public static Settings load()
+        public static SettingsOld load()
         {
             using (FileStream oFileStream = new FileStream(filename, FileMode.Open))
             {
-                Settings o = null;
+                SettingsOld o = null;
                 //Console.WriteLine("準備還原序列化物件");
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(Settings));
-                o = (Settings)xmlSerializer.Deserialize(oFileStream);
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(SettingsOld));
+                o = (SettingsOld)xmlSerializer.Deserialize(oFileStream);
                 oFileStream.Close();
                 //Console.WriteLine("還原完成");
                 //this = o;

@@ -129,6 +129,7 @@ namespace ComicModels
             object Result = null;
             try
             {
+                Microsoft.JScript.Eval
                 Result = Eval.JScriptEvaluate(JScript, "unsafe", engine);
             }
             catch (Exception ex)

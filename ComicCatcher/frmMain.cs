@@ -1,103 +1,123 @@
-﻿using System;
+﻿using ComicCatcher.App_Code.DbModel;
+using ComicCatcher.DbModel;
+using ComicModels;
+using Helpers;
+using Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-
-using System.IO;
-using System.Threading;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
-using System.Reflection;
-
-using Helpers;
-using Utils;
-using Models;
-using ComicModels;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Net;
+using System.Windows.Forms;
+using Utils;
 
 namespace ComicCatcher
 {
     public partial class frmMain : Form
     {
-        private static readonly Queue<Tasker> queue = new Queue<Tasker>();
+        private static readonly Queue<Tasker> queue = new();
 
         private Settings settings = null;
 
         private IComicCatcher comicSiteCatcher = null;
 
-        private PathGroup pathGroup = new PathGroup();
-        private IgnoreComic ignoreComic = new IgnoreComic();
+        private PathGroupDic pathGroupDic = null;
+        private IgnoreComicDic ignoreComicDic = null;
 
         //private DownloadedList dwnedList = null;
 
-        private List<Thread> threadPool = new List<Thread>();
-        private Dictionary<string, bool> lockNodes = new Dictionary<string, bool>();
-        private Dictionary<string, List<TreeNode>> comicNodes = new Dictionary<string, List<TreeNode>>();
+        private List<Thread> threadPool = new();
+        private Dictionary<string, bool> lockNodes = new();
+        private Dictionary<string, List<TreeNode>> comicNodes = new();
 
         public frmMain()
         {
             try
             {
-                ExportInteropFile();
+                //ExportInteropFile();
                 InitializeComponent();
                 NLogger.SetBox(this.txtInfo);
-                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls;
             }
             catch (Exception ex)
             { MessageBox.Show("錯誤發生" + ex.ToString()); }
         }
 
-        private void ExportInteropFile()
-        {
-            if (false == File.Exists(@".\System.Data.SQLite.dll"))
-            {
-                Assembly asm;
-                Stream asmfs;
-                asm = Assembly.GetExecutingAssembly();
-                asmfs = asm.GetManifestResourceStream("ComicCatcher.x86.System.Data.SQLite.dll");
-                //var files = asm.GetManifestResourceNames();
+        //private void ExportInteropFile()
+        //{
+        //    if (false == File.Exists(@".\System.Data.SQLite.dll"))
+        //    {
+        //        Assembly asm;
+        //        Stream asmfs;
+        //        asm = Assembly.GetExecutingAssembly();
+        //        asmfs = asm.GetManifestResourceStream("ComicCatcher.x86.System.Data.SQLite.dll");
+        //        //var files = asm.GetManifestResourceNames();
 
-                using (FileStream fs = new FileStream(@".\System.Data.SQLite.dll", FileMode.Create, FileAccess.Write))
-                {
-                    asmfs.Position = 0;
-                    int length = 4096;
-                    byte[] buffer = new Byte[length];
-                    int count = 0;
-                    while (0 < (count = asmfs.Read(buffer, 0, length)))
-                    {
-                        fs.Write(buffer, 0, count);
-                    }
-                }
-            }
-        }
+        //        using (FileStream fs = new FileStream(@".\System.Data.SQLite.dll", FileMode.Create, FileAccess.Write))
+        //        {
+        //            asmfs.Position = 0;
+        //            int length = 4096;
+        //            byte[] buffer = new Byte[length];
+        //            int count = 0;
+        //            while (0 < (count = asmfs.Read(buffer, 0, length)))
+        //            {
+        //                fs.Write(buffer, 0, count);
+        //            }
+        //        }
+        //    }
+        //}
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            //xindm.GetComicPages(new ComicChapter());
+            RenewSettings2Db();
+            settings = Settings.Load();
+
+            DownloadedList.Load();
+            pathGroupDic = PathGroupDic.Load();
+            ignoreComicDic = IgnoreComicDic.Load();
+
             lblCbMessage.Text = "";
             lblUpdateDate.Text = "";
             lblUpdateChapter.Text = "";
-            buildLocalComicDirComboBox();
-
-
-            ConfigureSettings();
-            GetSettingsToView();
-
-            RenewXML2DB();
-            DownloadedList.LoadDB();
-            //LoadDownloadList();
-
-
-            pathGroup.Load();
-            ignoreComic.Load();
+            BuildLocalComicDirComboBox();
+            BindSettingsToView();
 
             cbComicCatcher.SelectedIndex = 0;
             //ChangeComicSite(new Xindm());
+        }
+
+        private void RenewSettings2Db()
+        {
+            if (File.Exists(@".\settings.xml"))
+            {
+                try
+                {
+                    var oldSettings = SettingsOld.load();
+                    var newSettings = new Settings()
+                    {
+                        ArchiveDownloadedFile = oldSettings.ArchiveDownloadedFile,
+                        BackGroundLoadNode = oldSettings.BackGroundLoadNode,
+                        LoadAllPicture = oldSettings.LoadAllPicture,
+                        LocalPath = oldSettings.LocalPath,
+                        PhotoProgramPath = oldSettings.PhotoProgramPath,
+                        ProxyPort = oldSettings.ProxyPort,
+                        ProxyUrl = oldSettings.ProxyUrl,
+                        SaveWebSiteName = oldSettings.SaveWebSiteName,
+                        UsingProxy = oldSettings.UsingProxy,
+                        WinRARPath = oldSettings.WinRARPath
+                    };
+                    newSettings.Save();
+                    File.Delete(@".\settings.xml");
+                }
+                finally
+                {
+                    Cursor = System.Windows.Forms.Cursors.Default;
+                }
+            }
         }
 
         private void ChangeComicSite(IComicCatcher newCatcher)
@@ -174,7 +194,7 @@ namespace ComicCatcher
                     // 顯示其餘資料
                     try
                     {
-                        string pathGroupName = pathGroup.GetGroupName(tvComicTree.SelectedNode.Text);
+                        string pathGroupName = pathGroupDic.GetGroupName(tvComicTree.SelectedNode.Text);
 
                         string today = DateTime.Today.ToString("MM月dd号");
                         string yestoday = DateTime.Today.AddDays(-1).ToString("MM月dd号");
@@ -260,7 +280,7 @@ namespace ComicCatcher
         }
 
 
-        private void buildLocalComicDirComboBox()
+        private void BuildLocalComicDirComboBox()
         {
             try
             {
@@ -308,7 +328,7 @@ namespace ComicCatcher
             if (false == NodeCheckUtil.IsChapterNode(tn)) return;
 
             string taskname = tn.Parent.Text + "/" + tn.Text;
-            string localPath = Path.Combine(Path.Combine(txtRootPath.Text, pathGroup.GetGroupName(tn.Parent.Text)), tn.Text);
+            string localPath = Path.Combine(Path.Combine(txtRootPath.Text, pathGroupDic.GetGroupName(tn.Parent.Text)), tn.Text);
 
             string downUrl = tn.Name;
 
@@ -506,7 +526,7 @@ namespace ComicCatcher
         {
             if (e.KeyChar == (char)Keys.Enter)
             {
-                buildLocalComicDirComboBox();
+                BuildLocalComicDirComboBox();
             }
         }
 
@@ -754,8 +774,8 @@ namespace ComicCatcher
             try
             {
                 LoadSettingsFromSettingTab();
-                settings.save();
-                GetSettingsToView();
+                settings.Save();
+                BindSettingsToView();
                 MessageBox.Show("儲存完成");
             }
             catch (Exception ex)
@@ -764,21 +784,7 @@ namespace ComicCatcher
             }
         }
 
-        private void ConfigureSettings()
-        {
-            settings = new Settings();
-            try
-            {
-                settings = Settings.load();
-            }
-            catch (Exception ex)
-            {
-                NLogger.Error(MsgEnum.讀取設定失敗.ToString() + ex.ToString());
-            }
-            settings.save();
-        }
-
-        private void GetSettingsToView()
+        private void BindSettingsToView()
         {
             /// 設定畫面
             setPhotoProgramPath.Text = settings.PhotoProgramPath;
@@ -821,19 +827,6 @@ namespace ComicCatcher
             if (false == String.IsNullOrEmpty(setProxyPort.Text.Trim()))
                 settings.ProxyPort = int.Parse(setProxyPort.Text.Trim());
         }
-
-        //private void LoadDownloadList()
-        //{
-        //    dwnedList = new DownloadedList();
-        //    try
-        //    {
-        //        dwnedList = DownloadedList.loadxml();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        NLogger.Error(MsgEnum.讀取已下載清單失敗.ToString() + ex.ToString());
-        //    }
-        //}
         #endregion
 
         #region Form元件顯示相關功能
@@ -860,40 +853,6 @@ namespace ComicCatcher
         private void OpenDirectory_Click(object sender, EventArgs e)
         {
             Process.Start(Path.Combine(txtRootPath.Text, cbRelateFolders.Text));
-        }
-
-        private void RenewXML2DB()
-        {
-            //if (false == File.Exists(@".\ComicCatcher.s3db")
-            //    && File.Exists(@".\donwloadedlist.bin")
-            //    && File.Exists(@".\settings.xml"))
-            if (File.Exists(@".\donwloadedlist.bin") && (false == File.Exists(@".\ComicCatcher.s3db")))
-            {
-                MessageBox.Show("按下確定後更新設定資料");
-                try
-                {
-                    using (Form prompt = new Form())
-                    {
-                        prompt.Width = 300;
-                        prompt.Height = 100;
-                        Label textLabel = new Label() { Left = 50, Top = 20, Width = 300, Text = "資料更新中，請稍候..." };
-                        prompt.Controls.Add(textLabel);
-                        prompt.StartPosition = FormStartPosition.CenterScreen;
-                        prompt.ControlBox = false;
-                        prompt.FormBorderStyle = FormBorderStyle.FixedDialog;
-                        prompt.Show();
-                        Cursor = System.Windows.Forms.Cursors.WaitCursor;
-
-                        DownloadedListOld.ImportToDB();
-                        prompt.Hide();
-                        MessageBox.Show("更新完成！");
-                    }
-                }
-                finally
-                {
-                    Cursor = System.Windows.Forms.Cursors.Default;
-                }
-            }
         }
 
         #region BuildComicNode
@@ -996,7 +955,7 @@ namespace ComicCatcher
                 var names = new List<TreeNode>();
                 foreach (var comic in comicSiteCatcher.GetComicNames(cg))
                 {
-                    if (ignoreComic.ContainsKey(comic.Url))
+                    if (ignoreComicDic.IsIgnored(comic.Url))
                     {
                         continue;
                     }
@@ -1007,7 +966,7 @@ namespace ComicCatcher
                     }
 
                     //TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text);
-                    string groupName = pathGroup.GetGroupName(comic.Caption);
+                    string groupName = pathGroupDic.GetGroupName(comic.Caption);
                     TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
                     names.Add(nameNode);
                     //NLogger.Info(comic.Caption + "=" + comic.Url);
@@ -1088,18 +1047,9 @@ namespace ComicCatcher
             switch (cbComicCatcher.Text.ToUpper())
             {
                 case "XINDM":
-                    chkIsUseProxy.Checked = true;
-                    chkIsUseProxy.Enabled = true;
                     ChangeComicSite(new Xindm());
                     break;
                 case "DM5":
-                    chkIsUseProxy.Checked = false;
-                    chkIsUseProxy.Enabled = false;
-                    ChangeComicSite(new Dm5());
-                    break;
-                case "SEEMH":
-                    chkIsUseProxy.Checked = false;
-                    chkIsUseProxy.Enabled = false;
                     ChangeComicSite(new Dm5());
                     break;
             }
@@ -1107,15 +1057,15 @@ namespace ComicCatcher
 
         private void btnShowEditModal_Click(object sender, EventArgs e)
         {
-            frmEditPathGroup f = new frmEditPathGroup(SettingEnum.PathGroup);
+            ComicSettingsGroup f = new ComicSettingsGroup(SettingEnum.PathGroup);
             f.ShowDialog(this);
-            this.pathGroup.Load();
+            this.pathGroupDic = PathGroupDic.Load();
         }
         private void btnShowExceptModal_Click(object sender, EventArgs e)
         {
-            frmEditPathGroup f = new frmEditPathGroup(SettingEnum.IgnoreComic);
+            ComicSettingsGroup f = new ComicSettingsGroup(SettingEnum.IgnoreComic);
             f.ShowDialog(this);
-            this.ignoreComic.Load();
+            this.ignoreComicDic = IgnoreComicDic.Load();
         }
 
         private void btnAppendTo_Click(object sender, EventArgs e)
@@ -1150,7 +1100,7 @@ namespace ComicCatcher
             string htmlContent = ComicUtil.GetUtf8Content(url);
             Dm5 dm5 = new Dm5();
             ComicNameInWebPage comic = dm5.GetComicName(url);
-            string groupName = pathGroup.GetGroupName(comic.Caption);
+            string groupName = pathGroupDic.GetGroupName(comic.Caption);
             TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
             return nameNode;
 
@@ -1200,7 +1150,7 @@ namespace ComicCatcher
         {
             try
             {
-                ignoreComic.AddIgnoreComic(tvComicTree.SelectedNode.Name, tvComicTree.SelectedNode.Text);
+                ignoreComicDic.Add(tvComicTree.SelectedNode.Name, tvComicTree.SelectedNode.Text);
                 if (lockNodes.ContainsKey(tvComicTree.SelectedNode.FullPath))
                 {
                     lockNodes.Remove(tvComicTree.SelectedNode.FullPath);

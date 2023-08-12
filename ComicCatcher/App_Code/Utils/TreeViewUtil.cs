@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using ComicCatcher.DbModel;
 
 namespace Utils
 {
@@ -167,20 +168,6 @@ namespace Utils
             return childNodes;
         }
 
-        //public static TreeNode AddTreeNode(TreeNode parentNode, string key, string text)
-        //{
-        //    TreeNode tn = new TreeNode();
-        //    if (parentNode.TreeView == null) return null;
-        //    if (parentNode.TreeView.InvokeRequired)
-        //        parentNode.TreeView.Invoke(new MethodInvoker(() => tn = parentNode.Nodes.Add(key, text)));
-        //    else
-        //        lock (parentNode)
-        //        {
-        //            tn = parentNode.Nodes.Add(key, text);
-        //        }
-        //    return tn;
-        //}
-
         public static TreeNode BuildNode(ComicModels.ComicNameInWebPage comic, string localComicPath, string groupName)
         {
             TreeNode nameNode = new TreeNode();
@@ -220,7 +207,7 @@ namespace Utils
             chapterNode.Tag = chapter;
 
             // 如果是已下載過的點，變粗體，改顏色
-            if (Models.DownloadedList.HasDownloaded(webSiteName, comicName, chapterNode.Text))
+            if (DownloadedList.HasDownloaded(webSiteName, comicName, chapterNode.Text))
             {
                 chapterNode.NodeFont = boldFont;
                 chapterNode.ForeColor = Color.Blue;
