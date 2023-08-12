@@ -8,10 +8,13 @@ using Helpers;
 using System.Reflection;
 using System.Threading;
 using System.Web;
+using System.Net.Http;
+
 namespace Utils
 {
     public static class HttpUtil
     {
+        static readonly HttpClient client = new HttpClient();
         private static CookieContainer _myCookie = null;
         private static CookieContainer myCookie
         {
@@ -62,7 +65,9 @@ namespace Utils
         public static string getUtf8Response(string url, string reffer)
         {
             Encoding encode = System.Text.Encoding.UTF8;
-            return getResponseString(url, encode, reffer);
+            var utf8 = client.GetStringAsync(url).Result;
+            return utf8;
+            //return getResponseString(url, encode, reffer);
         }
 
         private static string getResponseString(string url, Encoding encoding, string reffer)

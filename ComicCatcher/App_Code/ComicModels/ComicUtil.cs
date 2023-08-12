@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-
-using Utils;
-using System.IO;
-using Microsoft.JScript;
-using Microsoft.JScript.Vsa;
-using System.CodeDom.Compiler;
-using System.Reflection;
+﻿using ComicCatcher.App_Code.Helpers;
 using Helpers;
+using System;
+using System.IO;
 using System.Threading;
+using Utils;
 
 namespace ComicModels
 {
@@ -30,16 +22,16 @@ namespace ComicModels
                 }
                 catch (Exception e)
                 {
-                    if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
-                    {
-                        NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
-                    }
+                    //if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
+                    //{
+                    //    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
+                    //}
                     System.Threading.Thread.Sleep(800);
                     GC.Collect();
                     remainTries--;
                 }
             }
-            throw new NullReferenceException(String.Format("連線發生錯誤，且重新測試超過{0}次！！", origTries));
+            throw new NullReferenceException(String.Format("GetPicture:連線發生錯誤，且重新測試超過{0}次！！", origTries));
         }
 
         public static MemoryStream GetPicture(string url, string reffer, string fileName)
@@ -55,16 +47,16 @@ namespace ComicModels
                 }
                 catch (Exception e)
                 {
-                    if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
-                    {
-                        NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
-                    }
+                    //if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
+                    //{
+                    //    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
+                    //}
                     System.Threading.Thread.Sleep(800);
                     GC.Collect();
                     remainTries--;
                 }
             }
-            throw new NullReferenceException(String.Format("連線發生錯誤，且重新測試超過{0}次！！", origTries));
+            throw new NullReferenceException(String.Format("GetPicture2:連線發生錯誤，且重新測試超過{0}次！！", origTries));
         }
 
         public static string GetContent(string url)
@@ -80,21 +72,21 @@ namespace ComicModels
                 }
                 catch (Exception e)
                 {
-                    if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
-                    {
-                        NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
-                    }
+                    //if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
+                    //{
+                    //    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
+                    //}
                     System.Threading.Thread.Sleep(800);
                     GC.Collect();
                     remainTries--;
                 }
             }
-            throw new NullReferenceException(String.Format("連線發生錯誤，且重新測試超過{0}次！！", origTries));
+            throw new NullReferenceException(String.Format("GetContent:連線發生錯誤，且重新測試超過{0}次！！", origTries));
         }
 
         public static string GetUtf8Content(string url, string reffer = "")
         {
-            int origTries = 20;
+            int origTries = 10;
             int remainTries = origTries;
             while (remainTries >= 0)
             {
@@ -105,44 +97,32 @@ namespace ComicModels
                 }
                 catch (Exception e)
                 {
-                    if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
-                    {
-                        NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
-                    }
-                    System.Threading.Thread.Sleep(800);
+                    //if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
+                    //{
+                    //    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
+                    //}
+                    System.Threading.Thread.Sleep(500);
                     GC.Collect();
                     remainTries--;
                 }
             }
-            throw new NullReferenceException(String.Format("連線發生錯誤，且重新測試超過{0}次！！", origTries));
+            throw new NullReferenceException(String.Format("GetUtf8Content:連線發生錯誤，且重新測試超過{0}次！！", origTries));
         }
 
 
 
-        private VsaEngine engine = null;
-        public ComicUtil()
+        private IJsEngine engine = null;
+        private ComicUtil(IJsEngine engine)
         {
-            engine = VsaEngine.CreateEngine();
+            this.engine = engine;
         }
-        public object EvalJScript(string JScript)
+
+        public static ComicUtil CreateVsaEngine()
         {
-            object Result = null;
-            try
-            {
-                Microsoft.JScript.Eval
-                Result = Eval.JScriptEvaluate(JScript, "unsafe", engine);
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-
-            return Result;
+            return new ComicUtil(new VsaEngine());
         }
 
-
-
-
+        public object EvalJScript(string jscript) => engine.EvalJScript(jscript);
         //        private static object _evaluator = null;
         //        private static Type _evaluatorType = null;
         //        private static readonly string _jscriptSource =

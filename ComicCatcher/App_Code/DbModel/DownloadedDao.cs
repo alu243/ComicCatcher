@@ -32,7 +32,7 @@ UNIQUE (ComicWeb, ComicName, ComicVolumn) ON CONFLICT REPLACE
         public static bool InDownloaded(string comicWeb, string comicName, string comicVolumn)
         {
             var sql = $"SELECT count(1) as cnt from DownloadedList where ComicWeb = '{comicWeb}' and ComicName = '{comicName}' and ComicVolumn = '{comicVolumn}' LIMIT 0, 1";
-            return SQLiteHelper.ExecuteScalar<int>(sql) > 0;
+            return SQLiteHelper.ExecuteScalar<long>(sql) > 0;
         }
 
         public static int AddDownloaded(string comicWeb, string comicName, string comicVolumn)

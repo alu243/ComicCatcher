@@ -8,10 +8,12 @@ namespace ComicCatcher.App_Code.DbModel
 {
     public static class SQLiteHelper
     {
-        private static string connStr = "Data Source=ComicCatcher.s3db;Pooling=true;Page Size=8192;Journal Mode=off;UTF8Encoding=True;";
+        //private static string connStr = "Data Source=ComicCatcher.s3db;Pooling=true;Page Size=8192;Journal Mode=off;UTF8Encoding=True;";
+        private static string connStr = "Data Source=ComicCatcher.s3db;Pooling=true;";
         private static SqliteConnection CreateConn()
         {
-            return new SqliteConnection(connStr);
+            var conn = new SqliteConnection(connStr);
+            return conn;
         }
 
         public static DataTable GetTable(string sql)

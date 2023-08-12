@@ -20,7 +20,7 @@ SettingValue NVARCHAR(1000) not NULL
         public static bool SaveSettings(string settingsJson)
         {
             var countSql = "SELECT count(1) AS cnt FROM ComicSettings";
-            var count = SQLiteHelper.ExecuteScalar<int>(countSql);
+            var count = SQLiteHelper.ExecuteScalar<long>(countSql);
             string sql;
             if (count > 0)
             {
@@ -33,7 +33,7 @@ SettingValue NVARCHAR(1000) not NULL
 
         public static string GetSettings()
         {
-            var sql = "SELECT ComicSettings AS cnt FROM ComicSettings";
+            var sql = "SELECT SettingValue AS cnt FROM ComicSettings";
             var table = SQLiteHelper.GetTable(sql);
             if (table.Rows.Count <= 0) return "";
 

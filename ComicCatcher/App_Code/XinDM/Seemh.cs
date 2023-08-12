@@ -238,7 +238,7 @@ namespace ComicModels
             string pageOuter = rPageLinkOuter.Matches(htmlContent)[0].Value;
             int pageCount = rPageLinkInner.Matches(pageOuter).Count;
 
-            ComicUtil util = new ComicUtil();
+            ComicUtil util = ComicUtil.CreateVsaEngine();
             //string jsCodeWrapper = "; var url = (typeof (hd_c) != \"undefined\" && hd_c.length > 0) ? hd_c[0] : d[0];";
             //string jsCodeWrapper = "; d[0];";
             string jsCodeWrapper = ";var url = (typeof (isrevtt) != \"undefined\" && isrevtt) ? hd_c[0] : d[0];";

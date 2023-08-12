@@ -216,7 +216,7 @@ namespace ComicModels
             string jsCode = String.Join(Environment.NewLine, rJS.Matches(htmlContent).Cast<Match>().ToList().Select(m => m.ToString()).ToArray());
             string evalCode = rEval.Matches(jsCode)[0].ToString();
             evalCode = evalCode.Substring(5, evalCode.Length - 6);
-            ComicUtil util = new ComicUtil();
+            ComicUtil util = ComicUtil.CreateVsaEngine();
             string photoStr = util.EvalJScript("var cs = " + evalCode).ToString();
 
             List<ComicPageInChapter> pages = new List<ComicPageInChapter>();

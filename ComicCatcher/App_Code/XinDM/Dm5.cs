@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Linq;
 
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ComicCatcher.App_Code.Helpers;
 using Utils;
 
 namespace ComicModels
@@ -202,12 +204,13 @@ namespace ComicModels
             var chapters = RetriveChapters(htmlContent);
             chapters.ForEach(c =>
             {
-                ComicChapterInName cb = new ComicChapterInName()
+                var cb = new ComicChapterInName()
                 {
                     Url = RetriveChapter_Url(c),
-                    Caption = RetriveChapter_Caption(c)
+                    Caption = RetriveChapter_Caption(c, cName.Url)
                 };
                 if (Uri.IsWellFormedUriString(cb.Url, UriKind.Absolute) == false) cb.Url = (new Uri(new Uri(this._cRoot.WebHost), cb.Url)).ToString();
+
 
                 if (false == String.IsNullOrEmpty(cb.Caption))
                 {
@@ -241,11 +244,12 @@ namespace ComicModels
 
         private List<string> RetriveChapters(string htmlContent)
         {
-            Regex comicListOuter = new Regex(@"<div id=""chapterlistload"">(.|\n)*?</div>", RegexOptions.Compiled);
+            Regex comicListOuter = new Regex(@"<div id=""chapterlistload"">(.|\n)*?</ul>(.|\n)*?</div>", RegexOptions.Compiled);
             Regex comicListInner = new Regex(@"<li>(.|\n)*?</li>", RegexOptions.Compiled);
 
             var allInOne = comicListOuter.Matches(htmlContent).Cast<Match>().Select(p => p.Value).First();
-            return comicListInner.Matches(allInOne).Cast<Match>().Select(p => p.Value).ToList();
+            var results = comicListInner.Matches(allInOne).Cast<Match>().Select(p => p.Value).ToList();
+            return results;
         }
 
         private string RetriveChapter_Url(string chapter)
@@ -262,17 +266,34 @@ namespace ComicModels
             return result;
         }
 
-        private string RetriveChapter_Caption(string chapter)
+        private string RetriveChapter_Caption(string chapter, string url)
         {
-            //<li>
-            //  <a href="/m582159/" title="" target="_blank">第103话
-            //    <span>（18P）</span>
-            //  </a>
-            //  <span class="new"></span>
-            //</li>
-            Regex rCaption = new Regex(@"target=""_blank"" *?>(.|\n)*?<", RegexOptions.Compiled);
-            string simplified = rCaption.Match(chapter).Value.Replace(@"target=""_blank""", "").Trim().Replace(">", "").Replace(@"<", "").Trim('"').Trim();
-            return CharsetConvertUtil.ToTraditional(simplified.Trim());
+            Regex rCaption = new Regex(@"target=""_blank"".*?>(.|\n)*?<", RegexOptions.Compiled);
+            var caption = rCaption.Match(chapter).Value.Trim();
+            //var caption = rCaption.Match(chapter).Value.Replace(@"target=""_blank""", "").Trim();
+            var simplified = ChopArrow(caption);
+
+            if (string.IsNullOrEmpty(simplified))
+            {
+                Regex rCaptionPart2 = new Regex(@"p.{1,10}class=""title.{1,10}"" *?>(.|\n)*?<", RegexOptions.Compiled);
+                //<p class="title ">第1回 要么突破，要么死！<span>（65P）</span></p>
+                caption = rCaptionPart2.Match(chapter).Value.Trim();
+                simplified = ChopArrow(caption);
+            }
+            if (url == "http://www.dm5.com/manhua-baimutianjiadejiushushenghuo/")
+            {
+                var d = simplified;
+            }
+
+            return CharsetConvertUtil.ToTraditional(simplified);
+        }
+
+        private string ChopArrow(string caption)
+        {
+            var start = caption.IndexOf('>');
+            var end = caption.IndexOf('<');
+            var simplified = caption.Substring(start + 1, end - start - 1).Trim();
+            return simplified;
         }
 
         //private string RetriveHtmlTagContent(string htmlContent)
@@ -300,7 +321,7 @@ namespace ComicModels
             string dt = RetrivePage_VIEWSIGNDT(htmlContent);
             string sign = RetrivePage_VIEWSIGN(htmlContent);
             int pageCount = RetrivePage_PageCount(htmlContent);
-            ComicUtil util = new ComicUtil();
+            ComicUtil util = ComicUtil.CreateVsaEngine();
 
 
             //string jsCodeWrapper = "; var url = (typeof (hd_c) != \"undefined\" && hd_c.length > 0) ? hd_c[0] : d[0];";
