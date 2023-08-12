@@ -71,11 +71,7 @@
   <ItemGroup>
     <PackageReference Include="CHTCHSConv" Version="1.0.0" />
     <PackageReference Include="Jint" Version="2.11.58" />
-    <PackageReference Include="Microsoft.ClearScript.V8" Version="7.4.2" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.10" />
-    <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
   <PropertyGroup>
     <AssemblyTitle>ComicCatcher</AssemblyTitle>

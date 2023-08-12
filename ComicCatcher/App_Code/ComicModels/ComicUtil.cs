@@ -122,7 +122,7 @@ namespace ComicModels
             return new ComicUtil(new VsaEngine());
         }
 
-        public object EvalJScript(string jscript) => engine.EvalJScript(jscript);
+        public object EvalJScript(string jscript) => engine.EvalJScript(jscript.StartsWith("eval") ? jscript : "eval(" + jscript.Trim(';') + ")");
         //        private static object _evaluator = null;
         //        private static Type _evaluatorType = null;
         //        private static readonly string _jscriptSource =

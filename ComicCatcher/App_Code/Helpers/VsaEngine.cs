@@ -1,6 +1,7 @@
 ﻿//using Microsoft.JScript;
 
 using System;
+using System.Collections.Generic;
 using Jint;
 
 namespace ComicCatcher.App_Code.Helpers
@@ -20,6 +21,15 @@ namespace ComicCatcher.App_Code.Helpers
             try
             {
                 result = this.engine.Execute(jscript).GetCompletionValue().ToObject();
+                if (result is object[])
+                {
+                    var strList = new List<string>();
+                    foreach (object obj in (object[])result)
+                    {
+                        strList.Add(obj.ToString());
+                    }
+                    return strList.ToArray();
+                }
                 //result = this.engine.SetValue("cs", result).Execute("cs = 'okk';");
             }
             catch (Exception ex)

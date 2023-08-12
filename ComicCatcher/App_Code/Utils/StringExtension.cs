@@ -27,7 +27,7 @@ namespace Utils
             return ss;
         }
 
-        public static string getRefferString(this string s)
+        public static string GetRefererString(this string s)
         {
             return "http://" + new Uri(s).Host.ToString();
             //return new Uri(s).Host.ToString();

@@ -23,7 +23,7 @@ namespace ComicModels
         {
             WebSiteTitle = "動漫屋(dm5)",
             WebSiteName = "dm5",
-            WebHost = @"http://www.dm5.com/",
+            WebHost = @"https://www.dm5.com/",
             IconHost = @"",
             PicHost = @"",
             PicHost2 = @"",
@@ -45,7 +45,7 @@ namespace ComicModels
             List<ComicWebPage> webPages = new List<ComicWebPage>();
             for (int i = 0; i < 300; ++i)
             {
-                // http://www.dm5.com/manhua-list-p1/
+                // https://www.dm5.com/manhua-list-p1/
                 ComicWebPage wp = new ComicWebPage();
                 wp.GroupNumber = i + 1;
                 wp.Caption = "第" + (i + 1).ToString().PadLeft(3, '0') + "頁";
@@ -207,7 +207,7 @@ namespace ComicModels
                 var cb = new ComicChapterInName()
                 {
                     Url = RetriveChapter_Url(c),
-                    Caption = RetriveChapter_Caption(c, cName.Url)
+                    Caption = RetriveChapter_Caption(c)
                 };
                 if (Uri.IsWellFormedUriString(cb.Url, UriKind.Absolute) == false) cb.Url = (new Uri(new Uri(this._cRoot.WebHost), cb.Url)).ToString();
 
@@ -246,10 +246,23 @@ namespace ComicModels
         {
             Regex comicListOuter = new Regex(@"<div id=""chapterlistload"">(.|\n)*?</ul>(.|\n)*?</div>", RegexOptions.Compiled);
             Regex comicListInner = new Regex(@"<li>(.|\n)*?</li>", RegexOptions.Compiled);
-
+            //try
+            //{
+            //if (url == "https://www.dm5.com/manhua-biaosuzhainan/" ||
+            //    url == "https://www.dm5.com/manhua-yidianxingyuan/")
+            //{
+            //    var a = "aaa";
+            //}
             var allInOne = comicListOuter.Matches(htmlContent).Cast<Match>().Select(p => p.Value).First();
             var results = comicListInner.Matches(allInOne).Cast<Match>().Select(p => p.Value).ToList();
             return results;
+            //}
+            //catch (Exception e)
+            //{
+            //    var m = comicListOuter.Matches(htmlContent);
+            //    Console.WriteLine(e.ToString());
+            //    return null;
+            //}
         }
 
         private string RetriveChapter_Url(string chapter)
@@ -266,7 +279,7 @@ namespace ComicModels
             return result;
         }
 
-        private string RetriveChapter_Caption(string chapter, string url)
+        private string RetriveChapter_Caption(string chapter)
         {
             Regex rCaption = new Regex(@"target=""_blank"".*?>(.|\n)*?<", RegexOptions.Compiled);
             var caption = rCaption.Match(chapter).Value.Trim();
@@ -280,11 +293,6 @@ namespace ComicModels
                 caption = rCaptionPart2.Match(chapter).Value.Trim();
                 simplified = ChopArrow(caption);
             }
-            if (url == "http://www.dm5.com/manhua-baimutianjiadejiushushenghuo/")
-            {
-                var d = simplified;
-            }
-
             return CharsetConvertUtil.ToTraditional(simplified);
         }
 
@@ -316,7 +324,7 @@ namespace ComicModels
             // http://css122.us.cdndm.com/v201708091849/default/js/chapternew_v22.js
             //Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
             string htmlContent = ComicUtil.GetUtf8Content(cChapter.Url);
-            string cid = cChapter.Url.Replace(@"http://www.dm5.com/m", "").Trim('/');
+            string cid = cChapter.Url.Replace(@"https://www.dm5.com/m", "").Trim('/');
             string mid = RetrivePage_MID(htmlContent);
             string dt = RetrivePage_VIEWSIGNDT(htmlContent);
             string sign = RetrivePage_VIEWSIGN(htmlContent);
@@ -361,17 +369,18 @@ namespace ComicModels
                             pageFunContent = pageFunContent.Trim('"').Trim('\n');
                             pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6) + ";";
                             string jsCode;
-                            string jsCodePass2;
+                            string url;
                             lock (util)
                             {
-                                jsCode = util.EvalJScript("var cs = " + pageFunContent).ToString();
-                                jsCodePass2 = util.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
+                                //jsCode = util.EvalJScript(pageFunContent).ToString();
+                                //jsCodePass2 = util.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
+                                url = ((string[])util.EvalJScript(pageFunContent))[0];
                             }
                             ComicPageInChapter page = new ComicPageInChapter();
                             page.PageNumber = data.i;
                             page.Reffer = data.reffer;
                             //page.Url = photoServer + pageFile + "?cid=" + cid + "&key=" + key + "&ak=" + ak;
-                            page.Url = jsCodePass2;
+                            page.Url = url;
                             page.Caption = "第" + data.i.ToString().PadLeft(3, '0') + "頁";
                             page.PageFileName = data.i.ToString().PadLeft(3, '0') + "." + System.IO.Path.GetExtension(page.Url.Substring(0, page.Url.IndexOf("?"))).TrimStart('.');
                             page.PageFileName = page.PageFileName.Replace("..", ".");

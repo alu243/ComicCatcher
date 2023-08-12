@@ -27,7 +27,7 @@ SettingValue NVARCHAR(1000) not NULL
                 sql = "DELETE FROM ComicSettings";
                 SQLiteHelper.ExecuteNonQuery(sql);
             }
-            sql = $"INSERT INTO ComicSettings (SettingValue) VALUES ({settingsJson})";
+            sql = $"INSERT INTO ComicSettings (SettingValue) VALUES ('{settingsJson}')";
             return SQLiteHelper.ExecuteNonQuery(sql) > 0;
         }
 
