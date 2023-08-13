@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 
-namespace ComicCatcher.App_Code.DbModel
+namespace ComicCatcher.DbModel
 {
     public class PathGroupDic
     {

@@ -1,13 +1,12 @@
-﻿using System;
+﻿using ComicCatcher.Helpers;
+using ComicCatcher.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using ComicCatcher.App_Code.Helpers;
-using ComicCatcher.ComicModels;
-using Utils;
 
-namespace ComicCatcher.App_Code.ComicModels.Domains;
+namespace ComicCatcher.ComicModels.Domains;
 
 public class ComicUtil
 {
@@ -92,7 +91,7 @@ public class ComicUtil
 
     public static ComicUtil CreateVsaEngine()
     {
-        return new ComicUtil(new VsaEngine());
+        return new ComicUtil(new JintEngine());
     }
 
     public object EvalJScript(string jscript) => engine.EvalJScript(jscript.StartsWith("eval") ? jscript : "eval(" + jscript.Trim(';') + ")");

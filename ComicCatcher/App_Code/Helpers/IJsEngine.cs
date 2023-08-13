@@ -1,4 +1,4 @@
-﻿namespace ComicCatcher.App_Code.Helpers
+﻿namespace ComicCatcher.Helpers
 {
     public interface IJsEngine
     {

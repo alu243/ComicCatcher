@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using ComicCatcher.App_Code.DbModel;
-using Helpers;
+using ComicCatcher.Helpers;
 
 namespace ComicCatcher.DbModel
 {

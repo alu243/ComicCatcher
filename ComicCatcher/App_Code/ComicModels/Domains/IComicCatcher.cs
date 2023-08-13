@@ -1,8 +1,7 @@
-﻿using ComicCatcher.ComicModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace ComicCatcher.App_Code.ComicModels.Domains
+namespace ComicCatcher.ComicModels.Domains
 {
     public interface IComicCatcher : IDisposable
     {

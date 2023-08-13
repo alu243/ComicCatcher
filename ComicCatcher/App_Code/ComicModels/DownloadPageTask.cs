@@ -1,8 +1,6 @@
-﻿using ComicCatcher.App_Code.ComicModels.Domains;
-using ComicCatcher.ComicModels;
-using System.IO;
+﻿using System.IO;
 
-namespace ComicCatcher.App_Code.ComicModels;
+namespace ComicCatcher.ComicModels;
 
 public class DownloadPageTask
 {

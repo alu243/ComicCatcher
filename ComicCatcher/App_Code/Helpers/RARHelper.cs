@@ -1,7 +1,7 @@
 ﻿using System;
-
 using System.IO;
-namespace Helpers
+
+namespace ComicCatcher.Helpers
 {
     public class RarHelper
     {

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace Utils
+namespace ComicCatcher.Utils
 {
     public static class FileUtil
     {

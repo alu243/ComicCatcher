@@ -1,8 +1,8 @@
-﻿using System;
+﻿using ComicCatcher.Helpers;
+using System;
 using System.Data;
-using Helpers;
 
-namespace ComicCatcher.App_Code.DbModel
+namespace ComicCatcher.DbModel
 {
     public class PathGroupDao
     {

@@ -1,8 +1,8 @@
-﻿using Helpers;
-using System;
+﻿using System;
 using System.Data;
+using ComicCatcher.Helpers;
 
-namespace ComicCatcher.App_Code.DbModel
+namespace ComicCatcher.DbModel
 {
     public class IgnoreComicDao
     {

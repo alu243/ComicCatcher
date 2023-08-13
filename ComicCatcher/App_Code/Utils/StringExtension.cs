@@ -1,5 +1,6 @@
 ﻿using System;
-namespace Utils
+
+namespace ComicCatcher.Utils
 {
     public static class StringExtension
     {

@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Utils
+namespace ComicCatcher.Utils
 {
     public static class HttpClientUtil
     {

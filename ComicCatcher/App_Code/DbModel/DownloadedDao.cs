@@ -1,5 +1,4 @@
-﻿using ComicCatcher.App_Code.DbModel;
-using Helpers;
+﻿using ComicCatcher.Helpers;
 using System;
 
 namespace ComicCatcher.DbModel

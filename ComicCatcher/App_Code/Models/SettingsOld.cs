@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Xml.Serialization;
-using System.Reflection;
-namespace Models
+
+namespace ComicCatcher.Models
 {
     [Serializable]
     public class SettingsOld

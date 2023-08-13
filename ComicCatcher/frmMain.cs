@@ -1,12 +1,9 @@
-﻿using ComicCatcher.App_Code.ComicModels;
-using ComicCatcher.App_Code.ComicModels.Domains;
-using ComicCatcher.App_Code.DbModel;
-using ComicCatcher.App_Code.Models;
-using ComicCatcher.ComicModels;
+﻿using ComicCatcher.ComicModels;
 using ComicCatcher.ComicModels.Domains;
 using ComicCatcher.DbModel;
-using Helpers;
-using Models;
+using ComicCatcher.Helpers;
+using ComicCatcher.Models;
+using ComicCatcher.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,10 +12,10 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Utils;
 
 namespace ComicCatcher
 {
@@ -37,7 +34,7 @@ namespace ComicCatcher
         {
             try
             {
-                //ExportInteropFile();
+                ExportInteropFile();
                 InitializeComponent();
                 NLogger.SetBox(this.txtInfo);
             }
@@ -45,29 +42,29 @@ namespace ComicCatcher
             { MessageBox.Show("錯誤發生" + ex.ToString()); }
         }
 
-        //private void ExportInteropFile()
-        //{
-        //    if (false == File.Exists(@".\System.Data.SQLite.dll"))
-        //    {
-        //        Assembly asm;
-        //        Stream asmfs;
-        //        asm = Assembly.GetExecutingAssembly();
-        //        asmfs = asm.GetManifestResourceStream("ComicCatcher.x86.System.Data.SQLite.dll");
-        //        //var files = asm.GetManifestResourceNames();
+        private void ExportInteropFile()
+        {
+            if (false == File.Exists(@".\e_sqlite3.dll"))
+            {
+                Assembly asm;
+                Stream asmfs;
+                asm = Assembly.GetExecutingAssembly();
+                asmfs = asm.GetManifestResourceStream("ComicCatcher.x64.e_sqlite3.dll");
+                //var files = asm.GetManifestResourceNames();
 
-        //        using (FileStream fs = new FileStream(@".\System.Data.SQLite.dll", FileMode.Create, FileAccess.Write))
-        //        {
-        //            asmfs.Position = 0;
-        //            int length = 4096;
-        //            byte[] buffer = new Byte[length];
-        //            int count = 0;
-        //            while (0 < (count = asmfs.Read(buffer, 0, length)))
-        //            {
-        //                fs.Write(buffer, 0, count);
-        //            }
-        //        }
-        //    }
-        //}
+                using (FileStream fs = new FileStream(@".\e_sqlite3.dll", FileMode.Create, FileAccess.Write))
+                {
+                    asmfs.Position = 0;
+                    int length = 4096;
+                    byte[] buffer = new Byte[length];
+                    int count = 0;
+                    while (0 < (count = asmfs.Read(buffer, 0, length)))
+                    {
+                        fs.Write(buffer, 0, count);
+                    }
+                }
+            }
+        }
 
         private void frmMain_Load(object sender, EventArgs e)
         {

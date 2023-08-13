@@ -1,14 +1,11 @@
-﻿using System;
+﻿using ComicCatcher.ComicModels;
+using ComicCatcher.DbModel;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 using System.IO;
-using ComicCatcher.ComicModels;
-using ComicCatcher.DbModel;
+using System.Windows.Forms;
 
-namespace Utils
+namespace ComicCatcher.Utils
 {
     public static class TreeViewUtil
     {

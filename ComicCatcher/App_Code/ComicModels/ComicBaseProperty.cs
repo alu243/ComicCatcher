@@ -1,4 +1,4 @@
-﻿using Utils;
+﻿using ComicCatcher.Utils;
 
 namespace ComicCatcher.ComicModels;
 

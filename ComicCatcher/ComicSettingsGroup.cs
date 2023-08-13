@@ -1,8 +1,9 @@
-﻿using ComicCatcher.App_Code.DbModel;
-using ComicCatcher.App_Code.Models;
+﻿using ComicCatcher.DbModel;
+using ComicCatcher.Models;
 using System;
 using System.Data;
 using System.Windows.Forms;
+
 namespace ComicCatcher
 {
     public partial class ComicSettingsGroup : Form

@@ -1,4 +1,4 @@
-﻿namespace ComicCatcher.App_Code.Models
+﻿namespace ComicCatcher.Models
 {
     public enum SettingEnum
     {

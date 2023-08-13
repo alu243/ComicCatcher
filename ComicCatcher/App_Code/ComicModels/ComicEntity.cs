@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Threading;
-using ComicCatcher.App_Code.ComicModels.Domains;
-using Helpers;
 
 namespace ComicCatcher.ComicModels;
 

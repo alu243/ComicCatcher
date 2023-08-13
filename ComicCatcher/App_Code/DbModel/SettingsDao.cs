@@ -1,6 +1,4 @@
-﻿using ComicCatcher.App_Code.DbModel;
-
-namespace Models
+﻿namespace ComicCatcher.DbModel
 {
     public class SettingsDao
     {

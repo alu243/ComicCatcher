@@ -1,13 +1,11 @@
-﻿using System;
+﻿using ComicCatcher.Utils;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Security.Policy;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using ComicCatcher.App_Code.ComicModels.Domains;
-using Utils;
 
 namespace ComicCatcher.ComicModels.Domains;
 

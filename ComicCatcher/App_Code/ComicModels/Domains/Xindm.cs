@@ -1,10 +1,10 @@
-﻿using System;
+﻿using ComicCatcher.ComicModels.Domains;
+using ComicCatcher.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using ComicCatcher.App_Code.ComicModels.Domains;
-using Utils;
 
 namespace ComicCatcher.ComicModels.Domains;
 

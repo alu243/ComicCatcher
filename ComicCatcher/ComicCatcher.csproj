@@ -39,6 +39,9 @@
     <None Remove="x86\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="x64\e_sqlite3.dll" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="bookicon.ico" />
     <Content Include="icons\book.png" />
     <Content Include="icons\bookicon.ico" />
@@ -71,6 +74,9 @@
       <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="x64\e_sqlite3.dll" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CHTCHSConv" Version="1.0.0" />

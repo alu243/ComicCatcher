@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.Sqlite;
+using System;
 using System.Data;
-using System.Data.Common;
-using Helpers;
-using Microsoft.Data.Sqlite;
+using ComicCatcher.Helpers;
 
-namespace ComicCatcher.App_Code.DbModel
+namespace ComicCatcher.DbModel
 {
     public static class SQLiteHelper
     {

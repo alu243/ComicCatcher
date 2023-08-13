@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
-namespace Helpers
+
+namespace ComicCatcher.Helpers
 {
     public class NLogger
     {

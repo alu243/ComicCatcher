@@ -1,16 +1,14 @@
-﻿//using Microsoft.JScript;
-
+﻿using Jint;
 using System;
 using System.Collections.Generic;
-using Jint;
 
-namespace ComicCatcher.App_Code.Helpers
+namespace ComicCatcher.Helpers
 {
-    public class VsaEngine : IJsEngine
+    public class JintEngine : IJsEngine
     {
         //Microsoft.JScript.Vsa.VsaEngine engine;
         private Engine engine;
-        public VsaEngine()
+        public JintEngine()
         {
             engine = new Engine();
             //engine = Microsoft.JScript.Vsa.VsaEngine.CreateEngine();

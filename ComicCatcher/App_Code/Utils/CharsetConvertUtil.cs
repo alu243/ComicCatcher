@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Runtime.InteropServices;
-using Microsoft.International.Converters.TraditionalChineseToSimplifiedConverter;
+﻿using Microsoft.International.Converters.TraditionalChineseToSimplifiedConverter;
 
-namespace Utils
+namespace ComicCatcher.Utils
 {
     /// <summary> 
     /// 做為字碼轉換工具 
@@ -58,7 +53,7 @@ namespace Utils
         public static string ToTraditional(string pSource)
         {
             var twText = ChineseConverter.Convert(pSource, ChineseConversionDirection.SimplifiedToTraditional);
-            return twText;  
+            return twText;
         }
     }
 }

@@ -1,9 +1,6 @@
-﻿using System.Runtime.InteropServices;
-using System.Text.Json;
-using System.Windows.Forms;
-using Models;
+﻿using System.Text.Json;
 
-namespace ComicCatcher.App_Code.DbModel
+namespace ComicCatcher.DbModel
 {
     public class Settings
     {

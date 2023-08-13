@@ -1,7 +1,6 @@
-﻿using ComicCatcher.App_Code.ComicModels.Domains;
-using ComicCatcher.ComicModels;
+﻿using ComicCatcher.ComicModels.Domains;
 
-namespace ComicCatcher.App_Code.ComicModels;
+namespace ComicCatcher.ComicModels;
 
 public class DownloadChapterTask
 {
