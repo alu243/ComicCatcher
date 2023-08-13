@@ -1,16 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using System.Net;
 using System.IO;
-using System.Threading;
+using System.Text;
 
 namespace Utils
 {
     public static class FileUtil
     {
+        public static bool CompareFileByMD5(string tmpFile, string cmpFile)
+        {
+            if (true == CompareMD5(tmpFile, cmpFile))
+            {
+                if (File.Exists(cmpFile)) File.Delete(cmpFile);
+                return true;
+            }
+            else
+            {
+                MoveFile(cmpFile, tmpFile);
+                return false;
+            }
+        }
+
         private static string CalcMD5(string localTmpFile)
         {
             StringBuilder sb = new StringBuilder();
@@ -44,22 +53,7 @@ namespace Utils
             return file1MD5.Equals(file2MD5);
         }
 
-
-        public static bool CompareFileByMD5(string tmpFile , string cmpFile)
-        {
-            if (true == CompareMD5(tmpFile, cmpFile))
-            {
-                if (File.Exists(cmpFile)) File.Delete(cmpFile);
-                return true;
-            }
-            else
-            {
-                FileUtil.MoveFile(cmpFile, tmpFile);
-                return false;
-            }
-        }
-
-        public static void MoveFile(string sourceFile, string destFile)
+        private static void MoveFile(string sourceFile, string destFile)
         {
             if (File.Exists(destFile)) File.Delete(destFile);
             File.Move(sourceFile, destFile);
