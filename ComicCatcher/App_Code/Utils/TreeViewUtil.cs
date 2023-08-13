@@ -223,6 +223,42 @@ namespace Utils
 
             return chapterNode;
         }
+
+
+        /// <summary>
+        /// 是否為顯示回數(集數)的節點
+        /// </summary>
+        /// <param name="tn"></param>
+        /// <returns></returns>
+        public static bool IsChapterNode(TreeNode tn)
+        {
+            return null != (tn.Tag as ComicChapter);
+        }
+
+        /// <summary>
+        /// 是否為顯示漫畫名稱的節點
+        /// </summary>
+        /// <param name="tn"></param>
+        /// <returns></returns>
+        public static bool IsComicNameNode(TreeNode tn)
+        {
+            return null != (tn.Tag as ComicEntity);
+            //return tn.Level == 2;
+            //if (null == tn) return false;
+            //if (false == tn.Name.Contains(XindmWebSite.WebUrl)) return false; // 節點本身必需要是包含此內容
+            //// 如果父節點是清單連結，表示此連結是漫畫名稱連結
+            //return IsListNode(tn.Parent);
+        }
+
+        /// <summary>
+        /// 是否為顯示漫畫清單的節點
+        /// </summary>
+        /// <param name="tn"></param>
+        /// <returns></returns>
+        public static bool IsPaginationNode(TreeNode tn)
+        {
+            return null != (tn.Tag as ComicPagination);
+        }
     }
 }
 

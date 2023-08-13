@@ -13,13 +13,13 @@ public class ComicUtil
 {
     public static MemoryStream GetPicture(string url, string refer = "")
     {
-        int origTries = 10;
+        int origTries = 5;
         int remainTries = origTries;
         while (remainTries >= 0)
         {
             try
             {
-                var result = HttpUtil.GetFileResponse(url, refer);
+                var result = HttpClientUtil.GetStreamResponse(url, refer).Result;
                 return result;
             }
             catch (Exception e)
@@ -29,14 +29,13 @@ public class ComicUtil
                 //    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
                 //}
                 Thread.Sleep(800);
-                GC.Collect();
                 remainTries--;
             }
         }
         throw new NullReferenceException(string.Format("GetPicture:連線發生錯誤，且重新測試超過{0}次！！", origTries));
     }
 
-    public static string GetContent(string url)
+    public static string GetGbContent(string url)
     {
         int origTries = 20;
         int remainTries = origTries;
@@ -44,7 +43,7 @@ public class ComicUtil
         {
             try
             {
-                var result = HttpUtil.getResponse(url);
+                var result = HttpUtil.GetResponse(url);
                 return result;
             }
             catch (Exception e)
@@ -54,7 +53,6 @@ public class ComicUtil
                 //    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
                 //}
                 Thread.Sleep(800);
-                GC.Collect();
                 remainTries--;
             }
         }
@@ -69,7 +67,7 @@ public class ComicUtil
         {
             try
             {
-                var result = HttpUtil.getUtf8Response(url, reffer);
+                var result = HttpClientUtil.GetStringResponse(url, reffer).Result;
                 return result;
             }
             catch (Exception e)

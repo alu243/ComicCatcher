@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Helpers;
+using System;
 using System.Data;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Helpers;
-using Microsoft.Data.Sqlite;
 
 namespace ComicCatcher.App_Code.DbModel
 {

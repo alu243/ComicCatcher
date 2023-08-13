@@ -39,7 +39,7 @@ public class Xindm : IComicCatcher
     {
         if (false == string.IsNullOrEmpty(this.webimgServerURL)) return this.webimgServerURL;
 
-        string content = ComicUtil.GetContent("http://www.xindm.cn/skin/v2/2014/js/server.js");
+        string content = ComicUtil.GetGbContent("http://www.xindm.cn/skin/v2/2014/js/server.js");
         Regex rhost = new Regex(@"WebimgServerURL\[0\].*?;", RegexOptions.Compiled);
         string hostName = rhost.Match(content).Value.Replace("WebimgServerURL[0]", "").Replace(";", "").Replace("=", "")
             .Trim().Trim('\"').Trim().TrimEnd('/') + "/";
@@ -51,7 +51,7 @@ public class Xindm : IComicCatcher
     {
         if (false == string.IsNullOrEmpty(this.nativePicServer)) return this.nativePicServer;
 
-        string content = ComicUtil.GetContent("http://www.xindm.cn/skin/v2/2014/js/server.js");
+        string content = ComicUtil.GetGbContent("http://www.xindm.cn/skin/v2/2014/js/server.js");
         Regex rhost = new Regex(@"NativePicServer.*?;", RegexOptions.Compiled);
         string hostName = rhost.Match(content).Value.Replace("NativePicServer", "").Replace(";", "").Replace("=", "")
             .Trim().Trim('\"').Trim().TrimEnd('/') + "/";
@@ -63,7 +63,7 @@ public class Xindm : IComicCatcher
     {
         if (false == string.IsNullOrEmpty(this.sonPicServer)) return this.sonPicServer;
 
-        string content = ComicUtil.GetContent("http://www.xindm.cn/skin/v2/2014/js/server.js");
+        string content = ComicUtil.GetGbContent("http://www.xindm.cn/skin/v2/2014/js/server.js");
         Regex rhost = new Regex(@"SonPicServer.*?;", RegexOptions.Compiled);
         string hostName = rhost.Match(content).Value.Replace("SonPicServer", "").Replace(";", "").Replace("=", "")
             .Trim().Trim('\"').Trim().TrimEnd('/') + "/";
@@ -101,7 +101,7 @@ public class Xindm : IComicCatcher
         Regex rUrl = new Regex(@"href=""(.|\n)*?""", RegexOptions.Compiled);
         Regex rCaption = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
 
-        string htmlContent = ComicUtil.GetContent(cGroup.Url);
+        string htmlContent = ComicUtil.GetGbContent(cGroup.Url);
 
         List<string> comicList = SplitForComicName(htmlContent);
         List<ComicEntity> result = comicList.Select<string, ComicEntity>(comic =>
@@ -164,7 +164,7 @@ public class Xindm : IComicCatcher
         Regex rCleanTag = new Regex(@"<(.|\n)*?>", RegexOptions.Compiled);
         Regex rCaption = new Regex(@"<span class=""(black|red)"">.+?</span>", RegexOptions.Compiled);
 
-        string htmlContent = ComicUtil.GetContent(cEntity.Url);
+        string htmlContent = ComicUtil.GetGbContent(cEntity.Url);
         List<ComicChapter> result = new List<ComicChapter>();
         string tagContent = RetriveHtmlTagContent(htmlContent);
         foreach (Match data in rVolumnList.Matches(tagContent))
@@ -211,7 +211,7 @@ public class Xindm : IComicCatcher
         //  var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
         Regex rPages = new Regex(@"\'.+?\'", RegexOptions.Compiled);
 
-        string htmlContent = ComicUtil.GetContent(cChapter.Url);
+        string htmlContent = ComicUtil.GetGbContent(cChapter.Url);
         //string htmlContent = ComicUtil.GetContent(@"http://www.xindm.cn/mh/Soul%20Catcher/109903.html");
         string jsCode = String.Join(Environment.NewLine, rJS.Matches(htmlContent).Cast<Match>().ToList().Select(m => m.ToString()).ToArray());
         string evalCode = rEval.Matches(jsCode)[0].ToString();
