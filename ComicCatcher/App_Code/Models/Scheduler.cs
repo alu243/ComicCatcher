@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using ComicCatcher.App_Code.ComicModels;
+using ComicCatcher.ComicModels;
+
 namespace Models
 {
     public class Tasker
     {
         public string name { get; set; }
 
-        public ComicModels.ComicChapterInName downloadChapter { get; set; }
+        public ComicChapter downloadChapter { get; set; }
         //public List<string> downloadUrls { get; set; }
         public string downloadPath { get; set; }
 
-        public ComicModels.IComicCatcher downloader { get; set; }
+        public IComicCatcher downloader { get; set; }
         //public List<string> downloadFileNames { get; set; }
     }
     public class DownloadPictureScheduler

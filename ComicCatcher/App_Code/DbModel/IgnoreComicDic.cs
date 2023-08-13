@@ -37,7 +37,7 @@ namespace ComicCatcher.App_Code.DbModel
                 foreach (DataRow row in result.Rows)
                 {
                     string url = row["ComicUrl"].ToString().Trim();
-                    string name = row["ComicName"].ToString().Trim();
+                    string name = row["ComicEntity"].ToString().Trim();
                     ig.dic.TryAdd(url, name);
                 }
 

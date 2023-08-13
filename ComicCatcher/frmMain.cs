@@ -1,6 +1,6 @@
 ﻿using ComicCatcher.App_Code.DbModel;
+using ComicCatcher.App_Code.Models;
 using ComicCatcher.DbModel;
-using ComicModels;
 using Helpers;
 using Models;
 using System;
@@ -14,7 +14,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ComicCatcher.ComicModels;
 using Utils;
+using ComicCatcher.App_Code.Utils;
+using ComicCatcher.App_Code.ComicModels;
+using ComicCatcher.Domains;
 
 namespace ComicCatcher
 {
@@ -130,12 +134,12 @@ namespace ComicCatcher
         {
             TreeViewUtil.ClearNodes(tvComicTree);
             GC.Collect();
-            ComicWebRoot cr = comicSiteCatcher.GetComicWebRoot();
-            TreeNode root = new TreeNode(cr.WebSiteTitle);
+            ComicRoot cr = comicSiteCatcher.GetRoot();
+            TreeNode root = new TreeNode(cr.Caption);
             tvComicTree.Nodes.Add(root);
             root.Tag = cr;
 
-            var groups = comicSiteCatcher.GetComicWebPages();
+            var groups = comicSiteCatcher.GetPaginations();
             groups.ForEach(g =>
             {
                 TreeNode tn = root.Nodes.Add(g.Url, g.Caption);
@@ -166,12 +170,12 @@ namespace ComicCatcher
                     {
                         pbIcon.Image = null;
                     }
-                    ComicNameInWebPage comicName = tvComicTree.SelectedNode.Tag as ComicNameInWebPage;
+                    ComicEntity comicEntity = tvComicTree.SelectedNode.Tag as ComicEntity;
                     try
                     {
                         lock (pbIcon)
                         {
-                            pbIcon.Image = comicName.IconImage;
+                            pbIcon.Image = comicEntity.IconImage;
                         }
                     }
                     catch (Exception ex)
@@ -201,12 +205,12 @@ namespace ComicCatcher
                         string beforeYestoday = DateTime.Today.AddDays(-2).ToString("MM月dd号");
 
                         txtUrl.Text = tvComicTree.SelectedNode.Name;
-                        lblUpdateDate.Text = comicName.LastUpdateDate.Replace("今天", today).Replace("昨天", yestoday).Replace("前天", beforeYestoday);
+                        lblUpdateDate.Text = comicEntity.LastUpdateDate.Replace("今天", today).Replace("昨天", yestoday).Replace("前天", beforeYestoday);
                         if (lblUpdateDate.Text.Contains("分钟前更新"))
                         {
                             lblUpdateDate.Text = today + lblUpdateDate.Text;
                         }
-                        lblUpdateChapter.Text = comicName.LastUpdateChapter;
+                        lblUpdateChapter.Text = comicEntity.LastUpdateChapter;
                         if (false == cbRelateFolders.Items.Contains(pathGroupName)) cbRelateFolders.Items.Add(pathGroupName);
 
                         cbRelateFolders.Text = pathGroupName;
@@ -334,7 +338,7 @@ namespace ComicCatcher
 
             try
             {
-                DownloadedList.AddDownloaded(comicSiteCatcher.GetComicWebRoot().WebSiteName, tn.Parent.Text, tn.Text);
+                DownloadedList.AddDownloaded(comicSiteCatcher.GetRoot().WebSiteName, tn.Parent.Text, tn.Text);
             }
             catch { }
 
@@ -357,18 +361,7 @@ namespace ComicCatcher
                 return;
             }
 
-            ComicChapterInName cc = tn.Tag as ComicChapterInName;
-            //List<string> downUrls = xindm.GetComicPages(cc).Select(p => p.Url).ToList(); ;
-            //List<string> downFileNames = xindm.GetComicPages(cc).Select(p => p.PageFileName).ToList(); ;
-            //if (true == chkUsingAlternativeUrl.Checked) // 使用替代網址下載圖片
-            //{
-            //    downUrls.ForEach(p =>
-            //    {
-            //        p = p.Replace(xindm.GetComicRoot().PicHost, xindm.GetComicRoot().PicHostAlternative);
-            //    });
-            //}
-
-            //queue.Enqueue(new Tasker() { name = taskname, downloadPath = localPath, downloadUrls = downUrls, downloadFileNames = downFileNames});
+            ComicChapter cc = tn.Tag as ComicChapter;
             queue.Enqueue(new Tasker() { name = taskname, downloadPath = localPath, downloadChapter = cc, downloader = comicSiteCatcher });
 
             NLogger.Info(taskname + " 已加入下載排程！");
@@ -404,28 +397,17 @@ namespace ComicCatcher
             {
                 string parentPath = Path.GetDirectoryName(task.downloadPath);
                 string currentDir = task.downloadPath.Replace(parentPath, String.Empty).Trim('\\');
-                task.downloadPath = parentPath + "\\" + task.downloader.GetComicWebRoot().WebSiteName + "_" + currentDir;
+                task.downloadPath = parentPath + "\\" + task.downloader.GetRoot().WebSiteName + "_" + currentDir;
             }
             if (false == Directory.Exists(task.downloadPath)) Directory.CreateDirectory(task.downloadPath);
 
-            // 因為 ManuelResetEvent 有 64 個上限限制，所以 thread Pool 手動寫
-            //ThreadPool.SetMaxThreads(20, 40);
-            //ManualResetEvent[] handles = new ManualResetEvent[allPictureUrl.Count];
-            //for (int i = 0; i < allPictureUrl.Count; ++i)
-            //{
-            //    ThreadPool.QueueUserWorkItem(
-            //        new WaitCallback(DownloadPicture),
-            //        new Scheduler() { name = task.name, downloadPath = task.downloadPath, downloadUrl = allPictureUrl[i], handle = handles[i] }
-            //        );
-            //} // end of foreach
 
-            //WaitHandle.WaitAll(handles);
             bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "[" + task.name + "]準備開始下載", infoMsg = "[" + task.name + "]準備開始下載" });
-            var pages = task.downloader.GetComicPages(task.downloadChapter);
+            var pages = task.downloader.GetPages(task.downloadChapter);
             bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "[" + task.name + "]準備開始下載", infoMsg = "[" + task.name + "]，共" + pages.Count + "頁" });
 
 
-            int threadCount = comicSiteCatcher.GetComicWebRoot().ThreadCount;
+            int threadCount = comicSiteCatcher.GetRoot().ThreadCount;
             int startPage = 0;
             int upperPage = (threadCount > pages.Count ? pages.Count : threadCount); // 一次下載設定的頁數，如果剩不到40頁就下載剩下的頁數
             while (startPage < pages.Count)
@@ -453,10 +435,10 @@ namespace ComicCatcher
             bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = "[" + task.name + "]已經下載完成", infoMsg = "[" + task.name + "]已經下載完成" });
             if (chkArchiveDownloadedFile.Checked)
             {
-                RARHelper rar = null;
+                RarHelper rar = null;
                 try
                 {
-                    rar = new RARHelper(settings.WinRARPath);
+                    rar = new RarHelper(settings.WinRARPath);
                     rar.ArchiveDirectory(task.downloadPath);
                 }
                 catch (Exception ex)
@@ -493,7 +475,7 @@ namespace ComicCatcher
             try
             {
                 sw.Start();
-                DonwloadUtil.donwload(pictureUrl, reffer, Path.Combine(localPath, pictureName));
+                ComicUtil.Download(pictureUrl, reffer, Path.Combine(localPath, pictureName));
                 sw.Stop();
             }
             catch (Exception ex)
@@ -691,10 +673,10 @@ namespace ComicCatcher
 
         private void ArchiveComic()
         {
-            RARHelper rar = null;
+            RarHelper rar = null;
             try
             {
-                rar = new RARHelper(settings.WinRARPath);
+                rar = new RarHelper(settings.WinRARPath);
                 rar.ArchiveDirectory(Path.Combine(txtRootPath.Text, cbRelateFolders.Text, tvFolder.SelectedNode.Text));
             }
             catch (Exception ex)
@@ -951,9 +933,9 @@ namespace ComicCatcher
                 //NLogger.Info("********************************************");
                 TreeViewUtil.ClearTreeNode(currNode);
                 GC.Collect();
-                ComicWebPage cg = currNode.Tag as ComicWebPage;
+                ComicPagination cg = currNode.Tag as ComicPagination;
                 var names = new List<TreeNode>();
-                foreach (var comic in comicSiteCatcher.GetComicNames(cg))
+                foreach (var comic in comicSiteCatcher.GetComics(cg, this.settings.LoadAllPicture))
                 {
                     if (ignoreComicDic.IsIgnored(comic.Url))
                     {
@@ -1012,11 +994,11 @@ namespace ComicCatcher
                 //NLogger.Info("********************************************");
                 TreeViewUtil.ClearTreeNode(currNode);
                 GC.Collect();
-                ComicNameInWebPage cn = currNode.Tag as ComicNameInWebPage;
+                ComicEntity cn = currNode.Tag as ComicEntity;
                 var chapters = new List<TreeNode>();
-                foreach (var chapter in comicSiteCatcher.GetComicChapters(cn))
+                foreach (var chapter in comicSiteCatcher.GetChapters(cn))
                 {
-                    TreeNode chapterNode = TreeViewUtil.BuildNode(chapter, comicSiteCatcher.GetComicWebRoot().WebSiteName, currNode.Text);
+                    TreeNode chapterNode = TreeViewUtil.BuildNode(chapter, comicSiteCatcher.GetRoot().WebSiteName, currNode.Text);
                     //chapterNode.ImageIndex = 5;
                     //chapterNode.SelectedImageIndex = 5;
                     chapters.Add(chapterNode);
@@ -1099,7 +1081,7 @@ namespace ComicCatcher
             //Caption = "A", IconImage = null, IconUrl = "", LastUpdateChapter = "", LastUpdateDate = "", 
             string htmlContent = ComicUtil.GetUtf8Content(url);
             Dm5 dm5 = new Dm5();
-            ComicNameInWebPage comic = dm5.GetComicName(url);
+            ComicEntity comic = dm5.GetComicName(url);
             string groupName = pathGroupDic.GetGroupName(comic.Caption);
             TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
             return nameNode;
@@ -1136,7 +1118,7 @@ namespace ComicCatcher
             //    lastUpdateChapter = lastUpdateChapter.Replace(@"最新章节：", "").Replace(@"<", "");
             //}
 
-            //ComicNameInWebPage comic = new ComicNameInWebPage()
+            //ComicEntity comic = new ComicEntity()
             //{
             //    IconUrl = iconurl, // 取得漫畫首頁圖像連結
             //    LastUpdateDate = lastUpdateDate, // 取得最近更新日期

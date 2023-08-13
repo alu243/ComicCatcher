@@ -7,7 +7,7 @@ using System.Windows.Forms;
 namespace Utils
 {
     /// <summary>
-    /// 判斷節點類別 Web -> List(page) -> ComicName -> Chapter
+    /// 判斷節點類別 Web -> List(page) -> ComicEntity -> Chapter
     /// </summary>
     class NodeCheckUtil
     {

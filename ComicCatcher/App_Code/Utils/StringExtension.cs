@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 namespace Utils
 {
     public static class StringExtension
@@ -11,7 +8,7 @@ namespace Utils
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
-        public static string trimEscapeString(this string s)
+        public static string TrimEscapeString(this string s)
         {
             if (String.IsNullOrEmpty(s)) return String.Empty;
             string ss = s;

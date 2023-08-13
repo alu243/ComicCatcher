@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using ComicCatcher.ComicModels;
 using ComicCatcher.DbModel;
 
 namespace Utils
@@ -168,7 +169,7 @@ namespace Utils
             return childNodes;
         }
 
-        public static TreeNode BuildNode(ComicModels.ComicNameInWebPage comic, string localComicPath, string groupName)
+        public static TreeNode BuildNode(ComicEntity comic, string localComicPath, string groupName)
         {
             TreeNode nameNode = new TreeNode();
             nameNode.Name = comic.Url;
@@ -199,7 +200,7 @@ namespace Utils
             return nameNode;
         }
 
-        public static TreeNode BuildNode(ComicModels.ComicChapterInName chapter, string webSiteName, string comicName)
+        public static TreeNode BuildNode(ComicChapter chapter, string webSiteName, string comicName)
         {
             TreeNode chapterNode = new TreeNode();
             chapterNode.Name = chapter.Url;

@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using System.IO;
-using System.Diagnostics;
-using System.Threading;
 namespace Helpers
 {
-    public class RARHelper
+    public class RarHelper
     {
         string _rarPath = String.Empty;
 
-        public RARHelper(string rarPath)
+        public RarHelper(string rarPath)
         {
             this._rarPath = rarPath;
         }

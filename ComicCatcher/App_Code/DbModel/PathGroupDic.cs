@@ -30,7 +30,7 @@ namespace ComicCatcher.App_Code.DbModel
                     string groupName = row["GroupName"].ToString().Trim();
                     for (int i = 1; i <= 10; i++)
                     {
-                        string name = row["ComicName" + i.ToString()].ToString().Trim();
+                        string name = row["ComicEntity" + i.ToString()].ToString().Trim();
                         pg.dic.TryAdd(name, groupName);
                     }
                 }
