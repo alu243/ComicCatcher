@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using ComicCatcher.App_Code.ComicModels;
-using ComicCatcher.App_Code.Utils;
-using ComicCatcher.ComicModels;
+using ComicCatcher.App_Code.ComicModels.Domains;
 using Utils;
 
-namespace ComicCatcher.Domains;
+namespace ComicCatcher.ComicModels.Domains;
 
 public class Seemh : IComicCatcher
 {

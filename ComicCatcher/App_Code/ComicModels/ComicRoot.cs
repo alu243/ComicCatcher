@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace ComicCatcher.ComicModels;
 
@@ -12,5 +13,5 @@ public class ComicRoot : ComicBaseProperty
     //public bool BackgroundLoadIcon { get; set; }
     public int ThreadCount { get; set; }
     public List<ComicPagination> Paginations { get; set; }
-    public List<ComicEntity> Comics { get; set; }
+    public List<ComicEntity> Comics => Paginations.SelectMany(p => p.Comics).ToList();
 }

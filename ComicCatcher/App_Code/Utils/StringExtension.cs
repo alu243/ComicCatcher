@@ -10,7 +10,7 @@ namespace Utils
         /// <returns></returns>
         public static string TrimEscapeString(this string s)
         {
-            if (String.IsNullOrEmpty(s)) return String.Empty;
+            if (string.IsNullOrEmpty(s)) return string.Empty;
             string ss = s;
             ss = ss.Replace("?", "");
             ss = ss.Replace("*", "＊");
@@ -29,5 +29,21 @@ namespace Utils
             return "http://" + new Uri(s).Host.ToString();
             //return new Uri(s).Host.ToString();
         }
+
+        public static string MakeUrlAbsolute(this string url, string rootUrl)
+        {
+            if (Uri.IsWellFormedUriString(url, UriKind.Absolute) == false)
+            {
+                url = (new Uri(new Uri(rootUrl), url)).ToString();
+            }
+            return url;
+        }
+
+        public static string TrimComicName(this string name, string comicName)
+        {
+            name = name?.Replace(comicName, string.Empty).Trim();
+            return name;
+        }
+
     }
 }

@@ -20,7 +20,8 @@ namespace Utils
                 // and then exit.
                 //System.Diagnostics.ProcessStartInfo procStartInfo =
                 //    new System.Diagnostics.ProcessStartInfo("cmd.exe", "/c " + (command as string));
-                string arguments = Encoding.Default.GetString(Encoding.GetEncoding(65000).GetBytes((command as CommandObj).arguments));
+                //string arguments = Encoding.Default.GetString(Encoding.GetEncoding(65000).GetBytes((command as CommandObj).arguments));
+                string arguments = Encoding.Default.GetString(Encoding.UTF8.GetBytes((command as CommandObj).arguments));
                 System.Diagnostics.ProcessStartInfo procStartInfo =
                     new System.Diagnostics.ProcessStartInfo((command as CommandObj).fileName, (command as CommandObj).arguments);
 

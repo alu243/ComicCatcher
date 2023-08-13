@@ -112,7 +112,7 @@ ComicName9 = '{name9}', ComicName10 = '{name10}' WHERE GroupName = '{groupName}'
                 else if (row.RowState == DataRowState.Deleted)
                 {
                     // 删除操作
-                    var url = Convert.ToString(row["ComicUrl"])?.Trim();
+                    var url = Convert.ToString(row["ComicUrl", DataRowVersion.Original])?.Trim();
                     DeletePathGroup(url);
                 }
                 else if (row.RowState == DataRowState.Added)

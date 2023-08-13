@@ -142,7 +142,7 @@ namespace Utils
         }
 
 
-        public static MemoryStream getFileResponse(string url, string reffer, string fileName)
+        public static MemoryStream GetFileResponse(string url, string reffer)
         {
             //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             //sw.Start();

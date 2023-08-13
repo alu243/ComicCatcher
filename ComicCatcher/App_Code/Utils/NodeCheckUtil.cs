@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using ComicCatcher.ComicModels;
 
 namespace Utils
 {
@@ -18,11 +19,7 @@ namespace Utils
         /// <returns></returns>
         public static bool IsChapterNode(TreeNode tn)
         {
-            return tn.Level == 3;
-            //if (null == tn) return false;
-            //if (false == tn.Name.Contains(XindmWebSite.WebUrl)) return false; // 節點本身必需要是包含此內容
-            //// 如果父節點是漫畫名稱節點，表示此節點是回數(集數 )節點
-            //return IsComicNameNode(tn.Parent);
+            return null != (tn.Tag as ComicChapter);
         }
 
         /// <summary>

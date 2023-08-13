@@ -36,7 +36,6 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.treeViewnComicName = new System.Windows.Forms.TreeView();
             this.btnAppendTo = new System.Windows.Forms.Button();
-            this.chkSaveWebSiteName = new System.Windows.Forms.CheckBox();
             this.cbComicCatcher = new System.Windows.Forms.ComboBox();
             this.chkArchiveDownloadedFile = new System.Windows.Forms.CheckBox();
             this.btnCollapse = new System.Windows.Forms.Button();
@@ -142,7 +141,6 @@
             this.splitContainer1.Panel1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.splitContainer1.Panel1.Controls.Add(this.treeViewnComicName);
             this.splitContainer1.Panel1.Controls.Add(this.btnAppendTo);
-            this.splitContainer1.Panel1.Controls.Add(this.chkSaveWebSiteName);
             this.splitContainer1.Panel1.Controls.Add(this.cbComicCatcher);
             this.splitContainer1.Panel1.Controls.Add(this.chkArchiveDownloadedFile);
             this.splitContainer1.Panel1.Controls.Add(this.btnCollapse);
@@ -182,7 +180,7 @@
             this.treeViewnComicName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.treeViewnComicName.BackColor = System.Drawing.SystemColors.InactiveBorder;
-            this.treeViewnComicName.Font = new System.Drawing.Font("新細明體", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.treeViewnComicName.Font = new System.Drawing.Font("新細明體", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.treeViewnComicName.HideSelection = false;
             this.treeViewnComicName.Indent = 5;
             this.treeViewnComicName.Location = new System.Drawing.Point(292, 36);
@@ -204,18 +202,6 @@
             this.btnAppendTo.UseVisualStyleBackColor = true;
             this.btnAppendTo.Click += new System.EventHandler(this.btnAppendTo_Click);
             // 
-            // chkSaveWebSiteName
-            // 
-            this.chkSaveWebSiteName.AutoSize = true;
-            this.chkSaveWebSiteName.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.chkSaveWebSiteName.Location = new System.Drawing.Point(588, 64);
-            this.chkSaveWebSiteName.Margin = new System.Windows.Forms.Padding(2);
-            this.chkSaveWebSiteName.Name = "chkSaveWebSiteName";
-            this.chkSaveWebSiteName.Size = new System.Drawing.Size(178, 22);
-            this.chkSaveWebSiteName.TabIndex = 18;
-            this.chkSaveWebSiteName.Text = "存檔目錄加上前綴";
-            this.chkSaveWebSiteName.UseVisualStyleBackColor = true;
-            // 
             // cbComicCatcher
             // 
             this.cbComicCatcher.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -227,7 +213,7 @@
             ""});
             this.cbComicCatcher.Location = new System.Drawing.Point(3, 9);
             this.cbComicCatcher.Name = "cbComicCatcher";
-            this.cbComicCatcher.Size = new System.Drawing.Size(63, 26);
+            this.cbComicCatcher.Size = new System.Drawing.Size(63, 27);
             this.cbComicCatcher.TabIndex = 3;
             this.cbComicCatcher.SelectedIndexChanged += new System.EventHandler(this.cbComicCatcher_SelectedIndexChanged);
             // 
@@ -240,7 +226,7 @@
             this.chkArchiveDownloadedFile.Location = new System.Drawing.Point(588, 124);
             this.chkArchiveDownloadedFile.Margin = new System.Windows.Forms.Padding(2);
             this.chkArchiveDownloadedFile.Name = "chkArchiveDownloadedFile";
-            this.chkArchiveDownloadedFile.Size = new System.Drawing.Size(124, 22);
+            this.chkArchiveDownloadedFile.Size = new System.Drawing.Size(106, 23);
             this.chkArchiveDownloadedFile.TabIndex = 10;
             this.chkArchiveDownloadedFile.Text = "下載後壓縮";
             this.chkArchiveDownloadedFile.UseVisualStyleBackColor = true;
@@ -266,7 +252,7 @@
             this.chkLoadPhoto.Location = new System.Drawing.Point(588, 84);
             this.chkLoadPhoto.Margin = new System.Windows.Forms.Padding(2);
             this.chkLoadPhoto.Name = "chkLoadPhoto";
-            this.chkLoadPhoto.Size = new System.Drawing.Size(214, 22);
+            this.chkLoadPhoto.Size = new System.Drawing.Size(181, 23);
             this.chkLoadPhoto.TabIndex = 7;
             this.chkLoadPhoto.Text = "展開頁時載入全部縮圖";
             this.chkLoadPhoto.UseVisualStyleBackColor = true;
@@ -285,7 +271,7 @@
             // 
             this.txtFind.Location = new System.Drawing.Point(588, 37);
             this.txtFind.Name = "txtFind";
-            this.txtFind.Size = new System.Drawing.Size(133, 29);
+            this.txtFind.Size = new System.Drawing.Size(133, 27);
             this.txtFind.TabIndex = 5;
             this.txtFind.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtFind_KeyPress);
             // 
@@ -306,42 +292,42 @@
             // lblUpdateChapter
             // 
             this.lblUpdateChapter.AutoSize = true;
-            this.lblUpdateChapter.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.lblUpdateChapter.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblUpdateChapter.ForeColor = System.Drawing.Color.Blue;
             this.lblUpdateChapter.Location = new System.Drawing.Point(584, 195);
             this.lblUpdateChapter.Name = "lblUpdateChapter";
-            this.lblUpdateChapter.Size = new System.Drawing.Size(168, 24);
+            this.lblUpdateChapter.Size = new System.Drawing.Size(139, 20);
             this.lblUpdateChapter.TabIndex = 14;
             this.lblUpdateChapter.Text = "lblUpdateChapter";
             // 
             // lblUpdateDate
             // 
             this.lblUpdateDate.AutoSize = true;
-            this.lblUpdateDate.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.lblUpdateDate.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblUpdateDate.ForeColor = System.Drawing.Color.Red;
             this.lblUpdateDate.Location = new System.Drawing.Point(585, 159);
             this.lblUpdateDate.Name = "lblUpdateDate";
-            this.lblUpdateDate.Size = new System.Drawing.Size(139, 24);
+            this.lblUpdateDate.Size = new System.Drawing.Size(116, 20);
             this.lblUpdateDate.TabIndex = 12;
             this.lblUpdateDate.Text = "lblUpdateDate";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.label2.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label2.Location = new System.Drawing.Point(585, 180);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(98, 18);
+            this.label2.Size = new System.Drawing.Size(82, 15);
             this.label2.TabIndex = 13;
             this.label2.Text = "更新回數：";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.label1.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label1.Location = new System.Drawing.Point(586, 142);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(98, 18);
+            this.label1.Size = new System.Drawing.Size(82, 15);
             this.label1.TabIndex = 11;
             this.label1.Text = "更新日期：";
             // 
@@ -354,7 +340,7 @@
             this.chkIsUseProxy.Location = new System.Drawing.Point(588, 104);
             this.chkIsUseProxy.Margin = new System.Windows.Forms.Padding(2);
             this.chkIsUseProxy.Name = "chkIsUseProxy";
-            this.chkIsUseProxy.Size = new System.Drawing.Size(73, 22);
+            this.chkIsUseProxy.Size = new System.Drawing.Size(70, 23);
             this.chkIsUseProxy.TabIndex = 8;
             this.chkIsUseProxy.Text = "Proxy";
             this.chkIsUseProxy.UseVisualStyleBackColor = true;
@@ -364,7 +350,7 @@
             // 
             this.txtUrl.Location = new System.Drawing.Point(115, 8);
             this.txtUrl.Name = "txtUrl";
-            this.txtUrl.Size = new System.Drawing.Size(658, 29);
+            this.txtUrl.Size = new System.Drawing.Size(658, 27);
             this.txtUrl.TabIndex = 1;
             // 
             // tvComicTree
@@ -372,7 +358,7 @@
             this.tvComicTree.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.tvComicTree.BackColor = System.Drawing.SystemColors.InactiveBorder;
-            this.tvComicTree.Font = new System.Drawing.Font("新細明體", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.tvComicTree.Font = new System.Drawing.Font("新細明體", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.tvComicTree.HideSelection = false;
             this.tvComicTree.Location = new System.Drawing.Point(4, 36);
             this.tvComicTree.Name = "tvComicTree";
@@ -404,7 +390,7 @@
             // 
             // btnShowExceptModal
             // 
-            this.btnShowExceptModal.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnShowExceptModal.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnShowExceptModal.Location = new System.Drawing.Point(253, 57);
             this.btnShowExceptModal.Name = "btnShowExceptModal";
             this.btnShowExceptModal.Size = new System.Drawing.Size(82, 29);
@@ -416,7 +402,7 @@
             // 
             // btnShowEditModal
             // 
-            this.btnShowEditModal.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnShowEditModal.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnShowEditModal.Location = new System.Drawing.Point(165, 57);
             this.btnShowEditModal.Name = "btnShowEditModal";
             this.btnShowEditModal.Size = new System.Drawing.Size(82, 29);
@@ -428,7 +414,7 @@
             // 
             // btnOpenDirectory
             // 
-            this.btnOpenDirectory.Font = new System.Drawing.Font("新細明體", 14F);
+            this.btnOpenDirectory.Font = new System.Drawing.Font("新細明體", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnOpenDirectory.Location = new System.Drawing.Point(306, 200);
             this.btnOpenDirectory.Name = "btnOpenDirectory";
             this.btnOpenDirectory.Size = new System.Drawing.Size(29, 102);
@@ -439,7 +425,7 @@
             // 
             // btnDelete
             // 
-            this.btnDelete.Font = new System.Drawing.Font("新細明體", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnDelete.Font = new System.Drawing.Font("新細明體", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnDelete.ImageList = this.tvFolderImageList1;
             this.btnDelete.Location = new System.Drawing.Point(306, 106);
             this.btnDelete.Name = "btnDelete";
@@ -451,6 +437,7 @@
             // 
             // tvFolderImageList1
             // 
+            this.tvFolderImageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
             this.tvFolderImageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("tvFolderImageList1.ImageStream")));
             this.tvFolderImageList1.TransparentColor = System.Drawing.Color.Transparent;
             this.tvFolderImageList1.Images.SetKeyName(0, "my_computer2.png");
@@ -463,7 +450,7 @@
             // 
             // btnArchive
             // 
-            this.btnArchive.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnArchive.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnArchive.Location = new System.Drawing.Point(84, 57);
             this.btnArchive.Name = "btnArchive";
             this.btnArchive.Size = new System.Drawing.Size(75, 29);
@@ -476,11 +463,11 @@
             // lblCbMessage
             // 
             this.lblCbMessage.AutoSize = true;
-            this.lblCbMessage.Font = new System.Drawing.Font("新細明體", 10F);
+            this.lblCbMessage.Font = new System.Drawing.Font("新細明體", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lblCbMessage.ForeColor = System.Drawing.Color.Blue;
             this.lblCbMessage.Location = new System.Drawing.Point(3, 89);
             this.lblCbMessage.Name = "lblCbMessage";
-            this.lblCbMessage.Size = new System.Drawing.Size(114, 20);
+            this.lblCbMessage.Size = new System.Drawing.Size(98, 17);
             this.lblCbMessage.TabIndex = 16;
             this.lblCbMessage.Text = "lblCbMessage";
             // 
@@ -490,18 +477,18 @@
             this.cbRelateFolders.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.cbRelateFolders.BackColor = System.Drawing.Color.Lavender;
             this.cbRelateFolders.Dock = System.Windows.Forms.DockStyle.Top;
-            this.cbRelateFolders.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.cbRelateFolders.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.cbRelateFolders.FormattingEnabled = true;
-            this.cbRelateFolders.Location = new System.Drawing.Point(0, 36);
+            this.cbRelateFolders.Location = new System.Drawing.Point(0, 31);
             this.cbRelateFolders.Name = "cbRelateFolders";
-            this.cbRelateFolders.Size = new System.Drawing.Size(390, 32);
+            this.cbRelateFolders.Size = new System.Drawing.Size(390, 28);
             this.cbRelateFolders.TabIndex = 2;
             this.cbRelateFolders.SelectedIndexChanged += new System.EventHandler(this.cbFolders_SelectedIndexChanged);
             this.cbRelateFolders.KeyUp += new System.Windows.Forms.KeyEventHandler(this.cbRelateFolders_KeyUp);
             // 
             // btnRefresh
             // 
-            this.btnRefresh.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnRefresh.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.btnRefresh.Location = new System.Drawing.Point(3, 57);
             this.btnRefresh.Name = "btnRefresh";
             this.btnRefresh.Size = new System.Drawing.Size(75, 29);
@@ -515,10 +502,10 @@
             // 
             this.txtRootPath.BackColor = System.Drawing.Color.Honeydew;
             this.txtRootPath.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtRootPath.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.txtRootPath.Font = new System.Drawing.Font("新細明體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtRootPath.Location = new System.Drawing.Point(0, 0);
             this.txtRootPath.Name = "txtRootPath";
-            this.txtRootPath.Size = new System.Drawing.Size(390, 36);
+            this.txtRootPath.Size = new System.Drawing.Size(390, 31);
             this.txtRootPath.TabIndex = 1;
             this.txtRootPath.Text = "Q:\\Comic\\ComicShelf";
             this.txtRootPath.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtPath_KeyPress);
@@ -592,7 +579,7 @@
             this.setArchiveDownloadedFile.Location = new System.Drawing.Point(313, 224);
             this.setArchiveDownloadedFile.Margin = new System.Windows.Forms.Padding(2);
             this.setArchiveDownloadedFile.Name = "setArchiveDownloadedFile";
-            this.setArchiveDownloadedFile.Size = new System.Drawing.Size(124, 22);
+            this.setArchiveDownloadedFile.Size = new System.Drawing.Size(106, 23);
             this.setArchiveDownloadedFile.TabIndex = 33;
             this.setArchiveDownloadedFile.Text = "下載後壓縮";
             this.setArchiveDownloadedFile.UseVisualStyleBackColor = true;
@@ -606,7 +593,7 @@
             this.setSaveWebSiteName.Location = new System.Drawing.Point(32, 224);
             this.setSaveWebSiteName.Margin = new System.Windows.Forms.Padding(2);
             this.setSaveWebSiteName.Name = "setSaveWebSiteName";
-            this.setSaveWebSiteName.Size = new System.Drawing.Size(178, 22);
+            this.setSaveWebSiteName.Size = new System.Drawing.Size(151, 23);
             this.setSaveWebSiteName.TabIndex = 32;
             this.setSaveWebSiteName.Text = "存檔目錄加上前綴";
             this.setSaveWebSiteName.UseVisualStyleBackColor = true;
@@ -620,7 +607,7 @@
             this.setBackGroundLoad.Location = new System.Drawing.Point(32, 275);
             this.setBackGroundLoad.Margin = new System.Windows.Forms.Padding(2);
             this.setBackGroundLoad.Name = "setBackGroundLoad";
-            this.setBackGroundLoad.Size = new System.Drawing.Size(142, 22);
+            this.setBackGroundLoad.Size = new System.Drawing.Size(121, 23);
             this.setBackGroundLoad.TabIndex = 31;
             this.setBackGroundLoad.Text = "自動載入資訊";
             this.setBackGroundLoad.UseVisualStyleBackColor = true;
@@ -644,7 +631,7 @@
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(16, 82);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(75, 18);
+            this.label7.Size = new System.Drawing.Size(77, 19);
             this.label7.TabIndex = 34;
             this.label7.Text = "ProxyPort";
             // 
@@ -652,7 +639,7 @@
             // 
             this.setProxyPort.Location = new System.Drawing.Point(76, 77);
             this.setProxyPort.Name = "setProxyPort";
-            this.setProxyPort.Size = new System.Drawing.Size(69, 29);
+            this.setProxyPort.Size = new System.Drawing.Size(69, 27);
             this.setProxyPort.TabIndex = 32;
             // 
             // label6
@@ -660,7 +647,7 @@
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(16, 54);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(80, 18);
+            this.label6.Size = new System.Drawing.Size(77, 19);
             this.label6.TabIndex = 33;
             this.label6.Text = "ProxyURL";
             // 
@@ -668,7 +655,7 @@
             // 
             this.setProxyUrl.Location = new System.Drawing.Point(76, 49);
             this.setProxyUrl.Name = "setProxyUrl";
-            this.setProxyUrl.Size = new System.Drawing.Size(155, 29);
+            this.setProxyUrl.Size = new System.Drawing.Size(155, 27);
             this.setProxyUrl.TabIndex = 31;
             // 
             // setUsingProxy
@@ -680,7 +667,7 @@
             this.setUsingProxy.Location = new System.Drawing.Point(16, 27);
             this.setUsingProxy.Margin = new System.Windows.Forms.Padding(2);
             this.setUsingProxy.Name = "setUsingProxy";
-            this.setUsingProxy.Size = new System.Drawing.Size(109, 22);
+            this.setUsingProxy.Size = new System.Drawing.Size(100, 23);
             this.setUsingProxy.TabIndex = 30;
             this.setUsingProxy.Text = "使用Proxy";
             this.setUsingProxy.UseVisualStyleBackColor = true;
@@ -690,7 +677,7 @@
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(32, 189);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(116, 18);
+            this.label5.Size = new System.Drawing.Size(99, 19);
             this.label5.TabIndex = 25;
             this.label5.Text = "本地圖片路徑";
             // 
@@ -699,7 +686,7 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(32, 137);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(107, 18);
+            this.label4.Size = new System.Drawing.Size(97, 19);
             this.label4.TabIndex = 24;
             this.label4.Text = "WinRAR路徑";
             // 
@@ -708,7 +695,7 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(32, 85);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(116, 18);
+            this.label3.Size = new System.Drawing.Size(99, 19);
             this.label3.TabIndex = 23;
             this.label3.Text = "看圖軟體路徑";
             // 
@@ -721,7 +708,7 @@
             this.setLoadAllPicture.Location = new System.Drawing.Point(32, 250);
             this.setLoadAllPicture.Margin = new System.Windows.Forms.Padding(2);
             this.setLoadAllPicture.Name = "setLoadAllPicture";
-            this.setLoadAllPicture.Size = new System.Drawing.Size(214, 22);
+            this.setLoadAllPicture.Size = new System.Drawing.Size(181, 23);
             this.setLoadAllPicture.TabIndex = 4;
             this.setLoadAllPicture.Text = "展開頁時載入全部縮圖";
             this.setLoadAllPicture.UseVisualStyleBackColor = true;
@@ -740,21 +727,21 @@
             // 
             this.setLocalPath.Location = new System.Drawing.Point(115, 184);
             this.setLocalPath.Name = "setLocalPath";
-            this.setLocalPath.Size = new System.Drawing.Size(819, 29);
+            this.setLocalPath.Size = new System.Drawing.Size(819, 27);
             this.setLocalPath.TabIndex = 3;
             // 
             // setWinRARPath
             // 
             this.setWinRARPath.Location = new System.Drawing.Point(115, 132);
             this.setWinRARPath.Name = "setWinRARPath";
-            this.setWinRARPath.Size = new System.Drawing.Size(819, 29);
+            this.setWinRARPath.Size = new System.Drawing.Size(819, 27);
             this.setWinRARPath.TabIndex = 2;
             // 
             // setPhotoProgramPath
             // 
             this.setPhotoProgramPath.Location = new System.Drawing.Point(115, 80);
             this.setPhotoProgramPath.Name = "setPhotoProgramPath";
-            this.setPhotoProgramPath.Size = new System.Drawing.Size(819, 29);
+            this.setPhotoProgramPath.Size = new System.Drawing.Size(819, 27);
             this.setPhotoProgramPath.TabIndex = 1;
             // 
             // statusStrip1
@@ -763,9 +750,9 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusMsg,
             this.statusMsg2});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 676);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 679);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1184, 28);
+            this.statusStrip1.Size = new System.Drawing.Size(1184, 25);
             this.statusStrip1.TabIndex = 3;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -773,13 +760,13 @@
             // 
             this.statusMsg.ForeColor = System.Drawing.Color.Blue;
             this.statusMsg.Name = "statusMsg";
-            this.statusMsg.Size = new System.Drawing.Size(22, 23);
+            this.statusMsg.Size = new System.Drawing.Size(19, 19);
             this.statusMsg.Text = "[]";
             // 
             // statusMsg2
             // 
             this.statusMsg2.Name = "statusMsg2";
-            this.statusMsg2.Size = new System.Drawing.Size(22, 23);
+            this.statusMsg2.Size = new System.Drawing.Size(19, 19);
             this.statusMsg2.Text = "[]";
             // 
             // timer1
@@ -800,12 +787,12 @@
             this.exceptMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.AddIgnoreComic});
             this.exceptMenu.Name = "exceptMenu";
-            this.exceptMenu.Size = new System.Drawing.Size(255, 32);
+            this.exceptMenu.Size = new System.Drawing.Size(224, 28);
             // 
             // AddIgnoreComic
             // 
             this.AddIgnoreComic.Name = "AddIgnoreComic";
-            this.AddIgnoreComic.Size = new System.Drawing.Size(254, 28);
+            this.AddIgnoreComic.Size = new System.Drawing.Size(223, 24);
             this.AddIgnoreComic.Text = "加入例外網頁(不顯示)";
             this.AddIgnoreComic.Click += new System.EventHandler(this.AddIgnoreComic_Click);
             // 
@@ -897,7 +884,6 @@
         private System.Windows.Forms.Button btnOpenDirectory;
         private System.Windows.Forms.CheckBox setBackGroundLoad;
         private System.Windows.Forms.ComboBox cbComicCatcher;
-        private System.Windows.Forms.CheckBox chkSaveWebSiteName;
         private System.Windows.Forms.CheckBox setSaveWebSiteName;
         private System.Windows.Forms.Button btnShowEditModal;
         private System.Windows.Forms.Button btnAppendTo;

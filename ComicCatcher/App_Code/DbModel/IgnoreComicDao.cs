@@ -24,7 +24,7 @@ namespace ComicCatcher.App_Code.DbModel
             string sql = @"
 CREATE TABLE IgnoreComic (
 ComicUrl NVARCHAR(200) not NULL,
-ComicEntity NVARCHAR(50) not NULL,
+ComicName NVARCHAR(50) not NULL,
 UNIQUE (ComicUrl) ON CONFLICT REPLACE
 );";
             try
@@ -38,7 +38,7 @@ UNIQUE (ComicUrl) ON CONFLICT REPLACE
         {
             try
             {
-                string sql = $"INSERT INTO IgnoreComic (ComicUrl, ComicEntity) values ('{url}' , '{name}')";
+                string sql = $"INSERT INTO IgnoreComic (ComicUrl, ComicName) values ('{url}' , '{name}')";
                 return SQLiteHelper.ExecuteNonQuery(sql) > 0;
             }
             catch (Exception ex)
@@ -51,7 +51,7 @@ UNIQUE (ComicUrl) ON CONFLICT REPLACE
         {
             try
             {
-                var sql = $"UPDATE IgnoreComic SET ComicEntity = '{name}' WHERE ComicUrl = '{url}'";
+                var sql = $"UPDATE IgnoreComic SET ComicName = '{name}' WHERE ComicUrl = '{url}'";
                 return SQLiteHelper.ExecuteNonQuery(sql) > 0;
             }
             catch (Exception ex)
@@ -84,20 +84,20 @@ UNIQUE (ComicUrl) ON CONFLICT REPLACE
                 {
                     // 更新操作
                     var url = Convert.ToString(row["ComicUrl"])?.Trim();
-                    var name = Convert.ToString(row["ComicEntity"])?.Trim();
+                    var name = Convert.ToString(row["ComicName"])?.Trim();
                     UpdateIgnoreComic(url, name);
                 }
                 else if (row.RowState == DataRowState.Deleted)
                 {
                     // 删除操作
-                    var url = Convert.ToString(row["ComicUrl"])?.Trim();
-                    //var name = Convert.ToString(row["ComicEntity"])?.Trim();
+                    var url = Convert.ToString(row["ComicUrl", DataRowVersion.Original])?.Trim();
+                    //var name = Convert.ToString(row["ComicName"])?.Trim();
                     DeleteIgnoreComic(url);
                 }
                 else if (row.RowState == DataRowState.Added)
                 {
                     var url = Convert.ToString(row["ComicUrl"])?.Trim();
-                    var name = Convert.ToString(row["ComicEntity"])?.Trim();
+                    var name = Convert.ToString(row["ComicName"])?.Trim();
                     AddIgnoreComic(url, name);
                 }
             }
