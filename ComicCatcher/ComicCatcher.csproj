@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="x64\e_sqlite3.dll" />
+    <None Remove="x64\WebView2Loader.dll" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bookicon.ico" />
@@ -77,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="x64\e_sqlite3.dll" />
+    <EmbeddedResource Include="x64\WebView2Loader.dll" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CHTCHSConv" Version="1.0.0" />

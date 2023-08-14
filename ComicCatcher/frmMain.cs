@@ -47,23 +47,25 @@ namespace ComicCatcher
 
         private void ExportInteropFile()
         {
-            if (false == File.Exists(@".\e_sqlite3.dll"))
-            {
-                Assembly asm;
-                Stream asmfs;
-                asm = Assembly.GetExecutingAssembly();
-                asmfs = asm.GetManifestResourceStream("ComicCatcher.x64.e_sqlite3.dll");
-                //var files = asm.GetManifestResourceNames();
+            Assembly asm = Assembly.GetExecutingAssembly();
+            Stream asmfs;
+            var resources = new List<string>() { "e_sqlite3.dll", "WebView2Loader.dll" };
 
-                using (FileStream fs = new FileStream(@".\e_sqlite3.dll", FileMode.Create, FileAccess.Write))
+            foreach (var resource in resources)
+            {
+                if (false == File.Exists(@$".\{resource}"))
                 {
-                    asmfs.Position = 0;
-                    int length = 4096;
-                    byte[] buffer = new Byte[length];
-                    int count = 0;
-                    while (0 < (count = asmfs.Read(buffer, 0, length)))
+                    asmfs = asm.GetManifestResourceStream($"ComicCatcher.x64.{resource}");
+                    using (FileStream fs = new FileStream(@$".\{resource}", FileMode.Create, FileAccess.Write))
                     {
-                        fs.Write(buffer, 0, count);
+                        asmfs.Position = 0;
+                        int length = 4096;
+                        byte[] buffer = new Byte[length];
+                        int count = 0;
+                        while (0 < (count = asmfs.Read(buffer, 0, length)))
+                        {
+                            fs.Write(buffer, 0, count);
+                        }
                     }
                 }
             }
