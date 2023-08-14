@@ -91,7 +91,7 @@ namespace ComicArchiver
             ExecuteCommandAsync(new CommandObj() { fileName = rarCmd, arguments = String.Format(rarArgument, path + ".rar", path) });
 
             //browseDirectory(Directory.GetParent(path).FullName);
-            //Thread.Sleep(1000);
+            //await Task.Delay()
         }
 
         private void tvFolder_KeyPress(object sender, KeyPressEventArgs e)

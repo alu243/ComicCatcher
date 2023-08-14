@@ -32,7 +32,7 @@ public class ComicUtil
                 {
                     NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
                 }
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 remainTries--;
             }
         }
@@ -56,7 +56,7 @@ public class ComicUtil
     //            //{
     //            //    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
     //            //}
-    //            Thread.Sleep(800);
+    //            Task.Delay(800);
     //            remainTries--;
     //        }
     //    }
@@ -80,7 +80,7 @@ public class ComicUtil
                 {
                     NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
                 }
-                Thread.Sleep(5000);
+                await Task.Delay(5000);
                 remainTries--;
             }
         }

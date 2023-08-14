@@ -18,7 +18,7 @@ namespace ComicCatcher.DbModel
             return JsonSerializer.Deserialize<Settings>(settingString);
         }
 
-        public string PhotoProgramPath { get; set; } = @"C:\MyProgram\MangaMeeya CE\MangaMeeyaCE.exe";
+        public string PhotoProgramPath { get; set; } = @"C:\Program Files\Honeyview\Honeyview.exe";
         public string WinRARPath { get; set; } = @"C:\Program Files\WinRAR\WinRAR.exe";
         public string LocalPath { get; set; } = @"Q:\Comic\ComicShelf";
         public bool UsingProxy { get; set; } = false;

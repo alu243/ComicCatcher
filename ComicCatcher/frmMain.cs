@@ -154,17 +154,17 @@ namespace ComicCatcher
             if (null == tvComicTree.SelectedNode) return;
             try
             {
+                var currNode = tvComicTree.SelectedNode;
                 //清單如果沒有子節點，就產生子節點(漫畫)
-                if (TreeViewUtil.IsPaginationNode(tvComicTree.SelectedNode))
+                if (TreeViewUtil.IsPaginationNode(currNode))
                 {
-                    var paginationNode = tvComicTree.SelectedNode;
-                    Task.Run(() => BuildComicNameNode(paginationNode, false));
+                    Task.Run(() => BuildComicNameNode(currNode, false));
                 }
 
                 #region IsComicNameNode then ShowComicData
-                if (TreeViewUtil.IsComicNameNode(tvComicTree.SelectedNode))
+                else if (TreeViewUtil.IsComicNameNode(currNode))
                 {
-                    this.BindComicNodeToView(tvComicTree.SelectedNode);
+                    this.BindComicNodeToView(currNode);
                 }
                 #endregion
             }
@@ -281,15 +281,16 @@ namespace ComicCatcher
                     TreeViewUtil.ClearSubNode(tvComicTree.SelectedNode);
 
                     // 分頁重設
-                    if (TreeViewUtil.IsPaginationNode(tvComicTree.SelectedNode))
+                    var treeNode = tvComicTree.SelectedNode;
+                    if (TreeViewUtil.IsPaginationNode(treeNode))
                     {
-                        Task.Run(() => BuildComicNameNode(tvComicTree.SelectedNode, true));
-                        tvComicTree.SelectedNode.Expand();
+                        Task.Run(() => BuildComicNameNode(treeNode, true));
+                        //tvComicTree.SelectedNode.Expand();
                     }
                     // 漫畫重讀章節
-                    else if (TreeViewUtil.IsComicNameNode(tvComicTree.SelectedNode))
+                    else if (TreeViewUtil.IsComicNameNode(treeNode))
                     {
-                        Task.Run(() => this.catcher.LoadChapters(tvComicTree.SelectedNode.Tag as ComicEntity));
+                        Task.Run(() => this.catcher.LoadChapters(treeNode.Tag as ComicEntity));
                     }
                 }
                 catch (Exception ex)
@@ -303,7 +304,6 @@ namespace ComicCatcher
                 }
             }
         }
-
 
         private void cbFolders_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -384,7 +384,7 @@ namespace ComicCatcher
             if (false == String.IsNullOrEmpty(msg.infoMsg)) NLogger.Info(msg.infoMsg);
         }
 
-        private void DownloadComic(DownloadChapterTask task)
+        private async Task DownloadComic(DownloadChapterTask task)
         {
             bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = $"[{task.Name}]準備開始下載", infoMsg = $"[{task.Name}]準備開始下載" });
 
@@ -411,7 +411,7 @@ namespace ComicCatcher
                     rar = null;
                 }
             }
-            Thread.Sleep(1);
+            await Task.Delay(1);
         }
         #endregion
 
@@ -632,7 +632,7 @@ namespace ComicCatcher
                     Array.Sort(files);
                     arugment = " \"" + files[0] + "\" ";
                 }
-                CMDUtil.ExecuteCommandSync(new CommandObj() { fileName = settings.PhotoProgramPath, arguments = arugment });
+                CMDUtil.ExecuteCommandAsync(new CommandObj() { fileName = settings.PhotoProgramPath, arguments = arugment });
             }
             catch (Exception ex)
             {

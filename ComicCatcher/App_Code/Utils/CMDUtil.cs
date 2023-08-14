@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Text;
 using System.Threading;
+using ComicCatcher.Helpers;
 
 namespace ComicCatcher.Utils
 {
     public static class CMDUtil
     {
-        public static void ExecuteCommandSync(object command)
+        private static void ExecuteCommandSync(object command)
         {
             try
             {
@@ -47,7 +48,8 @@ namespace ComicCatcher.Utils
             }
             catch (Exception e)
             {
-                throw e;
+                NLogger.Error(e.ToString());
+                //throw e;
             }
         }
         public static void ExecuteCommandAsync(CommandObj command)
@@ -63,7 +65,6 @@ namespace ComicCatcher.Utils
                 //Start the thread.
 
                 objThread.Start(command);
-                objThread.Join();
             }
             catch (ThreadStartException objException)
             {

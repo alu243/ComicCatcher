@@ -11,5 +11,5 @@ public class ComicEntity : ComicBaseProperty
     public string LastUpdateChapter { get; set; }
     public ComicState ListState { get; set; } = ComicState.Created;
     public ComicState ImageState { get; set; } = ComicState.Created;
-    public List<ComicChapter> Chapters { get; set; }
+    public List<ComicChapter> Chapters { get; set; } = new List<ComicChapter>();
 }

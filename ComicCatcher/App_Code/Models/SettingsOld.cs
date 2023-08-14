@@ -37,7 +37,7 @@ namespace ComicCatcher.Models
         private string _photoProgramPath;
         public string PhotoProgramPath
         {
-            get { return String.IsNullOrEmpty(this._photoProgramPath) ? @"C:\MyProgram\MangaMeeya CE\MangaMeeyaCE.exe" : this._photoProgramPath; }
+            get { return String.IsNullOrEmpty(this._photoProgramPath) ? @"C:\Program Files\Honeyview\Honeyview.exe" : this._photoProgramPath; }
             set { this._photoProgramPath = value; }
         }
         private string _winRARPath;

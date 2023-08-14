@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace ComicCatcher.ComicModels.Domains;
 
@@ -29,11 +28,12 @@ public class Dm5 : IComicCatcher
 
             ListState = ComicState.Created,
 
-            ThreadCount = 40,
+            ThreadCount = 80,
+            ConnectionCount = 30,
             Paginations = new List<ComicPagination>()
         };
-        locker = new SemaphoreSlim(100000);
-        HttpClientUtil.SetConnections(this._cRoot.ThreadCount);
+        locker = new SemaphoreSlim(this._cRoot.ThreadCount);
+        HttpClientUtil.SetConnections(this._cRoot.ConnectionCount);
         this.LoadPaginations();
     }
 
@@ -54,7 +54,7 @@ public class Dm5 : IComicCatcher
     #region Groups
     public void LoadPaginations()
     {
-        if (this.GetRoot().ListState !=  ComicState.Created) return;
+        if (this.GetRoot().ListState != ComicState.Created) return;
 
         this.GetRoot().ListState = ComicState.Processing;
 
@@ -114,49 +114,52 @@ public class Dm5 : IComicCatcher
     {
         if (pagination.ListState != ComicState.Created) return;
 
-        locker.Wait();
         pagination.ListState = ComicState.Processing;
-        try
-        {
-            pagination.Comics.Clear();
+        pagination.Comics.Clear();
 
-            var htmlContent = ComicUtil.GetUtf8Content(pagination.Url).Result;
-            var comicList = RetriveComicNames(htmlContent);
-            var results = comicList.Select(comicContent =>
+        var htmlContent = ComicUtil.GetUtf8Content(pagination.Url).Result;
+        var comicList = RetriveComicNames(htmlContent);
+        var results = comicList.Select(comicContent =>
+        {
+            var url = RetriveComicName_Url(comicContent);
+            url = url.MakeUrlAbsolute(this.GetRoot().Url);
+            if (ignoreComics.ContainsKey(url)) return null; // 忽略的回傳 null，等一下就過濾
+
+            var caption = RetriveComicName_Caption(comicContent);
+            var lastChapter = RetriveComicName_LastUpdateInfo(comicContent); // 取得最近更新回數
+            var comic = new ComicEntity()
             {
-                var url = RetriveComicName_Url(comicContent);
-                url = url.MakeUrlAbsolute(this.GetRoot().Url);
-                if (ignoreComics.ContainsKey(url)) return null; // 忽略的回傳 null，等一下就過濾
+                IconUrl = RetriveComicName_IconUrl(comicContent), // 取得漫畫首頁圖像連結
+                LastUpdateDate = RetriveComicName_LastUpdateDate(comicContent), // 取得最近更新日期
+                LastUpdateChapter = lastChapter.TrimEscapeString(),
+                Url = url,
+                Caption = caption.TrimEscapeString(),
+                Chapters = new List<ComicChapter>(),
+                ListState = ComicState.Created,
+                ImageState = ComicState.Created
+            };
+            comic.LastUpdateChapter = comic.LastUpdateChapter.TrimComicName(comic.Caption);
+            return comic;
+        }).Where(c => c != null).ToList();
 
-                var caption = RetriveComicName_Caption(comicContent);
-                var lastChapter = RetriveComicName_LastUpdateInfo(comicContent); // 取得最近更新回數
-                var comic = new ComicEntity()
-                {
-                    IconUrl = RetriveComicName_IconUrl(comicContent), // 取得漫畫首頁圖像連結
-                    LastUpdateDate = RetriveComicName_LastUpdateDate(comicContent), // 取得最近更新日期
-                    LastUpdateChapter = lastChapter.TrimEscapeString(),
-                    Url = url,
-                    Caption = caption.TrimEscapeString(),
-                    Chapters = new List<ComicChapter>(),
-                    ListState = ComicState.Created,
-                    ImageState = ComicState.Created
-                };
-                comic.LastUpdateChapter = comic.LastUpdateChapter.TrimComicName(comic.Caption);
-                return comic;
-            }).Where(c => c != null).ToList();
-
-            pagination.Comics.AddRange(results);
-        }
-        finally
-        {
-            pagination.ListState = ComicState.Created;
-            locker.Release();
-        }
+        pagination.Comics.AddRange(results);
+        pagination.ListState = ComicState.Created;
 
         foreach (var comic in pagination.Comics)
         {
-            Task.Run(() => this.LoadIconImage(comic));
-            Task.Run(() => this.LoadChapters(comic));
+            locker.Wait();
+            try
+            {
+                Task.Run(() => this.LoadIconImage(comic));
+            }
+            finally { locker.Release(); }
+
+            locker.Wait();
+            try
+            {
+                Task.Run(() => this.LoadChapters(comic));
+            }
+            finally { locker.Release(); }
         }
     }
 
@@ -164,22 +167,17 @@ public class Dm5 : IComicCatcher
     {
         if (comic.ImageState != ComicState.Created) return;
 
-        locker.Wait();
         comic.ImageState = ComicState.Processing;
         try
         {
             comic.IconImage = null;
             using Stream iconData = ComicUtil.GetPicture(comic.IconUrl).Result;
             comic.IconImage = Image.FromStream(iconData);
+            comic.ImageState = ComicState.ImageLoaded;
         }
         catch (Exception ex)
         {
             comic.ImageState = ComicState.ListError;
-        }
-        finally
-        {
-            comic.ImageState = ComicState.ImageLoaded;
-            locker.Release();
         }
     }
 
@@ -250,7 +248,6 @@ public class Dm5 : IComicCatcher
     {
         if (comic.ListState != ComicState.Created) return;
 
-        locker.Wait();
         comic.ListState = ComicState.Processing;
         try
         {
@@ -267,7 +264,8 @@ public class Dm5 : IComicCatcher
                 var cb = new ComicChapter()
                 {
                     Url = url.MakeUrlAbsolute(this.GetRoot().Url),
-                    Caption = caption.TrimEscapeString().TrimComicName(comic.Caption)
+                    Caption = caption.TrimEscapeString().TrimComicName(comic.Caption),
+                    Pages = new List<ComicPage>()
                 };
 
                 if (false == string.IsNullOrEmpty(cb.Caption))
@@ -284,7 +282,6 @@ public class Dm5 : IComicCatcher
         finally
         {
             comic.ListState = ComicState.ListLoaded;
-            locker.Release();
         }
     }
 
@@ -366,99 +363,84 @@ public class Dm5 : IComicCatcher
     #region Pages
     public void GetPages(ComicChapter chapter)
     {
-        locker.Wait();
-        try
+        chapter.Pages.Clear();
+        // fix by
+        // http://css122.us.cdndm.com/v201708091849/default/js/chapternew_v22.js
+        //Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
+        string htmlContent = ComicUtil.GetUtf8Content(chapter.Url).Result;
+        string cid = chapter.Url.Replace(@"https://www.dm5.com/m", "").Trim('/');
+        string mid = RetrivePage_MID(htmlContent);
+        string dt = RetrivePage_VIEWSIGNDT(htmlContent);
+        string sign = RetrivePage_VIEWSIGN(htmlContent);
+        int pageCount = RetrivePage_PageCount(htmlContent);
+
+        //string jsCodeWrapper = "; var url = (typeof (hd_c) != \"undefined\" && hd_c.length > 0) ? hd_c[0] : d[0];";
+        //string jsCodeWrapper = "; d[0];";
+        List<ComicPage> pages = new List<ComicPage>();
+
+        List<string> pageUrls;
+        if (pageCount > 0)
         {
-            chapter.Pages.Clear();
-            // fix by
-            // http://css122.us.cdndm.com/v201708091849/default/js/chapternew_v22.js
-            //Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
-            string htmlContent = ComicUtil.GetUtf8Content(chapter.Url).Result;
-            string cid = chapter.Url.Replace(@"https://www.dm5.com/m", "").Trim('/');
-            string mid = RetrivePage_MID(htmlContent);
-            string dt = RetrivePage_VIEWSIGNDT(htmlContent);
-            string sign = RetrivePage_VIEWSIGN(htmlContent);
-            int pageCount = RetrivePage_PageCount(htmlContent);
-
-            //string jsCodeWrapper = "; var url = (typeof (hd_c) != \"undefined\" && hd_c.length > 0) ? hd_c[0] : d[0];";
-            //string jsCodeWrapper = "; d[0];";
-            List<ComicPage> pages = new List<ComicPage>();
-
-            List<string> pageUrls;
-            if (pageCount > 0)
+            var tasks = new List<Task<string>>();
+            for (int i = 1; i <= pageCount; i++)
             {
-                var tasks = new List<Task<string>>();
-                for (int i = 1; i <= pageCount; i++)
-                {
-                    string pageUrl = this._cRoot.Url + "m" + cid + "/" + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString() + "&language=1&gtk=6&_cid=" + cid + "&_mid=" + mid + "&_dt=" + dt + "&_sign=" + sign;
-                    var refer = $"{this._cRoot.Url}m{cid}/";
-                    Task<string> task = Task.Run(() => GetPageUrl(pageUrl, refer));
-                    tasks.Add(task);
-                }
-                Task.WaitAll(tasks.ToArray());
-
-                pageUrls = tasks.Select(p => p.Result).ToList();
-                tasks.Clear();
-            }
-            else
-            {
-                pageUrls = RetrivePage_PageCount_Type2(htmlContent);
-            }
-
-            for (int i = 1; i <= pageUrls.Count; i++)
-            {
+                string pageUrl = this._cRoot.Url + "m" + cid + "/" + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString() + "&language=1&gtk=6&_cid=" + cid + "&_mid=" + mid + "&_dt=" + dt + "&_sign=" + sign;
                 var refer = $"{this._cRoot.Url}m{cid}/";
-                var page = GetComicPage(refer, pageUrls[i - 1], i);
-                pages.Add(page);
+                Task<string> task = Task.Run(() => GetPageUrl(pageUrl, refer));
+                tasks.Add(task);
             }
-            //Regex rInvalidFileName = new Regex(string.Format("[{0}]", Regex.Escape(new String(System.IO.Path.GetInvalidFileNameChars()))));
-            chapter.Pages = pages;
+            Task.WaitAll(tasks.ToArray());
+
+            pageUrls = tasks.Select(p => p.Result).ToList();
+            tasks.Clear();
         }
-        finally
+        else
         {
-            locker.Release();
+            pageUrls = RetrivePage_PageCount_Type2(htmlContent);
         }
+
+        for (int i = 1; i <= pageUrls.Count; i++)
+        {
+            var refer = $"{this._cRoot.Url}m{cid}/";
+            var page = GetComicPage(refer, pageUrls[i - 1], i);
+            pages.Add(page);
+        }
+        //Regex rInvalidFileName = new Regex(string.Format("[{0}]", Regex.Escape(new String(System.IO.Path.GetInvalidFileNameChars()))));
+        chapter.Pages = pages;
+
     }
 
     private string GetPageUrl(string pageUrl, string refer)
     {
-        locker.Wait();
-        try
+        ComicUtil util = ComicUtil.CreateVsaEngine();
+
+        // unpacker test url = 
+        // url: 'chapterfun.ashx',
+        // data: { cid: DM5_CID, page: DM5_PAGE, key: mkey, language: 1, gtk: 6, _cid: DM5_CID, _mid: DM5_MID, _dt: DM5_VIEWSIGN_DT, _sign: DM5_VIEWSIGN },
+        string jsCodeWrapper = ";var url = (typeof (isrevtt) != \"undefined\" && isrevtt) ? hd_c[0] : d[0];";
+
+        string pageFunContent = ComicUtil.GetUtf8Content(pageUrl, refer).Result; // 這個得到的是一串 eval(...)字串
+        for (int j = 0; j <= 20; j++)
         {
-            ComicUtil util = ComicUtil.CreateVsaEngine();
-
-            // unpacker test url = 
-            // url: 'chapterfun.ashx',
-            // data: { cid: DM5_CID, page: DM5_PAGE, key: mkey, language: 1, gtk: 6, _cid: DM5_CID, _mid: DM5_MID, _dt: DM5_VIEWSIGN_DT, _sign: DM5_VIEWSIGN },
-            string jsCodeWrapper = ";var url = (typeof (isrevtt) != \"undefined\" && isrevtt) ? hd_c[0] : d[0];";
-
-            string pageFunContent = ComicUtil.GetUtf8Content(pageUrl, refer).Result; // 這個得到的是一串 eval(...)字串
-            for (int j = 0; j <= 20; j++)
+            if (false == String.IsNullOrEmpty(pageFunContent) && false == pageFunContent.Contains("war|jpg"))
             {
-                if (false == String.IsNullOrEmpty(pageFunContent) && false == pageFunContent.Contains("war|jpg"))
-                {
-                    break;
-                }
-                else
-                {
-                    pageFunContent = ComicUtil.GetUtf8Content(pageUrl).Result; // 這個得到的是一串 eval(...)字串
-                }
+                break;
             }
-
-            pageFunContent = pageFunContent.Trim('"').Trim('\n');
-            pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6) + ";";
-            string url;
-            //string jsCode;
-            //jsCode = util.EvalJScript(pageFunContent).ToString();
-            //jsCodePass2 = util.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
-            url = ((string[])util.EvalJScript(pageFunContent))[0];
-
-            return url;
+            else
+            {
+                pageFunContent = ComicUtil.GetUtf8Content(pageUrl).Result; // 這個得到的是一串 eval(...)字串
+            }
         }
-        finally
-        {
-            locker.Release();
-        }
+
+        pageFunContent = pageFunContent.Trim('"').Trim('\n');
+        pageFunContent = pageFunContent.Substring(5, pageFunContent.Length - 6) + ";";
+        string url;
+        //string jsCode;
+        //jsCode = util.EvalJScript(pageFunContent).ToString();
+        //jsCodePass2 = util.EvalJScript("var isrevtt; var hd_c;" + jsCode + jsCodeWrapper).ToString();
+        url = ((string[])util.EvalJScript(pageFunContent))[0];
+
+        return url;
     }
 
     private ComicPage GetComicPage(string refer, string pageUrl, int pageNumber)
@@ -543,33 +525,27 @@ public class Dm5 : IComicCatcher
     #endregion
 
     #region Download
-
     public void DownloadChapter(ComicChapter chapter, string downloadPath)
     {
-        locker.Wait();
-        try
+        if (false == Directory.Exists(downloadPath)) Directory.CreateDirectory(downloadPath);
+
+        var tasks = new List<Task>();
+        foreach (var page in chapter.Pages)
         {
-
-            if (false == Directory.Exists(downloadPath)) Directory.CreateDirectory(downloadPath);
-
-            var tasks = new List<Task>();
-            foreach (var page in chapter.Pages)
+            locker.Wait();
+            try
             {
                 var task = Task.Run(() => DownloadPage(page, downloadPath));
                 tasks.Add(task);
             }
-            Task.WaitAll(tasks.ToArray());
-            tasks.Clear();
+            finally { locker.Release(); }
         }
-        finally
-        {
-            locker.Release();
-        }
+        Task.WaitAll(tasks.ToArray());
+        tasks.Clear();
     }
 
     private void DownloadPage(ComicPage page, string downloadPath)
     {
-        locker.Wait();
         try
         {
             var fullPath = Path.Combine(downloadPath, page.PageFileName);
@@ -583,10 +559,6 @@ public class Dm5 : IComicCatcher
         catch (Exception ex)
         {
             throw new Exception("下載漫畫圖片時發生錯誤，原因：" + ex);
-        }
-        finally
-        {
-            locker.Release();
         }
     }
     #endregion
