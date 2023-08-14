@@ -15,3 +15,12 @@ public class ComicBaseProperty
     }
     private string _caption;
 }
+
+public enum ComicState
+{
+    Created,
+    Processing,
+    ListLoaded,
+    ImageLoaded,
+    ListError,
+}

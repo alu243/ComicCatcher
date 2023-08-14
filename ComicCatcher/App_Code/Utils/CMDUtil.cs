@@ -63,6 +63,7 @@ namespace ComicCatcher.Utils
                 //Start the thread.
 
                 objThread.Start(command);
+                objThread.Join();
             }
             catch (ThreadStartException objException)
             {

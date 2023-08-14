@@ -15,7 +15,7 @@ namespace ComicCatcher.Utils
             {
                 if (_client == null)
                 {
-                    var handler = new HttpClientHandler() { UseCookies = true, Proxy = null};
+                    var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null};
                     _client = new HttpClient(handler);// { BaseAddress = baseAddress };
                 }
                 return _client;
@@ -24,7 +24,7 @@ namespace ComicCatcher.Utils
 
         public static void SetConnections(int conections)
         {
-            var handler = new HttpClientHandler() { UseCookies = true, Proxy = null, MaxConnectionsPerServer = conections};
+            var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null, MaxConnectionsPerServer = conections};
             _client = new HttpClient(handler);// { BaseAddress = baseAddress };
         }
 

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace ComicCatcher.ComicModels.Domains;
 
@@ -19,18 +20,21 @@ public class Dm5 : IComicCatcher
         _cRoot = new ComicRoot()
         {
             Caption = "動漫屋(dm5)",
-            WebSiteName = "dm5",
             Url = @"https://www.dm5.com/",
+            WebSiteName = "dm5",
             IconHost = @"",
             PicHost = @"",
             PicHost2 = @"",
-
             PicHostAlternative = @"",
-            ThreadCount = 20,
+
+            ListState = ComicState.Created,
+
+            ThreadCount = 40,
             Paginations = new List<ComicPagination>()
         };
-        locker = new SemaphoreSlim(_cRoot.ThreadCount);
-        HttpClientUtil.SetConnections(_cRoot.ThreadCount / 2);
+        locker = new SemaphoreSlim(100000);
+        HttpClientUtil.SetConnections(this._cRoot.ThreadCount);
+        this.LoadPaginations();
     }
 
     public void Dispose()
@@ -48,8 +52,13 @@ public class Dm5 : IComicCatcher
     #endregion
 
     #region Groups
-    public List<ComicPagination> GetPaginations()
+    public void LoadPaginations()
     {
+        if (this.GetRoot().ListState !=  ComicState.Created) return;
+
+        this.GetRoot().ListState = ComicState.Processing;
+
+        this.GetRoot().Paginations.Clear();
         var paginations = new List<ComicPagination>();
         for (int i = 1; i <= 300; ++i)
         {
@@ -59,12 +68,13 @@ public class Dm5 : IComicCatcher
                 TabNumber = i,
                 Caption = "第" + i.ToString().PadLeft(3, '0') + "頁",
                 Url = url.MakeUrlAbsolute(this.GetRoot().Url),
-                Comics = new List<ComicEntity>()
+                Comics = new List<ComicEntity>(),
+                ListState = ComicState.Created
             };
             paginations.Add(pagination);
         }
         this.GetRoot().Paginations.AddRange(paginations);
-        return paginations;
+        this.GetRoot().ListState = ComicState.ListLoaded;
     }
     #endregion
 
@@ -100,51 +110,75 @@ public class Dm5 : IComicCatcher
         return cn;
     }
 
-    public void LoadComics(ComicPagination pagination)
+    public void LoadComics(ComicPagination pagination, Dictionary<string, string> ignoreComics)
     {
+        if (pagination.ListState != ComicState.Created) return;
+
         locker.Wait();
+        pagination.ListState = ComicState.Processing;
         try
         {
+            pagination.Comics.Clear();
+
             var htmlContent = ComicUtil.GetUtf8Content(pagination.Url).Result;
             var comicList = RetriveComicNames(htmlContent);
-            var results = comicList.Select(comic =>
+            var results = comicList.Select(comicContent =>
             {
-                var url = RetriveComicName_Url(comic);
-                var caption = RetriveComicName_Caption(comic);
-                var lastChapter = RetriveComicName_LastUpdateInfo(comic); // 取得最近更新回數
-                var cn = new ComicEntity()
-                {
-                    IconUrl = RetriveComicName_IconUrl(comic), // 取得漫畫首頁圖像連結
-                    LastUpdateDate = RetriveComicName_LastUpdateDate(comic), // 取得最近更新日期
-                    LastUpdateChapter = lastChapter.TrimEscapeString(),
-                    Url = url.MakeUrlAbsolute(this.GetRoot().Url),
-                    Caption = caption.TrimEscapeString(),
-                    Chapters = new List<ComicChapter>()
-                };
-                cn.LastUpdateChapter = cn.LastUpdateChapter.TrimComicName(cn.Caption);
+                var url = RetriveComicName_Url(comicContent);
+                url = url.MakeUrlAbsolute(this.GetRoot().Url);
+                if (ignoreComics.ContainsKey(url)) return null; // 忽略的回傳 null，等一下就過濾
 
-                Task.Run(() => this.LoadIconImage(cn));
-                Task.Run(() => this.LoadChapters(cn));
-                return cn;
-            }).ToList();
+                var caption = RetriveComicName_Caption(comicContent);
+                var lastChapter = RetriveComicName_LastUpdateInfo(comicContent); // 取得最近更新回數
+                var comic = new ComicEntity()
+                {
+                    IconUrl = RetriveComicName_IconUrl(comicContent), // 取得漫畫首頁圖像連結
+                    LastUpdateDate = RetriveComicName_LastUpdateDate(comicContent), // 取得最近更新日期
+                    LastUpdateChapter = lastChapter.TrimEscapeString(),
+                    Url = url,
+                    Caption = caption.TrimEscapeString(),
+                    Chapters = new List<ComicChapter>(),
+                    ListState = ComicState.Created,
+                    ImageState = ComicState.Created
+                };
+                comic.LastUpdateChapter = comic.LastUpdateChapter.TrimComicName(comic.Caption);
+                return comic;
+            }).Where(c => c != null).ToList();
+
             pagination.Comics.AddRange(results);
         }
         finally
         {
+            pagination.ListState = ComicState.Created;
             locker.Release();
+        }
+
+        foreach (var comic in pagination.Comics)
+        {
+            Task.Run(() => this.LoadIconImage(comic));
+            Task.Run(() => this.LoadChapters(comic));
         }
     }
 
-    private void LoadIconImage(ComicEntity cn)
+    private void LoadIconImage(ComicEntity comic)
     {
+        if (comic.ImageState != ComicState.Created) return;
+
         locker.Wait();
+        comic.ImageState = ComicState.Processing;
         try
         {
-            using Stream iconData = ComicUtil.GetPicture(cn.IconUrl).Result;
-            cn.IconImage = Image.FromStream(iconData);
+            comic.IconImage = null;
+            using Stream iconData = ComicUtil.GetPicture(comic.IconUrl).Result;
+            comic.IconImage = Image.FromStream(iconData);
+        }
+        catch (Exception ex)
+        {
+            comic.ImageState = ComicState.ListError;
         }
         finally
         {
+            comic.ImageState = ComicState.ImageLoaded;
             locker.Release();
         }
     }
@@ -214,9 +248,14 @@ public class Dm5 : IComicCatcher
     #region Chapters
     public void LoadChapters(ComicEntity comic)
     {
+        if (comic.ListState != ComicState.Created) return;
+
         locker.Wait();
+        comic.ListState = ComicState.Processing;
         try
         {
+            comic.Chapters.Clear();
+
             string htmlContent = ComicUtil.GetUtf8Content(comic.Url).Result;
             List<ComicChapter> results = new List<ComicChapter>();
             var chapters = RetriveChapters(htmlContent);
@@ -238,11 +277,15 @@ public class Dm5 : IComicCatcher
             });
             comic.Chapters.AddRange(results);
         }
+        catch (Exception ex)
+        {
+            comic.ImageState = ComicState.ListError;
+        }
         finally
         {
+            comic.ListState = ComicState.ListLoaded;
             locker.Release();
         }
-
     }
 
     private List<string> RetriveChapters(string htmlContent)
@@ -326,6 +369,7 @@ public class Dm5 : IComicCatcher
         locker.Wait();
         try
         {
+            chapter.Pages.Clear();
             // fix by
             // http://css122.us.cdndm.com/v201708091849/default/js/chapternew_v22.js
             //Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);

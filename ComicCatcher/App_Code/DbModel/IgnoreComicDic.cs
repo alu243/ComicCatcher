@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace ComicCatcher.DbModel
 {
@@ -17,6 +18,8 @@ namespace ComicCatcher.DbModel
         //    if (false == ContainsKey(url)) return url;
         //    return this[url];
         //}
+
+        public Dictionary<string, string> GetDictionary() => dic.ToDictionary(k => k.Key, v => v.Value);
 
         public bool Add(string url, string name)
         {

@@ -6,8 +6,8 @@ namespace ComicCatcher.ComicModels.Domains
     public interface IComicCatcher : IDisposable
     {
         ComicRoot GetRoot();
-        List<ComicPagination> GetPaginations();
-        void LoadComics(ComicPagination pagination);
+        void LoadPaginations();
+        void LoadComics(ComicPagination pagination, Dictionary<string, string> ignoreComics);
         void LoadChapters(ComicEntity comic);
         void GetPages(ComicChapter chapter);
         void DownloadChapter(ComicChapter chapter, string downloadPath);

@@ -12,6 +12,7 @@ public class ComicRoot : ComicBaseProperty
     public string PicHostAlternative { get; set; }
     //public bool BackgroundLoadIcon { get; set; }
     public int ThreadCount { get; set; }
+    public ComicState ListState { get; set; } = ComicState.Created;
     public List<ComicPagination> Paginations { get; set; }
     public List<ComicEntity> Comics => Paginations.SelectMany(p => p.Comics).ToList();
 }

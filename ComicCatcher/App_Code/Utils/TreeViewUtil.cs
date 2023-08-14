@@ -133,7 +133,7 @@ namespace ComicCatcher.Utils
             }
         }
 
-        public static void ClearNodes(TreeView tv)
+        public static void ClearTree(TreeView tv)
         {
             if (tv == null) return;
             if (tv.InvokeRequired)
@@ -146,7 +146,7 @@ namespace ComicCatcher.Utils
             }
         }
 
-        public static void ClearTreeNode(TreeNode currNode)
+        public static void ClearSubNode(TreeNode currNode)
         {
             if (currNode.TreeView == null) return;
             if (currNode.TreeView.InvokeRequired)
@@ -176,6 +176,23 @@ namespace ComicCatcher.Utils
                 }
             }
             return childNodes;
+        }
+
+        public static TreeNode BuildNode(ComicPagination pagination)
+        {
+            TreeNode paginationNode = new TreeNode(pagination.Caption);
+            paginationNode.Name = pagination.Url;
+            paginationNode.Tag = pagination;
+            paginationNode.ImageIndex = 3;
+            paginationNode.SelectedImageIndex = 3;
+            return paginationNode;
+        }
+
+        public static TreeNode BuildNode(ComicRoot root)
+        {
+            TreeNode rootNode = new TreeNode(root.Caption);
+            rootNode.Tag = root;
+            return rootNode;
         }
 
         public static TreeNode BuildNode(ComicEntity comic, string localComicPath, string groupName)

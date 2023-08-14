@@ -16,7 +16,7 @@ public class ComicUtil
 
     public static async Task<Stream> GetPicture(string url, string refer = "")
     {
-        int origTries = 5;
+        int origTries = 10;
         int remainTries = origTries;
         while (remainTries >= 0)
         {
@@ -28,11 +28,11 @@ public class ComicUtil
             }
             catch (Exception e)
             {
-                //if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
-                //{
-                //    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
-                //}
-                Thread.Sleep(800);
+                if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
+                {
+                    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
+                }
+                Thread.Sleep(5000);
                 remainTries--;
             }
         }
@@ -76,12 +76,11 @@ public class ComicUtil
             }
             catch (Exception e)
             {
-                //if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
-                //{
-                //    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
-                //}
-                Thread.Sleep(500);
-                GC.Collect();
+                if ((origTries - remainTries) >= 5 && (origTries - remainTries) % 5 == 0)
+                {
+                    NLogger.Error("讀取url內容發生錯誤(Thread ID=" + Thread.CurrentThread.GetHashCode().ToString() + "), 已重試 " + (origTries - remainTries) + "次," + url + Environment.NewLine + e.ToString());
+                }
+                Thread.Sleep(5000);
                 remainTries--;
             }
         }
