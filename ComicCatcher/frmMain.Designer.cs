@@ -50,6 +50,7 @@
             chkIsUseProxy = new System.Windows.Forms.CheckBox();
             txtUrl = new System.Windows.Forms.TextBox();
             tvComicTree = new System.Windows.Forms.TreeView();
+            btnViewHtml = new System.Windows.Forms.Button();
             btnShowExceptModal = new System.Windows.Forms.Button();
             btnShowEditModal = new System.Windows.Forms.Button();
             btnOpenDirectory = new System.Windows.Forms.Button();
@@ -156,6 +157,7 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.BackColor = System.Drawing.Color.WhiteSmoke;
+            splitContainer1.Panel2.Controls.Add(btnViewHtml);
             splitContainer1.Panel2.Controls.Add(btnShowExceptModal);
             splitContainer1.Panel2.Controls.Add(btnShowEditModal);
             splitContainer1.Panel2.Controls.Add(btnOpenDirectory);
@@ -364,6 +366,17 @@
             tvComicTree.KeyPress += tvComicTree_KeyPress;
             tvComicTree.KeyUp += tvComicTree_KeyUp;
             tvComicTree.MouseDoubleClick += tvComicTree_MouseDoubleClick;
+            // 
+            // btnViewHtml
+            // 
+            btnViewHtml.Font = new System.Drawing.Font("新細明體", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnViewHtml.Location = new System.Drawing.Point(306, 308);
+            btnViewHtml.Name = "btnViewHtml";
+            btnViewHtml.Size = new System.Drawing.Size(29, 102);
+            btnViewHtml.TabIndex = 20;
+            btnViewHtml.Text = "開啟網頁";
+            btnViewHtml.UseVisualStyleBackColor = true;
+            btnViewHtml.Click += btnViewHtml_Click;
             // 
             // btnShowExceptModal
             // 
@@ -863,6 +876,8 @@
         private System.Windows.Forms.ToolStripMenuItem AddIgnoreComic;
         private System.Windows.Forms.CheckBox setArchiveDownloadedFile;
         private System.Windows.Forms.TreeView treeViewnComicName;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnViewHtml;
     }
 }
 

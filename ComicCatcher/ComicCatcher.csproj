@@ -82,6 +82,7 @@
     <PackageReference Include="CHTCHSConv" Version="1.0.0" />
     <PackageReference Include="Jint" Version="2.11.58" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.10" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1901.177" />
   </ItemGroup>
   <PropertyGroup>
     <AssemblyTitle>ComicCatcher</AssemblyTitle>

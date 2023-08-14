@@ -16,6 +16,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Web.WebView2.WinForms;
 
 namespace ComicCatcher
 {
@@ -29,6 +30,7 @@ namespace ComicCatcher
 
         private PathGroupDic pathGroupDic = null;
         private IgnoreComicDic ignoreComicDic = null;
+        frmView view;
 
         public frmMain()
         {
@@ -36,6 +38,7 @@ namespace ComicCatcher
             {
                 ExportInteropFile();
                 InitializeComponent();
+                view = new frmView();
                 NLogger.SetBox(this.txtInfo);
             }
             catch (Exception ex)
@@ -835,7 +838,14 @@ namespace ComicCatcher
 
         private void OpenDirectory_Click(object sender, EventArgs e)
         {
-            Process.Start(Path.Combine(txtRootPath.Text, cbRelateFolders.Text));
+            try
+            {
+                Process.Start("explorer.exe", Path.Combine(txtRootPath.Text, cbRelateFolders.Text));
+            }
+            catch (Exception ex)
+            {
+                NLogger.Error(ex.ToString());
+            }
         }
 
         private void cbComicCatcher_SelectedIndexChanged(object sender, EventArgs e)
@@ -914,6 +924,30 @@ namespace ComicCatcher
                     exceptMenu.Show(p);//顯示右鍵選單
                 }
             }
+        }
+
+        private void btnViewHtml_Click(object sender, EventArgs e)
+        {
+            var viewPath = Path.Combine(txtRootPath.Text, "view.html");
+            var files = Directory.GetFiles(Path.Combine(txtRootPath.Text, cbRelateFolders.Text, tvFolder.SelectedNode.Text));
+            using (StreamWriter writer = new StreamWriter(viewPath))
+            {
+                writer.WriteLine(@"<html><header></header><body onload=""sc()"">");
+                foreach (var file in files)
+                {
+                    //style=""min-wdith:70%;width:95%;""
+                    writer.WriteLine($@"<div><img src=""file:///{file}"" alt=""Snow""></div>");
+                }
+                writer.WriteLine("<script>function sc(){window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });}</script></body></html>");
+
+            }
+            view.SetPath(viewPath);
+            view.ShowDialog(this);
+
+            //WebView2 wb2 = new WebView2();
+            //wb2.EnsureCoreWebView2Async().Wait();
+            //wb2.CoreWebView2.Navigate(viewPath);
+            //wb2.Show();
         }
     }
 }
