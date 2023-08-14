@@ -14,6 +14,7 @@ namespace ComicCatcher.Utils
         {
             if (tn.TreeView == null) return;
             if (tn.TreeView.InvokeRequired)
+            {
                 tn.TreeView.Invoke(new MethodInvoker(() =>
                 {
                     tn.NodeFont = boldFont;
@@ -28,7 +29,9 @@ namespace ComicCatcher.Utils
                         tn.SelectedImageIndex = 99;
                     }
                 }));
+            }
             else
+            {
                 lock (tn)
                 {
                     if (null != tn.NodeFont && true == tn.NodeFont.Bold)
@@ -47,6 +50,7 @@ namespace ComicCatcher.Utils
                         tn.Text = tn.Text;
                     }
                 }
+            }
         }
 
         public static void SetFontBold(TreeNode tn)
@@ -92,6 +96,7 @@ namespace ComicCatcher.Utils
         {
             if (tn.TreeView == null) return;
             if (tn.TreeView.InvokeRequired)
+            {
                 tn.TreeView.Invoke(new MethodInvoker(() =>
                 {
                     tn.NodeFont = boldFont;
@@ -107,6 +112,7 @@ namespace ComicCatcher.Utils
                         tn.SelectedImageIndex = 5;
                     }
                 }));
+            }
             else
             {
                 lock (tn)
@@ -131,38 +137,44 @@ namespace ComicCatcher.Utils
         {
             if (tv == null) return;
             if (tv.InvokeRequired)
+            {
                 tv.Invoke(new MethodInvoker(() => tv.Nodes.Clear()));
+            }
             else
-                lock (tv)
-                {
-                    tv.Nodes.Clear();
-                }
+            {
+                lock (tv) tv.Nodes.Clear();
+            }
         }
 
         public static void ClearTreeNode(TreeNode currNode)
         {
             if (currNode.TreeView == null) return;
             if (currNode.TreeView.InvokeRequired)
+            {
                 currNode.TreeView.Invoke(new MethodInvoker(() => currNode.Nodes.Clear()));
+            }
             else
-                lock (currNode)
-                {
-                    currNode.Nodes.Clear();
-                }
+            {
+                lock (currNode) currNode.Nodes.Clear();
+            }
         }
 
         public static List<TreeNode> AddTreeNodes(TreeNode parentNode, List<TreeNode> childNodes)
         {
             if (parentNode.TreeView == null) return null;
             if (parentNode.TreeView.InvokeRequired)
+            {
                 parentNode.TreeView.Invoke(new MethodInvoker(() => parentNode.Nodes.AddRange(childNodes.ToArray())));
+            }
             else
+            {
                 lock (parentNode)
                 {
                     parentNode.TreeView.BeginUpdate();
                     parentNode.Nodes.AddRange(childNodes.ToArray());
                     parentNode.TreeView.EndUpdate();
                 }
+            }
             return childNodes;
         }
 
@@ -217,7 +229,6 @@ namespace ComicCatcher.Utils
                 chapterNode.ImageIndex = 99;
                 chapterNode.SelectedImageIndex = 99;
             }
-
             return chapterNode;
         }
 
@@ -229,7 +240,7 @@ namespace ComicCatcher.Utils
         /// <returns></returns>
         public static bool IsChapterNode(TreeNode tn)
         {
-            return null != (tn.Tag as ComicChapter);
+            return null != (tn?.Tag as ComicChapter);
         }
 
         /// <summary>
@@ -239,12 +250,7 @@ namespace ComicCatcher.Utils
         /// <returns></returns>
         public static bool IsComicNameNode(TreeNode tn)
         {
-            return null != (tn.Tag as ComicEntity);
-            //return tn.Level == 2;
-            //if (null == tn) return false;
-            //if (false == tn.Name.Contains(XindmWebSite.WebUrl)) return false; // 節點本身必需要是包含此內容
-            //// 如果父節點是清單連結，表示此連結是漫畫名稱連結
-            //return IsListNode(tn.Parent);
+            return null != (tn?.Tag as ComicEntity);
         }
 
         /// <summary>
@@ -254,7 +260,7 @@ namespace ComicCatcher.Utils
         /// <returns></returns>
         public static bool IsPaginationNode(TreeNode tn)
         {
-            return null != (tn.Tag as ComicPagination);
+            return null != (tn?.Tag as ComicPagination);
         }
     }
 }

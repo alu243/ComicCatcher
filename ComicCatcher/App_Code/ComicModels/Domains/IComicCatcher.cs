@@ -7,8 +7,9 @@ namespace ComicCatcher.ComicModels.Domains
     {
         ComicRoot GetRoot();
         List<ComicPagination> GetPaginations();
-        List<ComicEntity> GetComics(ComicPagination pagination, bool loadIcon);
-        List<ComicChapter> GetChapters(ComicEntity comic);
-        List<ComicPage> GetPages(ComicChapter chapter);
+        void LoadComics(ComicPagination pagination);
+        void LoadChapters(ComicEntity comic);
+        void GetPages(ComicChapter chapter);
+        void DownloadChapter(ComicChapter chapter, string downloadPath);
     }
 }

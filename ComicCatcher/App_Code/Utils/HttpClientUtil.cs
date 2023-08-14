@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Jint.Parser.Ast;
 
 namespace ComicCatcher.Utils
 {
@@ -14,18 +15,24 @@ namespace ComicCatcher.Utils
             {
                 if (_client == null)
                 {
-                    var handler = new HttpClientHandler() { UseCookies = true, Proxy = null };
+                    var handler = new HttpClientHandler() { UseCookies = true, Proxy = null};
                     _client = new HttpClient(handler);// { BaseAddress = baseAddress };
                 }
                 return _client;
             }
         }
 
+        public static void SetConnections(int conections)
+        {
+            var handler = new HttpClientHandler() { UseCookies = true, Proxy = null, MaxConnectionsPerServer = conections};
+            _client = new HttpClient(handler);// { BaseAddress = baseAddress };
+        }
+
         public static async Task<string> GetStringResponse(string url, string referer)
         {
             if (string.IsNullOrEmpty(referer))
             {
-                referer = url.GetRefererString();
+                referer = url?.GetRefererString();
             }
 
             using (var message = new HttpRequestMessage(HttpMethod.Get, url))
@@ -47,7 +54,7 @@ namespace ComicCatcher.Utils
             }
         }
 
-        public static async Task<MemoryStream> GetStreamResponse(string url, string referer)
+        public static async Task<Stream> GetStreamResponse(string url, string referer)
         {
             if (string.IsNullOrEmpty(referer))
             {
@@ -59,9 +66,7 @@ namespace ComicCatcher.Utils
                 var result = await client.SendAsync(message);
                 result.EnsureSuccessStatusCode();
                 var res = await result.Content.ReadAsStreamAsync();
-                var ms = new MemoryStream();
-                await res.CopyToAsync(ms);
-                return ms;
+                return res;
             }
         }
 

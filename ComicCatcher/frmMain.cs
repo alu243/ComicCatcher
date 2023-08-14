@@ -110,7 +110,7 @@ namespace ComicCatcher
                 }
                 finally
                 {
-                    Cursor = System.Windows.Forms.Cursors.Default;
+                    Cursor = Cursors.Default;
                 }
             }
         }
@@ -124,7 +124,6 @@ namespace ComicCatcher
         private void InitialComicRootTree()
         {
             TreeViewUtil.ClearNodes(tvComicTree);
-            GC.Collect();
             ComicRoot cr = comicSiteCatcher.GetRoot();
             TreeNode root = new TreeNode(cr.Caption);
             tvComicTree.Nodes.Add(root);
@@ -148,7 +147,7 @@ namespace ComicCatcher
 
         private void tvComicTree_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            Cursor = System.Windows.Forms.Cursors.WaitCursor;
+            Cursor = Cursors.WaitCursor;
             if (null == tvComicTree.SelectedNode) return;
             try
             {
@@ -198,8 +197,6 @@ namespace ComicCatcher
 
                         // 章節在另一個 treeview 顯示
 
-                        //nd.Nodes[0].Nodes.Add(tvComicTree.SelectedNode.Text);
-
                         var comic = tvComicTree.SelectedNode.Tag as ComicEntity;
                         TreeNode nd = new TreeNode(comic.Caption);
                         if (comic != null)
@@ -224,7 +221,7 @@ namespace ComicCatcher
                 }
                 #endregion
 
-                //清單如果沒有子節點，就產生子節點
+                //清單如果沒有子節點，就產生子節點(漫畫)
                 if (TreeViewUtil.IsPaginationNode(tvComicTree.SelectedNode))
                 {
                     if (tvComicTree.SelectedNode.Nodes.Count <= 0)
@@ -268,7 +265,6 @@ namespace ComicCatcher
             }
         }
 
-
         private void BuildLocalComicDirComboBox()
         {
             try
@@ -307,11 +303,6 @@ namespace ComicCatcher
             }
         }
 
-        private void btnDownload_Click(object sender, EventArgs e)
-        {
-            //AddDownloadTask(tvComicTree.SelectedNode);
-        }
-
         private void AddDownloadTask(TreeNode tn)
         {
             if (false == TreeViewUtil.IsChapterNode(tn)) return;
@@ -325,26 +316,24 @@ namespace ComicCatcher
             }
             catch { }
 
-            //string fullPath1 = tn.Parent.FullPath;
-            //string fullPath2 = tvComicTree.SelectedNode.FullPath;
             TreeViewUtil.SetFontBold(tvComicTree.SelectedNode);
             TreeViewUtil.SetFontBold(tn, Color.Blue);
 
-            if ((queue.Count<DownloadChapterTask>(q => q.Name == taskname)) > 0)
+            if ((queue.Count(q => q.Name == taskname)) > 0)
             {
                 NLogger.Info(taskname + " 已在下載排程，不重新加入！");
                 statusMsg.Text = taskname + " 已在下載排程，不重新加入！";
                 return;
             }
 
-            if (true == File.Exists(localPath + ".rar"))
+            if (File.Exists(localPath + ".rar"))
             {
                 NLogger.Info(taskname + " 已壓縮封存，不加入排程下載！");
                 statusMsg.Text = taskname + " 已壓縮封存，不加入排程下載！";
                 return;
             }
 
-            ComicChapter cc = tn.Tag as ComicChapter;
+            var cc = tn.Tag as ComicChapter;
             queue.Enqueue(new DownloadChapterTask() { Name = taskname, Path = localPath, Chapter = cc, Downloader = comicSiteCatcher });
 
             NLogger.Info(taskname + " 已加入下載排程！");
@@ -376,15 +365,12 @@ namespace ComicCatcher
 
         private void DownloadComic(DownloadChapterTask task)
         {
-            if (false == Directory.Exists(task.Path)) Directory.CreateDirectory(task.Path);
-
             bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = $"[{task.Name}]準備開始下載", infoMsg = $"[{task.Name}]準備開始下載" });
-            var pages = task.Downloader.GetPages(task.Chapter);
-            bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = $"[{task.Name}]準備開始下載", infoMsg = $"[{task.Name}]，共" + pages.Count + "頁" });
 
-            ComicUtil.DownloadChapter(task);
+            Task.Run(() => task.Downloader.GetPages(task.Chapter)).Wait();
+            bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = $"[{task.Name}]準備開始下載", infoMsg = $"[{task.Name}]，共{task.Chapter.Pages.Count}頁" });
 
-            GC.Collect();
+            Task.Run(() => task.Downloader.DownloadChapter(task.Chapter, task.Path)).Wait();
 
             //statusMsg.Text = "[" + myTask.name + "]已經下載完成";
             bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = $"[{task.Name}]已經下載完成", infoMsg = $"[{task.Name}]已經下載完成" });
@@ -583,11 +569,6 @@ namespace ComicCatcher
             ArchiveComic();
         }
 
-        private void btnBatchArchive_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void ArchiveComic()
         {
             RarHelper rar = null;
@@ -758,63 +739,34 @@ namespace ComicCatcher
         {
             try
             {
-                var t = Task.Factory.StartNew((node) => { buildComicNodeBackground(node); }, currNode);
-            }
-            catch (Exception ex)
-            {
-                NLogger.Error("buildComicNode," + ex.ToString());
-            }
-        }
-
-        private void buildComicNodeBackground(object objNode)
-        {
-            TreeNode currNode = objNode as TreeNode;
-            if (currNode == null) return;
-            try
-            {
                 if (TreeViewUtil.IsPaginationNode(currNode))
                 {
-                    buildComicNameNode(currNode);
-                    //var nodeList = currNode.Nodes.Cast<TreeNode>().ToList();
-                    //Parallel.ForEach(nodeList, node =>
-                    //{
-                    //    buildComicChapterNode(node);
-                    //});
+                    Task.Run(() => buildComicNameNode(currNode));
                 }
-                //else if (TreeViewUtil.IsComicNameNode(currNode))
-                //{
-                //    comicSiteCatcher.GetChapters(cn);
-
-                //    buildComicChapterNode(currNode);
-                //}
             }
             catch (Exception ex)
             {
-                NLogger.Error("buildComicNodeBackground," + ex.ToString());
-                throw ex;
+                NLogger.Error($"buildComicNodeBackground,{ex}");
             }
         }
 
         private void buildComicNameNode(TreeNode paginationNode)
         {
-            if (null == paginationNode) return;
             if (false == TreeViewUtil.IsPaginationNode(paginationNode)) return;
-
             try
             {
+                TreeViewUtil.ClearTreeNode(paginationNode);
+
                 var nameNodes = new List<TreeNode>();
 
-                TreeViewUtil.ClearTreeNode(paginationNode);
                 var cg = paginationNode.Tag as ComicPagination;
-                comicSiteCatcher.GetComics(cg, this.settings.LoadAllPicture);
+                Task.Run(() => comicSiteCatcher.LoadComics(cg)).Wait();
                 cg.Comics = cg.Comics.Where(c => false == ignoreComicDic.IsIgnored(c.Url)).ToList();
                 foreach (var comic in cg.Comics)
                 {
                     string groupName = pathGroupDic.GetGroupName(comic.Caption);
                     TreeNode nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
                     nameNodes.Add(nameNode);
-                    // 完成 comicNode 時載入chapter 節點
-                    Task.Run(() => this.comicSiteCatcher.GetChapters(comic));
                 }
                 TreeViewUtil.AddTreeNodes(paginationNode, nameNodes);
             }
@@ -859,9 +811,9 @@ namespace ComicCatcher
         {
             switch (cbComicCatcher.Text.ToUpper())
             {
-                case "XINDM":
-                    ChangeComicSite(new Xindm());
-                    break;
+                //case "XINDM":
+                //    ChangeComicSite(new Xindm());
+                //    break;
                 case "DM5":
                     ChangeComicSite(new Dm5());
                     break;
@@ -874,6 +826,7 @@ namespace ComicCatcher
             f.ShowDialog(this);
             this.pathGroupDic = PathGroupDic.Load();
         }
+
         private void btnShowExceptModal_Click(object sender, EventArgs e)
         {
             ComicSettingsGroup f = new ComicSettingsGroup(SettingEnum.IgnoreComic);
@@ -940,110 +893,22 @@ namespace ComicCatcher
                 }
             }
         }
-
-        private readonly Size CHECK_BOX_SIZE = new Size(13, 13);
-        private readonly Size IMAGE_SIZE = new Size(16, 16);
         private void tvComicTree_DrawNode(object sender, DrawTreeNodeEventArgs e)
         {
             var font = e.Node.NodeFont == null ? (sender as TreeView).Font : e.Node.NodeFont;
             if (e.Node.ImageIndex == 99) // if there is no image
             {
-                //int imagewidths = 16;
-                //int textheight = 16;
-                //int x = e.Node.Bounds.Left - 3 - imagewidths / 2;
-                //int y = (e.Bounds.Top + e.Bounds.Bottom) / 2 + 1;
-                //Point point = new Point(x - imagewidths / 2, y - textheight / 2); // the new location for the text to be drawn
-
-
                 Rectangle textRect = e.Node.Bounds;
                 textRect.Offset(new Point(-18));
                 textRect.Offset(1, 1);
                 textRect.Width -= 2;
                 textRect.Height -= 2;
 
-
                 TextRenderer.DrawText(e.Graphics, e.Node.Text, font, textRect, e.Node.ForeColor);
                 e.DrawDefault = false;
             }
             else
                 e.DrawDefault = true;
-            // drawn at the default location
-            //TextRenderer.DrawText(e.Graphics, e.Node.Text, font, e.Bounds, e.Node.ForeColor);
-
-
-
-
-
-
-            //            //Get the backcolor and forecolor
-            //            Color backColor, foreColor;
-
-            //if ((e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected)
-            //{
-            //    backColor = SystemColors.Highlight;
-            //    foreColor = SystemColors.HighlightText;
-            //}
-
-            //else if ((e.State & TreeNodeStates.Hot) == TreeNodeStates.Hot)
-            //{
-            //    backColor = SystemColors.HotTrack;
-            //    foreColor = SystemColors.HighlightText;
-            //}
-            //else
-            //{
-            //    backColor = e.Node.BackColor;
-            //    foreColor = e.Node.ForeColor;
-            //}
-
-            ////Calculate the text rectangle.
-            //Rectangle textRect = e.Node.Bounds;
-            ////textRect.Offset(new Point(-IMAGE_SIZE.Width - 3));
-            //textRect.Offset(new Point(-18));
-            //textRect.Offset(1, 1);
-            //textRect.Width -= 2;
-            //textRect.Height -= 2;
-
-            ////The first level nodes has images but no checkboxes.
-            ////The second level nodes has checkboxes but no images.
-            ////The other level nodes is drawn by default.
-            //if (e.Node.Level >= 2 && e.Node.ImageIndex == 99)
-            //{
-            //    try
-            //    {
-            //        //Draw the background.
-            //        //using (SolidBrush brush = new SolidBrush(backColor))
-            //        //{
-            //        //    e.Graphics.FillRectangle(brush, textRect);
-            //        //}
-
-            //        //Draw the image.
-            //        //if (e.Node.TreeView.ImageList != null && e.Node.ImageIndex >= 0
-            //        //    && e.Node.ImageIndex < e.Node.TreeView.ImageList.Images.Count)
-            //        //{
-            //        //    Image img = this.tvComicTree.ImageList.Images[e.Node.ImageIndex];
-            //        //    if (img != null)
-            //        //        e.Graphics.DrawImage(img, new Point(textRect.X - img.Width - 1, textRect.Y + 1));
-            //        //}
-
-            //        //Draw the text.
-            //        TextRenderer.DrawText(e.Graphics, e.Node.Text, e.Node.NodeFont, textRect, foreColor, backColor);
-            //        //Draw the focused rectangle.
-            //        if ((e.State & TreeNodeStates.Focused) == TreeNodeStates.Focused)
-            //        {
-            //            ControlPaint.DrawFocusRectangle(e.Graphics, textRect, foreColor, backColor);
-            //        }
-            //    }
-            //    catch (Exception exp)
-            //    {
-            //        Console.WriteLine(exp.ToString());
-            //    }
-
-            //    e.DrawDefault = false;
-            //}
-            //else
-            //{
-            //    e.DrawDefault = true;
-            //}
         }
     }
 }
