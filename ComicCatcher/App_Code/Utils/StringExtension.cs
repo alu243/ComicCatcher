@@ -14,15 +14,17 @@ namespace ComicCatcher.Utils
             if (string.IsNullOrEmpty(s)) return string.Empty;
             string ss = s;
             ss = ss.Replace("?", "");
-            ss = ss.Replace("*", "＊");
-            ss = ss.Replace(":", "：");
-            ss = ss.Replace("\\", "＼");
-            ss = ss.Replace("/", "／");
-            ss = ss.Replace(">", "＞");
-            ss = ss.Replace("<", "＜");
-            ss = ss.Replace("|", "｜");
-            ss = ss.Replace("\"", "");
-            return ss;
+            ss = ss.Replace("*", " ");
+            ss = ss.Replace(":", " ");
+            ss = ss.Replace("\\", " ");
+            ss = ss.Replace("/", " ");
+            ss = ss.Replace(">", " ");
+            ss = ss.Replace("<", " ");
+            ss = ss.Replace("|", " ");
+            ss = ss.Replace("\"", " ");
+            ss = ss.Replace(".", " ");
+            ss = ss.Replace(" ", "");
+            return ss.Trim();
         }
 
         public static string GetRefererString(this string s)
