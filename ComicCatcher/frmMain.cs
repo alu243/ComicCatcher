@@ -1,8 +1,4 @@
-﻿using ComicCatcher.ComicModels;
-using ComicCatcher.ComicModels.Domains;
-using ComicCatcher.DbModel;
-using ComicCatcher.Helpers;
-using ComicCatcher.Models;
+﻿using ComicCatcher.Helpers;
 using ComicCatcher.Utils;
 using System;
 using System.Collections.Generic;
@@ -17,6 +13,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
+using ComicCatcherLib.ComicModels;
+using ComicCatcherLib.DbModel;
+using ComicCatcherLib.Utils;
+using ComicCatcherLib.Helpers;
+using ComicCatcherLib.ComicModels.Domains;
+using ComicCatcherLib.Models;
 
 namespace ComicCatcher
 {
@@ -200,7 +202,7 @@ namespace ComicCatcher
                 }
                 else if (comic.ImageState == ComicState.ImageLoaded)
                 {
-                    pbIcon.Image = comic.IconImage;
+                    pbIcon.Image = Image.FromStream(comic.IconImage);
                 }
             }
             catch (Exception ex)

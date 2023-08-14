@@ -21,7 +21,7 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <UseWindowsForms>true</UseWindowsForms>
+    <UseWindowsForms>True</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -31,11 +31,8 @@
     <ApplicationIcon>bookicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="App_Code\sfacg\**" />
     <Compile Remove="x86\**" />
-    <EmbeddedResource Remove="App_Code\sfacg\**" />
     <EmbeddedResource Remove="x86\**" />
-    <None Remove="App_Code\sfacg\**" />
     <None Remove="x86\**" />
   </ItemGroup>
   <ItemGroup>
@@ -81,10 +78,10 @@
     <EmbeddedResource Include="x64\WebView2Loader.dll" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CHTCHSConv" Version="1.0.0" />
-    <PackageReference Include="Jint" Version="2.11.58" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.10" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1901.177" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ComicCatcherLib\ComicCatcherLib.csproj" />
   </ItemGroup>
   <PropertyGroup>
     <AssemblyTitle>ComicCatcher</AssemblyTitle>

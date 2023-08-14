@@ -1,5 +1,5 @@
-﻿using ComicCatcher.DbModel;
-using ComicCatcher.Models;
+﻿using ComicCatcherLib.DbModel;
+using ComicCatcherLib.Models;
 using System;
 using System.Data;
 using System.Windows.Forms;
