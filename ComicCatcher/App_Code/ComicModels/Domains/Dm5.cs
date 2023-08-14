@@ -1,4 +1,5 @@
-﻿using ComicCatcher.Utils;
+﻿using ComicCatcher.Models;
+using ComicCatcher.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,8 +13,6 @@ namespace ComicCatcher.ComicModels.Domains;
 
 public class Dm5 : IComicCatcher
 {
-    private SemaphoreSlim locker;
-
     public Dm5()
     {
         _cRoot = new ComicRoot()
@@ -32,7 +31,6 @@ public class Dm5 : IComicCatcher
             ConnectionCount = 30,
             Paginations = new List<ComicPagination>()
         };
-        locker = new SemaphoreSlim(this._cRoot.ThreadCount);
         HttpClientUtil.SetConnections(this._cRoot.ConnectionCount);
         this.LoadPaginations();
     }
@@ -79,9 +77,9 @@ public class Dm5 : IComicCatcher
     #endregion
 
     #region Names
-    public ComicEntity GetSingleComicName(string url)
+    public async Task<ComicEntity> GetSingleComicName(string url)
     {
-        var htmlContent = ComicUtil.GetUtf8Content(url).Result;
+        var htmlContent = await ComicUtil.GetUtf8Content(url);
 
         //string sLink = rLink.Match(comic).Value;
         Regex rTitle = new Regex(@"<div class=""banner_detail_form"">(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>(.|\n)*?</div>", RegexOptions.Compiled);
@@ -110,14 +108,14 @@ public class Dm5 : IComicCatcher
         return cn;
     }
 
-    public void LoadComics(ComicPagination pagination, Dictionary<string, string> ignoreComics)
+    public async Task LoadComics(ComicPagination pagination, Dictionary<string, string> ignoreComics)
     {
         if (pagination.ListState != ComicState.Created) return;
 
         pagination.ListState = ComicState.Processing;
         pagination.Comics.Clear();
 
-        var htmlContent = ComicUtil.GetUtf8Content(pagination.Url).Result;
+        var htmlContent = await ComicUtil.GetUtf8Content(pagination.Url);
         var comicList = RetriveComicNames(htmlContent);
         var results = comicList.Select(comicContent =>
         {
@@ -147,23 +145,12 @@ public class Dm5 : IComicCatcher
 
         foreach (var comic in pagination.Comics)
         {
-            locker.Wait();
-            try
-            {
-                Task.Run(() => this.LoadIconImage(comic));
-            }
-            finally { locker.Release(); }
-
-            locker.Wait();
-            try
-            {
-                Task.Run(() => this.LoadChapters(comic));
-            }
-            finally { locker.Release(); }
+            Task.Run(async () => await this.LoadIconImage(comic));
+            Task.Run(async () => await this.LoadChapters(comic));
         }
     }
 
-    private void LoadIconImage(ComicEntity comic)
+    private async Task LoadIconImage(ComicEntity comic)
     {
         if (comic.ImageState != ComicState.Created) return;
 
@@ -171,7 +158,7 @@ public class Dm5 : IComicCatcher
         try
         {
             comic.IconImage = null;
-            using Stream iconData = ComicUtil.GetPicture(comic.IconUrl).Result;
+            using Stream iconData = await ComicUtil.GetPicture(comic.IconUrl);
             comic.IconImage = Image.FromStream(iconData);
             comic.ImageState = ComicState.ImageLoaded;
         }
@@ -244,7 +231,7 @@ public class Dm5 : IComicCatcher
     #endregion
 
     #region Chapters
-    public void LoadChapters(ComicEntity comic)
+    public async Task LoadChapters(ComicEntity comic)
     {
         if (comic.ListState != ComicState.Created) return;
 
@@ -253,7 +240,7 @@ public class Dm5 : IComicCatcher
         {
             comic.Chapters.Clear();
 
-            string htmlContent = ComicUtil.GetUtf8Content(comic.Url).Result;
+            string htmlContent = await ComicUtil.GetUtf8Content(comic.Url);
             List<ComicChapter> results = new List<ComicChapter>();
             var chapters = RetriveChapters(htmlContent);
             chapters.ForEach(c =>
@@ -361,13 +348,13 @@ public class Dm5 : IComicCatcher
     #endregion
 
     #region Pages
-    public void GetPages(ComicChapter chapter)
+    public async Task GetPages(ComicChapter chapter)
     {
         chapter.Pages.Clear();
         // fix by
         // http://css122.us.cdndm.com/v201708091849/default/js/chapternew_v22.js
         //Regex rPages = new Regex(@"var ArrayPhoto=new Array\(""(.|\n)+?;", RegexOptions.Compiled);
-        string htmlContent = ComicUtil.GetUtf8Content(chapter.Url).Result;
+        string htmlContent = await ComicUtil.GetUtf8Content(chapter.Url);
         string cid = chapter.Url.Replace(@"https://www.dm5.com/m", "").Trim('/');
         string mid = RetrivePage_MID(htmlContent);
         string dt = RetrivePage_VIEWSIGNDT(htmlContent);
@@ -386,7 +373,7 @@ public class Dm5 : IComicCatcher
             {
                 string pageUrl = this._cRoot.Url + "m" + cid + "/" + "chapterfun.ashx?cid=" + cid + "&page=" + i.ToString() + "&language=1&gtk=6&_cid=" + cid + "&_mid=" + mid + "&_dt=" + dt + "&_sign=" + sign;
                 var refer = $"{this._cRoot.Url}m{cid}/";
-                Task<string> task = Task.Run(() => GetPageUrl(pageUrl, refer));
+                Task<string> task = GetPageUrl(pageUrl, refer);
                 tasks.Add(task);
             }
             Task.WaitAll(tasks.ToArray());
@@ -410,7 +397,7 @@ public class Dm5 : IComicCatcher
 
     }
 
-    private string GetPageUrl(string pageUrl, string refer)
+    private async Task<string> GetPageUrl(string pageUrl, string refer)
     {
         ComicUtil util = ComicUtil.CreateVsaEngine();
 
@@ -419,7 +406,7 @@ public class Dm5 : IComicCatcher
         // data: { cid: DM5_CID, page: DM5_PAGE, key: mkey, language: 1, gtk: 6, _cid: DM5_CID, _mid: DM5_MID, _dt: DM5_VIEWSIGN_DT, _sign: DM5_VIEWSIGN },
         string jsCodeWrapper = ";var url = (typeof (isrevtt) != \"undefined\" && isrevtt) ? hd_c[0] : d[0];";
 
-        string pageFunContent = ComicUtil.GetUtf8Content(pageUrl, refer).Result; // 這個得到的是一串 eval(...)字串
+        string pageFunContent = await ComicUtil.GetUtf8Content(pageUrl, refer); // 這個得到的是一串 eval(...)字串
         for (int j = 0; j <= 20; j++)
         {
             if (false == String.IsNullOrEmpty(pageFunContent) && false == pageFunContent.Contains("war|jpg"))
@@ -428,7 +415,7 @@ public class Dm5 : IComicCatcher
             }
             else
             {
-                pageFunContent = ComicUtil.GetUtf8Content(pageUrl).Result; // 這個得到的是一串 eval(...)字串
+                pageFunContent = await ComicUtil.GetUtf8Content(pageUrl); // 這個得到的是一串 eval(...)字串
             }
         }
 
@@ -525,36 +512,46 @@ public class Dm5 : IComicCatcher
     #endregion
 
     #region Download
-    public void DownloadChapter(ComicChapter chapter, string downloadPath)
+    public async Task DownloadChapter(DownloadChapterRequest request)
     {
-        if (false == Directory.Exists(downloadPath)) Directory.CreateDirectory(downloadPath);
+        await this.GetPages(request.Chapter);
+
+        if (request.Chapter != null)
+        {
+            request.ReportProgressAction(0, $"[{request.Name}]準備開始下載，共{request.Chapter.Pages.Count}頁");
+        }
+
+
+        if (false == Directory.Exists(request.Path)) Directory.CreateDirectory(request.Path);
 
         var tasks = new List<Task>();
-        foreach (var page in chapter.Pages)
+        foreach (var page in request.Chapter.Pages)
         {
-            locker.Wait();
-            try
-            {
-                var task = Task.Run(() => DownloadPage(page, downloadPath));
-                tasks.Add(task);
-            }
-            finally { locker.Release(); }
+            var task = DownloadPage(request, page);
+            tasks.Add(task);
         }
         Task.WaitAll(tasks.ToArray());
         tasks.Clear();
     }
 
-    private void DownloadPage(ComicPage page, string downloadPath)
+    private async Task DownloadPage(DownloadChapterRequest request, ComicPage page)
     {
         try
         {
-            var fullPath = Path.Combine(downloadPath, page.PageFileName);
-            using var stream = ComicUtil.GetPicture(page.Url, page.Refer).Result;
+            var fullPath = Path.Combine(request.Path, page.PageFileName);
+            using var stream = await ComicUtil.GetPicture(page.Url, page.Refer);
             using var fs = new FileStream(fullPath, FileMode.Create);
-            stream.CopyTo(fs);
+            await stream.CopyToAsync(fs);
 
             fs.Close();
             stream.Close();
+            //tagname = "[" + ((DownloadPictureScheduler)scheduler).name + "]"
+            //string ThreadID = " Thread ID=[" + Thread.CurrentThread.GetHashCode().ToString() + "]";
+            //bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = tagname + pictureName + "下載中...", infoMsg = tagname + pictureName + "下載中..." + "[" + pictureUrl + "]" + ThreadID });
+            if (request.ReportProgressAction != null)
+            {
+                request.ReportProgressAction(0, $"[{request.Name}] {page.PageFileName}下載中...");
+            }
         }
         catch (Exception ex)
         {

@@ -21,7 +21,7 @@ namespace ComicCatcher
 {
     public partial class frmMain : Form
     {
-        private static readonly Queue<DownloadChapterTask> queue = new();
+        private static readonly Queue<DownloadChapterRequest> queue = new();
 
         private Settings settings = null;
 
@@ -142,9 +142,8 @@ namespace ComicCatcher
             {
                 // 背景更新，直接用 rootNodes.Nodes[i] 順序不知道為什麼是亂掉
                 var pageNode = tvComicTree.Nodes[0].Nodes[i];
-                Task.Run(() => BuildComicNameNode(pageNode, false));
+                Task.Run(async () => await BuildComicNameNode(pageNode, false));
             }
-
             tvComicTree.SelectedNode = tvComicTree.Nodes[0];
         }
 
@@ -158,7 +157,7 @@ namespace ComicCatcher
                 //清單如果沒有子節點，就產生子節點(漫畫)
                 if (TreeViewUtil.IsPaginationNode(currNode))
                 {
-                    Task.Run(() => BuildComicNameNode(currNode, false));
+                    Task.Run(async () => await BuildComicNameNode(currNode, false));
                 }
 
                 #region IsComicNameNode then ShowComicData
@@ -284,13 +283,13 @@ namespace ComicCatcher
                     var treeNode = tvComicTree.SelectedNode;
                     if (TreeViewUtil.IsPaginationNode(treeNode))
                     {
-                        Task.Run(() => BuildComicNameNode(treeNode, true));
+                        BuildComicNameNode(treeNode, true);
                         //tvComicTree.SelectedNode.Expand();
                     }
                     // 漫畫重讀章節
                     else if (TreeViewUtil.IsComicNameNode(treeNode))
                     {
-                        Task.Run(() => this.catcher.LoadChapters(treeNode.Tag as ComicEntity));
+                        this.catcher.LoadChapters(treeNode.Tag as ComicEntity);
                     }
                 }
                 catch (Exception ex)
@@ -299,7 +298,7 @@ namespace ComicCatcher
                 }
                 finally
                 {
-                    Cursor = System.Windows.Forms.Cursors.Arrow;
+                    Cursor = Cursors.Arrow;
                     //Application.DoEvents();
                 }
             }
@@ -354,8 +353,8 @@ namespace ComicCatcher
                 return;
             }
 
-            var cc = tn.Tag as ComicChapter;
-            queue.Enqueue(new DownloadChapterTask() { Name = taskname, Path = localPath, Chapter = cc, Downloader = catcher });
+            var chapter = tn.Tag as ComicChapter;
+            queue.Enqueue(new DownloadChapterRequest() { Name = taskname, Path = localPath, Chapter = chapter });
 
             NLogger.Info(taskname + " 已加入下載排程！");
             statusMsg.Text = taskname + " 已加入下載排程！";
@@ -367,34 +366,39 @@ namespace ComicCatcher
             if (bgWorker.IsBusy) return;
 
             if (queue.Count <= 0) return;
-            DownloadChapterTask myTask = queue.Dequeue();
+            DownloadChapterRequest myTask = queue.Dequeue();
             bgWorker.RunWorkerAsync(myTask);
         }
 
         private void bgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            DownloadChapterTask myTask = (DownloadChapterTask)e.Argument;
+            DownloadChapterRequest myTask = (DownloadChapterRequest)e.Argument;
             DownloadComic(myTask);
         }
 
         private void bgWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            WorkerMsg msg = (WorkerMsg)e.UserState;
-            if (false == String.IsNullOrEmpty(msg.statusMsg)) statusMsg.Text = msg.statusMsg;
-            if (false == String.IsNullOrEmpty(msg.infoMsg)) NLogger.Info(msg.infoMsg);
+            if (e.UserState is WorkerMsg msg)
+            {
+                if (false == String.IsNullOrEmpty(msg.StatusMsg)) statusMsg.Text = msg.StatusMsg;
+                if (false == String.IsNullOrEmpty(msg.InfoMsg)) NLogger.Info(msg.InfoMsg);
+            }
+            else if (e.UserState is string sMsg)
+            {
+                statusMsg.Text = sMsg;
+            }
         }
 
-        private async Task DownloadComic(DownloadChapterTask task)
+        private void DownloadComic(DownloadChapterRequest task)
         {
-            bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = $"[{task.Name}]準備開始下載", infoMsg = $"[{task.Name}]準備開始下載" });
+            task.ReportProgressAction = bgWorker.ReportProgress;
 
-            Task.Run(() => task.Downloader.GetPages(task.Chapter)).Wait();
-            bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = $"[{task.Name}]準備開始下載", infoMsg = $"[{task.Name}]，共{task.Chapter.Pages.Count}頁" });
+            bgWorker.ReportProgress(0, new WorkerMsg() { StatusMsg = $"[{task.Name}]準備開始下載", InfoMsg = $"[{task.Name}]準備開始下載" });
 
-            Task.Run(() => task.Downloader.DownloadChapter(task.Chapter, task.Path)).Wait();
+            this.catcher.DownloadChapter(task).Wait();
 
             //statusMsg.Text = "[" + myTask.name + "]已經下載完成";
-            bgWorker.ReportProgress(0, new WorkerMsg() { statusMsg = $"[{task.Name}]已經下載完成", infoMsg = $"[{task.Name}]已經下載完成" });
+            bgWorker.ReportProgress(0, new WorkerMsg() { StatusMsg = $"[{task.Name}]已經下載完成", InfoMsg = $"[{task.Name}]已經下載完成" });
             if (chkArchiveDownloadedFile.Checked && File.Exists(settings.WinRARPath))
             {
                 RarHelper rar = new RarHelper(settings.WinRARPath);
@@ -411,7 +415,7 @@ namespace ComicCatcher
                     rar = null;
                 }
             }
-            await Task.Delay(1);
+            Task.Delay(1).Wait();
         }
         #endregion
 
@@ -436,7 +440,7 @@ namespace ComicCatcher
 
 
         #region BuildComicNode
-        private void BuildComicNameNode(TreeNode paginationNode, bool rebuild)
+        private async Task BuildComicNameNode(TreeNode paginationNode, bool rebuild)
         {
             if (false == TreeViewUtil.IsPaginationNode(paginationNode)) return;
             //if (false == rebuild && paginationNode.Nodes.Count > 0) return;
@@ -444,7 +448,7 @@ namespace ComicCatcher
             try
             {
                 (paginationNode.Tag as ComicPagination).ListState = ComicState.Created;
-                Task.Run(() => this.catcher.LoadComics(paginationNode.Tag as ComicPagination, ignoreComicDic.GetDictionary())).Wait();
+                await this.catcher.LoadComics(paginationNode.Tag as ComicPagination, ignoreComicDic.GetDictionary());
 
                 var nameNodes = new List<TreeNode>();
                 foreach (var comic in (paginationNode.Tag as ComicPagination).Comics)
@@ -464,10 +468,10 @@ namespace ComicCatcher
             }
         }
 
-        private TreeNode BuildOneComicNameNode(string url)
+        private async Task<TreeNode> BuildOneComicNameNode(string url)
         {
             Dm5 dm5 = new Dm5();
-            ComicEntity comic = dm5.GetSingleComicName(url);
+            var comic = await dm5.GetSingleComicName(url);
             var groupName = pathGroupDic.GetGroupName(comic.Caption);
             var nameNode = TreeViewUtil.BuildNode(comic, txtRootPath.Text, groupName);
             return nameNode;
@@ -861,7 +865,7 @@ namespace ComicCatcher
             this.ignoreComicDic = IgnoreComicDic.Load();
         }
 
-        private void btnAppendTo_Click(object sender, EventArgs e)
+        private async void btnAppendTo_Click(object sender, EventArgs e)
         {
             try
             {
@@ -875,7 +879,7 @@ namespace ComicCatcher
                 var urls = tvComicTree.Nodes[0].Nodes[0].Nodes.Cast<TreeNode>().ToList().Select(p => p.Name).ToList();
                 if (false == urls.Any(p => p == txtUrl.Text))
                 {
-                    var nameNode = BuildOneComicNameNode(txtUrl.Text);
+                    var nameNode = await BuildOneComicNameNode(txtUrl.Text);
                     tvComicTree.Nodes[0].Nodes[0].Nodes.Add(nameNode);
                     tvComicTree.Nodes[0].ExpandAll();
                 }

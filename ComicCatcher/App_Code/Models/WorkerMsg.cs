@@ -5,8 +5,8 @@
         /// <summary>
         /// URL
         /// </summary>
-        public string statusMsg { get; set; }
+        public string StatusMsg { get; set; }
 
-        public string infoMsg { get; set; }
+        public string InfoMsg { get; set; }
    }
 }

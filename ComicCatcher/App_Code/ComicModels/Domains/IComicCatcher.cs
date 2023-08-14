@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ComicCatcher.ComicModels.Domains
 {
@@ -7,9 +8,9 @@ namespace ComicCatcher.ComicModels.Domains
     {
         ComicRoot GetRoot();
         void LoadPaginations();
-        void LoadComics(ComicPagination pagination, Dictionary<string, string> ignoreComics);
-        void LoadChapters(ComicEntity comic);
-        void GetPages(ComicChapter chapter);
-        void DownloadChapter(ComicChapter chapter, string downloadPath);
+        Task LoadComics(ComicPagination pagination, Dictionary<string, string> ignoreComics);
+        Task LoadChapters(ComicEntity comic);
+        Task GetPages(ComicChapter chapter);
+        Task DownloadChapter(DownloadChapterRequest request);
     }
 }
