@@ -6,6 +6,6 @@ public interface IComicCatcher : IDisposable
     void LoadPaginations();
     Task LoadComics(ComicPagination pagination, Dictionary<string, string> ignoreComics);
     Task LoadChapters(ComicEntity comic);
-    Task GetPages(ComicChapter chapter);
+    Task LoadPages(ComicChapter chapter);
     Task DownloadChapter(DownloadChapterRequest request);
 }

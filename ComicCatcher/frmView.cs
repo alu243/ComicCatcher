@@ -23,7 +23,6 @@ namespace ComicCatcher
             webview.ExecuteScriptAsync("window.scroll(0,0);");
         }
 
-
         private async void frmView_Load(object sender, EventArgs e)
         {
             await webview.EnsureCoreWebView2Async();

@@ -69,6 +69,20 @@ public class Dm5 : IComicCatcher
     #endregion
 
     #region Names
+
+    public static ComicEntity CreateComic(string url) => new ComicEntity()
+    {
+        ListState = ComicState.Created,
+        ImageState = ComicState.Created,
+        Url = url,
+        Chapters = new List<ComicChapter>(),
+        Caption = "Comic",
+        IconImage = null,
+        IconUrl = "",
+        LastUpdateChapter = "",
+        LastUpdateDate = "",
+    };
+
     public async Task<ComicEntity> GetSingleComicName(string url)
     {
         var htmlContent = await ComicUtil.GetUtf8Content(url);
@@ -140,6 +154,41 @@ public class Dm5 : IComicCatcher
             Task.Run(async () => await LoadIconImage(comic));
             Task.Run(async () => await LoadChapters(comic));
         }
+    }
+
+    public async Task LoadComicsForWeb(ComicPagination pagination)
+    {
+        if (pagination.ListState != ComicState.Created) return;
+
+        pagination.ListState = ComicState.Processing;
+        pagination.Comics.Clear();
+
+        var htmlContent = await ComicUtil.GetUtf8Content(pagination.Url);
+        var comicList = RetriveComicNames(htmlContent);
+        var results = comicList.Select(comicContent =>
+        {
+            var url = RetriveComicName_Url(comicContent);
+            url = url.MakeUrlAbsolute(GetRoot().Url);
+
+            var caption = RetriveComicName_Caption(comicContent);
+            var lastChapter = RetriveComicName_LastUpdateInfo(comicContent); // 取得最近更新回數
+            var comic = new ComicEntity()
+            {
+                IconUrl = RetriveComicName_IconUrl(comicContent), // 取得漫畫首頁圖像連結
+                LastUpdateDate = RetriveComicName_LastUpdateDate(comicContent), // 取得最近更新日期
+                LastUpdateChapter = lastChapter.TrimEscapeString(),
+                Url = url,
+                Caption = caption.TrimEscapeString(),
+                Chapters = new List<ComicChapter>(),
+                ListState = ComicState.Created,
+                ImageState = ComicState.Created
+            };
+            comic.LastUpdateChapter = comic.LastUpdateChapter.TrimComicName(comic.Caption);
+            return comic;
+        }).Where(c => c != null).ToList();
+
+        pagination.Comics.AddRange(results);
+        pagination.ListState = ComicState.Created;
     }
 
     private async Task LoadIconImage(ComicEntity comic)
@@ -341,7 +390,7 @@ public class Dm5 : IComicCatcher
     #endregion
 
     #region Pages
-    public async Task GetPages(ComicChapter chapter)
+    public async Task LoadPages(ComicChapter chapter)
     {
         chapter.Pages.Clear();
         // fix by
@@ -507,7 +556,7 @@ public class Dm5 : IComicCatcher
     #region Download
     public async Task DownloadChapter(DownloadChapterRequest request)
     {
-        await GetPages(request.Chapter);
+        await LoadPages(request.Chapter);
 
         if (request.Chapter != null)
         {

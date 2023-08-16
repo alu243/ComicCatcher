@@ -44,6 +44,8 @@ public static class StringExtension
 
     public static string TrimComicName(this string name, string comicName)
     {
+        if (string.IsNullOrWhiteSpace(name)) return "";
+        if (string.IsNullOrWhiteSpace(comicName)) return name;
         name = name?.Replace(comicName, string.Empty).Trim();
         return name;
     }

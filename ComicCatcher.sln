@@ -18,9 +18,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{74EE5F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComicCatcherTests", "ComicCatcherTests\ComicCatcherTests.csproj", "{61D49417-1D1F-4767-93B0-D7F7A6A20231}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComicApi", "ComicApi\ComicApi.csproj", "{9A5878EF-242F-4517-99C0-9C99E3661EA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComicApi", "ComicApi\ComicApi.csproj", "{9A5878EF-242F-4517-99C0-9C99E3661EA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComicCatcherLib", "ComicCatcherLib\ComicCatcherLib.csproj", "{BB6F022E-E7C6-42B6-89D5-96E2335F542C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComicCatcherLib", "ComicCatcherLib\ComicCatcherLib.csproj", "{BB6F022E-E7C6-42B6-89D5-96E2335F542C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OldProjects", "OldProjects", "{819FA64A-24C7-45A2-B6ED-4FEC9934E26D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,6 +103,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C440414E-14F1-40E7-B516-5F144AB62017} = {819FA64A-24C7-45A2-B6ED-4FEC9934E26D}
+		{82593C62-F595-4131-9FA3-7C99AF0AEEAC} = {819FA64A-24C7-45A2-B6ED-4FEC9934E26D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {701F61F2-7A52-4AED-9D6B-373354D21E8A}

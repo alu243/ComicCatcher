@@ -943,15 +943,9 @@ namespace ComicCatcher
                     writer.WriteLine($@"<div><img src=""file:///{file}"" alt=""Snow""></div>");
                 }
                 writer.WriteLine("<script>function sc(){window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });}</script></body></html>");
-
             }
             view.SetPath(viewPath);
             view.ShowDialog(this);
-
-            //WebView2 wb2 = new WebView2();
-            //wb2.EnsureCoreWebView2Async().Wait();
-            //wb2.CoreWebView2.Navigate(viewPath);
-            //wb2.Show();
         }
     }
 }

@@ -15,4 +15,8 @@
     <ProjectReference Include="..\ComicCatcherLib\ComicCatcherLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 </Project>
