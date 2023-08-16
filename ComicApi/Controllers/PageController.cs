@@ -28,10 +28,11 @@ namespace ComicApi.Controllers
 
             var sb = new StringBuilder();
             sb.AppendLine(@"<html><head><meta charset=""utf-8""></head><body>");
+            int p = 1;
             foreach (var pg in dm5.GetRoot().Paginations.Take(30))
             {
                 var uri = new Uri(pagination.Url);
-                sb.AppendLine($@"<a href=""/page/{page}"">{pg.Caption}</a>&nbsp;&nbsp;");
+                sb.AppendLine($@"<a href=""/page/{p++}"">{pg.Caption}</a>&nbsp;&nbsp;");
             }
 
             var pageCount = 5;
