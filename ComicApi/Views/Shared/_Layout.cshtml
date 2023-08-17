@@ -1,3 +1,21 @@
-﻿<h2>The time on the server is @DateTime.Now</h2>
+﻿@{
+    var cookies = Context.Request.Cookies;
+    var userid = Context.Request.Cookies["userid"];
+    var username = userid ?? "Guest";
+}
+
+<h2> Hi @username Now the time on the server is @DateTime.Now</h2>
+@Html.TextBoxFor(t => userid)
+<button onclick="addCookie()">登入</button>
 
 @RenderBody()
+
+
+<script>
+    function addCookie() {
+        var newuserid = document.querySelector('#userid').value;
+        console.log('loginuser = ', newuserid);
+        document.cookie = 'userid=' + newuserid;
+        location.reload();
+    }
+</script>

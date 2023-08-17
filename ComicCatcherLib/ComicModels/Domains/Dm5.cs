@@ -285,6 +285,8 @@ public class Dm5 : IComicCatcher
             string htmlContent = await ComicUtil.GetUtf8Content(comic.Url);
             List<ComicChapter> results = new List<ComicChapter>();
             var chapters = RetriveChapters(htmlContent);
+            var reverse = htmlContent.Contains(">正序<");
+            if (reverse) chapters.Reverse();
             chapters.ForEach(c =>
             {
                 var url = RetriveChapter_Url(c);

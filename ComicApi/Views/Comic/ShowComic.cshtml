@@ -12,12 +12,12 @@
     var pageCount = 5;
     var i = 0;
     @Html.Raw("<table><tbody>")
-    ;
+
     foreach (var chapter in Model.CurrComic.Chapters)
     {
         if (i % pageCount == 0)
             @Html.Raw("<tr>")
-        ;
+
         var relativeUrl = new Uri(chapter.Url).LocalPath.Trim('/');
         <td>
             <p><a href="./@Model.Comic/@relativeUrl">@chapter.Caption</a></p>
@@ -25,11 +25,9 @@
         i++;
         if (i % pageCount == 0)
             @Html.Raw("</tr>")
-        ;
     }
     if (i % pageCount != 0) Html.Raw("</tr>");
     @Html.Raw("</tbody></table>")
-    ;
 }
 
 
