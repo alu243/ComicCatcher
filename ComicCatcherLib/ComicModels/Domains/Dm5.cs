@@ -436,6 +436,7 @@ public class Dm5 : IComicCatcher
         }
         //Regex rInvalidFileName = new Regex(string.Format("[{0}]", Regex.Escape(new String(System.IO.Path.GetInvalidFileNameChars()))));
         chapter.Pages = pages;
+        if (chapter.Pages.Count > 0) chapter.ListState = ComicState.ListLoaded;
 
     }
 

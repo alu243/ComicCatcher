@@ -1,0 +1,36 @@
+﻿@model ComicApi.Model.ComicModel
+@{
+    ViewBag.Title = "Comic";
+    Layout = "_Layout";
+}
+
+<h2>@Model.CurrComic.Caption</h2>
+
+<button onclick="history.back()">上一頁</button>
+
+@{
+    var pageCount = 5;
+    var i = 0;
+    @Html.Raw("<table><tbody>")
+    ;
+    foreach (var chapter in Model.CurrComic.Chapters)
+    {
+        if (i % pageCount == 0)
+            @Html.Raw("<tr>")
+        ;
+        var relativeUrl = new Uri(chapter.Url).LocalPath.Trim('/');
+        <td>
+            <p><a href="./@Model.Comic/@relativeUrl">@chapter.Caption</a></p>
+        </td>
+        i++;
+        if (i % pageCount == 0)
+            @Html.Raw("</tr>")
+        ;
+    }
+    if (i % pageCount != 0) Html.Raw("</tr>");
+    @Html.Raw("</tbody></table>")
+    ;
+}
+
+
+<button onclick="history.back()">上一頁</button>

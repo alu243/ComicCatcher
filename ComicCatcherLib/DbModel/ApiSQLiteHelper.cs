@@ -1,19 +1,27 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
+using Jint.Parser.Ast;
 
 namespace ComicCatcherLib.DbModel;
 
 public static class ApiSQLiteHelper
 {
     //private static string connStr = "Data Source=ComicCatcher.s3db;Pooling=true;Page Size=8192;Journal Mode=off;UTF8Encoding=True;";
-    private static string connStr = "Data Source=./Volumes/db/ComicApi.s3db;Pooling=true;";
+    private static string connStr = "";
+
+    public static void SetDbPath(string path)
+    {
+        connStr = $"Data Source={Path.Combine(path, "ComicApi.s3db")};Pooling=true;";
+    }
+
+
     private static SqliteConnection CreateConn()
     {
         var conn = new SqliteConnection(connStr);
         return conn;
     }
 
-    public static DataTable GetTable(string sql)
+    public static async Task<DataTable> GetTable(string sql)
     {
         using (var conn = CreateConn())
         {
@@ -21,7 +29,7 @@ public static class ApiSQLiteHelper
             var cmd = conn.CreateCommand();
             cmd.CommandText = sql;
             DataTable dt = new DataTable();
-            using (var reader = cmd.ExecuteReader())
+            using (var reader = await cmd.ExecuteReaderAsync())
             {
                 dt.Load(reader);
             }
@@ -29,37 +37,37 @@ public static class ApiSQLiteHelper
         }
     }
 
-    public static int ExecuteNonQuery(string sql)
+    public static async Task<int> ExecuteNonQuery(string sql)
     {
         using (var conn = CreateConn())
         {
             conn.Open();
             var cmd = conn.CreateCommand();
             cmd.CommandText = sql;
-            int affectRecord = cmd.ExecuteNonQuery();
+            int affectRecord = await cmd.ExecuteNonQueryAsync();
             return affectRecord;
         }
     }
 
-    public static T ExecuteScalar<T>(string sql)
+    public static async Task<T> ExecuteScalar<T>(string sql)
     {
         using (var conn = CreateConn())
         {
             conn.Open();
             var cmd = conn.CreateCommand();
             cmd.CommandText = sql;
-            T scalar = (T)cmd.ExecuteScalar();
+            T scalar = (T)(await cmd.ExecuteScalarAsync());
             return scalar;
         }
     }
 
 
-    public static void VACCUM()
+    public static async Task VACCUM()
     {
         try
         {
             string sql = "VACUUM";
-            ExecuteNonQuery(sql);
+            await ExecuteNonQuery(sql);
         }
         catch (Exception ex)
         {

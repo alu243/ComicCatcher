@@ -7,7 +7,9 @@ namespace ComicApi
 {
     public static class Config
     {
-        public static string GetComicPath() => "wwwroot/comic";
+        public static string ComicPath => "wwwroot/comic";
         public static string GetDbPath() => "volume/comic";
+
+        public static int CacheMinute => 5;
     }
 }
