@@ -2,7 +2,7 @@
 
 public class DownloadedDao
 {
-    public static void CreateTableOnFly()
+    public static async Task CreateTableOnFly()
     {
         string sql = @"
 CREATE TABLE DownloadedList(
@@ -13,30 +13,29 @@ UNIQUE (ComicWeb, ComicName, ComicVolumn) ON CONFLICT REPLACE
 );";
         try
         {
-            SQLiteHelper.ExecuteNonQuery(sql);
+            await SQLiteHelper.ExecuteNonQuery(sql);
         }
         catch { /* doNothing */ }
 
         sql = "CREATE INDEX IX_DList_ComicName ON DownloadedList(ComicWeb, ComicName, ComicVolumn)";
         try
         {
-            SQLiteHelper.ExecuteNonQuery(sql);
+            await SQLiteHelper.ExecuteNonQuery(sql);
         }
         catch { /* doNothing */ }
     }
-    public static bool InDownloaded(string comicWeb, string comicName, string comicVolumn)
+    public static async Task<bool> InDownloaded(string comicWeb, string comicName, string comicVolumn)
     {
         var sql = $"SELECT count(1) as cnt from DownloadedList where ComicWeb = '{comicWeb}' and ComicName = '{comicName}' and ComicVolumn = '{comicVolumn}' LIMIT 0, 1";
-        return SQLiteHelper.ExecuteScalar<long>(sql) > 0;
+        return await SQLiteHelper.ExecuteScalar<long>(sql) > 0;
     }
 
-    public static int AddDownloaded(string comicWeb, string comicName, string comicVolumn)
+    public static async Task<int> AddDownloaded(string comicWeb, string comicName, string comicVolumn)
     {
         try
         {
-            string sql =
-                "INSERT INTO DownloadedList (ComicWeb, ComicName, ComicVolumn) values ('{0}' , '{1}', '{2}')";
-            return SQLiteHelper.ExecuteNonQuery(string.Format(sql, comicWeb, comicName, comicVolumn));
+            string sql = "INSERT INTO DownloadedList (ComicWeb, ComicName, ComicVolumn) values ('{0}' , '{1}', '{2}')";
+            return await SQLiteHelper.ExecuteNonQuery(string.Format(sql, comicWeb, comicName, comicVolumn));
         }
         catch (Exception ex)
         {

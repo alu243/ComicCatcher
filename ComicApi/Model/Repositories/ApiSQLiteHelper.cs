@@ -1,12 +1,18 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
+using Jint.Parser.Ast;
 
 namespace ComicCatcherLib.DbModel;
 
-public static class SQLiteHelper
+public static class ApiSQLiteHelper
 {
     //private static string connStr = "Data Source=ComicCatcher.s3db;Pooling=true;Page Size=8192;Journal Mode=off;UTF8Encoding=True;";
-    private static string connStr = "Data Source=ComicCatcher.s3db;Pooling=true;";
+    private static string connStr = "";
+
+    public static void SetDbPath(string path)
+    {
+        connStr = $"Data Source={Path.Combine(path, "ComicApi.s3db")};Pooling=true;";
+    }
 
     public static async Task<DataTable> GetTable(string sql)
     {

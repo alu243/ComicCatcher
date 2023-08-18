@@ -8,33 +8,28 @@ public class IgnoreComicDic
 
     private IgnoreComicDic()
     {
-        IgnoreComicDao.CreateTableOnFly();
+        IgnoreComicDao.CreateTableOnFly().Wait();
         dic = new Dictionary<string, string>();
     }
-    //public string GetIgnoreComic(string url)
-    //{
-    //    if (false == ContainsKey(url)) return url;
-    //    return this[url];
-    //}
 
     public Dictionary<string, string> GetDictionary() => dic.ToDictionary(k => k.Key, v => v.Value);
 
-    public bool Add(string url, string name)
+    public async Task<bool> Add(string url, string name)
     {
         if (true == string.IsNullOrEmpty(url)) return false;
-        IgnoreComicDao.AddIgnoreComic(url, name);
+        await IgnoreComicDao.AddIgnoreComic(url, name);
         return dic.TryAdd(url, name);
     }
 
     public bool IsIgnored(string url) => dic.ContainsKey(url);
 
-    public static IgnoreComicDic Load()
+    public static async Task<IgnoreComicDic> Load()
     {
         try
         {
             var ig = new IgnoreComicDic();
 
-            var result = IgnoreComicDao.GetTable();
+            var result = await IgnoreComicDao.GetTable();
             foreach (DataRow row in result.Rows)
             {
                 string url = row["ComicUrl"].ToString().Trim();

@@ -76,11 +76,11 @@ namespace ComicCatcher
         private void frmMain_Load(object sender, EventArgs e)
         {
             RenewSettings2Db();
-            settings = Settings.Load();
+            settings = Settings.Load().Result;
 
             DownloadedList.Load();
-            pathGroupDic = PathGroupDic.Load();
-            ignoreComicDic = IgnoreComicDic.Load();
+            pathGroupDic = PathGroupDic.Load().Result;
+            ignoreComicDic = IgnoreComicDic.Load().Result;
 
             lblCbMessage.Text = "";
             lblUpdateDate.Text = "";
@@ -869,14 +869,14 @@ namespace ComicCatcher
         {
             ComicSettingsGroup f = new ComicSettingsGroup(SettingEnum.PathGroup);
             f.ShowDialog(this);
-            this.pathGroupDic = PathGroupDic.Load();
+            this.pathGroupDic = PathGroupDic.Load().Result;
         }
 
         private void btnShowExceptModal_Click(object sender, EventArgs e)
         {
             ComicSettingsGroup f = new ComicSettingsGroup(SettingEnum.IgnoreComic);
             f.ShowDialog(this);
-            this.ignoreComicDic = IgnoreComicDic.Load();
+            this.ignoreComicDic = IgnoreComicDic.Load().Result;
         }
 
         private async void btnAppendTo_Click(object sender, EventArgs e)

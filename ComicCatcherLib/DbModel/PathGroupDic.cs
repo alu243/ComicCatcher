@@ -8,7 +8,7 @@ namespace ComicCatcherLib.DbModel
 
         private PathGroupDic()
         {
-            IgnoreComicDao.CreateTableOnFly();
+            IgnoreComicDao.CreateTableOnFly().Wait();
             dic = new Dictionary<string, string>();
         }
 
@@ -18,18 +18,18 @@ namespace ComicCatcherLib.DbModel
             return dic[cName];
         }
 
-        public static PathGroupDic Load()
+        public static async Task<PathGroupDic> Load()
         {
             try
             {
                 var pg = new PathGroupDic();
-                DataTable result = PathGroupDao.GetTable();
+                DataTable result = await PathGroupDao.GetTable();
                 foreach (DataRow row in result.Rows)
                 {
                     string groupName = row["GroupName"].ToString().Trim();
                     for (int i = 1; i <= 10; i++)
                     {
-                        string name = row["ComicName" + i.ToString()].ToString().Trim();
+                        string name = row[$"ComicName{i}"].ToString().Trim();
                         pg.dic.TryAdd(name, groupName);
                     }
                 }

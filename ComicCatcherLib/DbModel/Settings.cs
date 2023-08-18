@@ -4,18 +4,18 @@ namespace ComicCatcherLib.DbModel;
 
 public class Settings
 {
-    public bool Save()
+    public async Task<bool> Save()
     {
         var settingString = JsonSerializer.Serialize(this);
-        return SettingsDao.SaveSettings(settingString);
+        return await SettingsDao.SaveSettings(settingString);
     }
 
-    public static Settings Load()
+    public static async Task<Settings> Load()
     {
         SettingsDao.CreateSettingsTableOnFly();
-        var settingString = SettingsDao.GetSettings();
+        var settingString = await SettingsDao.GetSettings();
         if (string.IsNullOrEmpty(settingString)) return new Settings();
-        return JsonSerializer.Deserialize<Settings>(settingString);
+        return JsonSerializer.Deserialize<Settings>(settingString)!;
     }
 
     public string PhotoProgramPath { get; set; } = @"C:\Program Files\Honeyview\Honeyview.exe";

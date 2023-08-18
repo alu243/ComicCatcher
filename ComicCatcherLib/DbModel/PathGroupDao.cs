@@ -4,14 +4,14 @@ namespace ComicCatcherLib.DbModel;
 
 public class PathGroupDao
 {
-    public static DataTable GetTable()
+    public static async Task<DataTable> GetTable()
     {
         string sql = "select * from PathGroup";
-        var table = SQLiteHelper.GetTable(sql);
+        var table = await SQLiteHelper.GetTable(sql);
         return table;
     }
 
-    public static void CreateTableOnFly()
+    public static async Task CreateTableOnFly()
     {
         string sql = @"
 CREATE TABLE PathGroup (
@@ -30,25 +30,25 @@ UNIQUE (GroupName) ON CONFLICT REPLACE
 );";
         try
         {
-            SQLiteHelper.ExecuteNonQuery(sql);
+            await SQLiteHelper.ExecuteNonQuery(sql);
         }
         catch { /* doNothing */ }
 
         sql = "CREATE INDEX IX_PG_GroupName ON PathGroup(GroupName)";
         try
         {
-            SQLiteHelper.ExecuteNonQuery(sql);
+            await SQLiteHelper.ExecuteNonQuery(sql);
         }
         catch { /* doNothing */ }
     }
 
-    public static bool AddPathGroup(string groupName, string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10)
+    public static async Task<bool> AddPathGroup(string groupName, string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10)
     {
         try
         {
             string sql = $@"INSERT INTO PathGroup (GroupName, ComicName1, ComicName2, ComicName3, ComicName4, ComicName5, ComicName6, ComicName7, ComicName8, ComicName9, ComicName10) 
                 values ('{groupName}', '{name1}', '{name2}', '{name3}', '{name4}', '{name5}', '{name6}', '{name7}', '{name8}', '{name9}', '{name10}')";
-            return SQLiteHelper.ExecuteNonQuery(sql) > 0;
+            return await SQLiteHelper.ExecuteNonQuery(sql) > 0;
         }
         catch (Exception ex)
         {
@@ -56,14 +56,14 @@ UNIQUE (GroupName) ON CONFLICT REPLACE
             return false;
         }
     }
-    public static bool UpdatePathGroup(string groupName, string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10)
+    public static async Task<bool> UpdatePathGroup(string groupName, string name1, string name2, string name3, string name4, string name5, string name6, string name7, string name8, string name9, string name10)
     {
         try
         {
             var sql = $@"UPDATE PathGroup SET ComicName1 = '{name1}', ComicName2 = '{name2}', ComicName3 = '{name3}',
 ComicName4 = '{name4}', ComicName5 = '{name5}',ComicName6 = '{name6}', ComicName7= '{name7}', ComicName8 = '{name8}',
 ComicName9 = '{name9}', ComicName10 = '{name10}' WHERE GroupName = '{groupName}'";
-            return SQLiteHelper.ExecuteNonQuery(sql) > 0;
+            return await SQLiteHelper.ExecuteNonQuery(sql) > 0;
         }
         catch (Exception ex)
         {
@@ -72,12 +72,12 @@ ComicName9 = '{name9}', ComicName10 = '{name10}' WHERE GroupName = '{groupName}'
         }
     }
 
-    public static bool DeletePathGroup(string groupName)
+    public static async Task<bool> DeletePathGroup(string groupName)
     {
         try
         {
             var sql = $"DELETE FROM PathGroup WHERE GroupName = '{groupName}'";
-            return SQLiteHelper.ExecuteNonQuery(sql) > 0;
+            return await SQLiteHelper.ExecuteNonQuery(sql) > 0;
         }
         catch (Exception ex)
         {
@@ -87,7 +87,7 @@ ComicName9 = '{name9}', ComicName10 = '{name10}' WHERE GroupName = '{groupName}'
     }
 
 
-    public static void ApplyChangesToDatabase(DataTable dataTable)
+    public static async Task ApplyChangesToDatabase(DataTable dataTable)
     {
         foreach (DataRow row in dataTable.Rows)
         {
@@ -105,13 +105,13 @@ ComicName9 = '{name9}', ComicName10 = '{name10}' WHERE GroupName = '{groupName}'
                 var name8 = Convert.ToString(row["ComicName8"])?.Trim();
                 var name9 = Convert.ToString(row["ComicName9"])?.Trim();
                 var name10 = Convert.ToString(row["ComicName10"])?.Trim();
-                UpdatePathGroup(groupName, name1, name2, name3, name4, name5, name6, name7, name8, name9, name10);
+                await UpdatePathGroup(groupName, name1, name2, name3, name4, name5, name6, name7, name8, name9, name10);
             }
             else if (row.RowState == DataRowState.Deleted)
             {
                 // 删除操作
                 var url = Convert.ToString(row["ComicUrl", DataRowVersion.Original])?.Trim();
-                DeletePathGroup(url);
+                await DeletePathGroup(url);
             }
             else if (row.RowState == DataRowState.Added)
             {
@@ -126,7 +126,7 @@ ComicName9 = '{name9}', ComicName10 = '{name10}' WHERE GroupName = '{groupName}'
                 var name8 = Convert.ToString(row["ComicName8"])?.Trim();
                 var name9 = Convert.ToString(row["ComicName9"])?.Trim();
                 var name10 = Convert.ToString(row["ComicName10"])?.Trim();
-                AddPathGroup(groupName, name1, name2, name3, name4, name5, name6, name7, name8, name9, name10);
+                await AddPathGroup(groupName, name1, name2, name3, name4, name5, name6, name7, name8, name9, name10);
             }
         }
     }

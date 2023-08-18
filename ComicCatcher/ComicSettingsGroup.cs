@@ -15,13 +15,13 @@ namespace ComicCatcher
             this.setting = setting;
             if (this.setting == SettingEnum.IgnoreComic)
             {
-                IgnoreComicDao.CreateTableOnFly();
-                myTable = IgnoreComicDao.GetTable();
+                IgnoreComicDao.CreateTableOnFly().Wait();
+                myTable = IgnoreComicDao.GetTable().Result;
             }
             else //if(this.setting == SettingEnum.PathGroup)
             {
-                PathGroupDao.CreateTableOnFly();
-                myTable = PathGroupDao.GetTable();
+                PathGroupDao.CreateTableOnFly().Wait();
+                myTable = PathGroupDao.GetTable().Result;
             }
             InitializeComponent();
         }

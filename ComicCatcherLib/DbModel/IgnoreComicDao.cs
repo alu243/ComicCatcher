@@ -4,14 +4,14 @@ namespace ComicCatcherLib.DbModel;
 
 public class IgnoreComicDao
 {
-    public static DataTable GetTable()
+    public static async Task<DataTable> GetTable()
     {
         string sql = "select * from IgnoreComic";
-        var table = SQLiteHelper.GetTable(sql);
+        var table = await SQLiteHelper.GetTable(sql);
         return table;
     }
 
-    public static void CreateTableOnFly()
+    public static async Task CreateTableOnFly()
     {
         string sql = @"
 CREATE TABLE IgnoreComic (
@@ -21,17 +21,17 @@ UNIQUE (ComicUrl) ON CONFLICT REPLACE
 );";
         try
         {
-            SQLiteHelper.ExecuteNonQuery(sql);
+            await SQLiteHelper.ExecuteNonQuery(sql);
         }
         catch { /* doNothing */ }
     }
 
-    public static bool AddIgnoreComic(string url, string name)
+    public static async Task<bool> AddIgnoreComic(string url, string name)
     {
         try
         {
             string sql = $"INSERT INTO IgnoreComic (ComicUrl, ComicName) values ('{url}' , '{name}')";
-            return SQLiteHelper.ExecuteNonQuery(sql) > 0;
+            return await SQLiteHelper.ExecuteNonQuery(sql) > 0;
         }
         catch (Exception ex)
         {
@@ -39,12 +39,12 @@ UNIQUE (ComicUrl) ON CONFLICT REPLACE
             return false;
         }
     }
-    public static bool UpdateIgnoreComic(string url, string name)
+    public static async Task<bool> UpdateIgnoreComic(string url, string name)
     {
         try
         {
             var sql = $"UPDATE IgnoreComic SET ComicName = '{name}' WHERE ComicUrl = '{url}'";
-            return SQLiteHelper.ExecuteNonQuery(sql) > 0;
+            return await SQLiteHelper.ExecuteNonQuery(sql) > 0;
         }
         catch (Exception ex)
         {
@@ -53,12 +53,12 @@ UNIQUE (ComicUrl) ON CONFLICT REPLACE
         }
     }
 
-    public static bool DeleteIgnoreComic(string url)
+    public static async Task<bool> DeleteIgnoreComic(string url)
     {
         try
         {
             var sql = $"DELETE FROM IgnoreComic WHERE ComicUrl = '{url}'";
-            return SQLiteHelper.ExecuteNonQuery(sql) > 0;
+            return await SQLiteHelper.ExecuteNonQuery(sql) > 0;
         }
         catch (Exception ex)
         {
@@ -68,7 +68,7 @@ UNIQUE (ComicUrl) ON CONFLICT REPLACE
     }
 
 
-    public static void ApplyChangesToDatabase(DataTable dataTable)
+    public static async Task ApplyChangesToDatabase(DataTable dataTable)
     {
         foreach (DataRow row in dataTable.Rows)
         {
@@ -77,20 +77,20 @@ UNIQUE (ComicUrl) ON CONFLICT REPLACE
                 // 更新操作
                 var url = Convert.ToString(row["ComicUrl"])?.Trim();
                 var name = Convert.ToString(row["ComicName"])?.Trim();
-                UpdateIgnoreComic(url, name);
+                await UpdateIgnoreComic(url, name);
             }
             else if (row.RowState == DataRowState.Deleted)
             {
                 // 删除操作
                 var url = Convert.ToString(row["ComicUrl", DataRowVersion.Original])?.Trim();
                 //var name = Convert.ToString(row["ComicName"])?.Trim();
-                DeleteIgnoreComic(url);
+                await DeleteIgnoreComic(url);
             }
             else if (row.RowState == DataRowState.Added)
             {
                 var url = Convert.ToString(row["ComicUrl"])?.Trim();
                 var name = Convert.ToString(row["ComicName"])?.Trim();
-                AddIgnoreComic(url, name);
+                await AddIgnoreComic(url, name);
             }
         }
     }

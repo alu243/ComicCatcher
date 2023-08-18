@@ -234,7 +234,7 @@ namespace ComicCatcher.Utils
             chapterNode.Tag = chapter;
 
             // 如果是已下載過的點，變粗體，改顏色
-            if (DownloadedList.HasDownloaded(webSiteName, comicName, chapterNode.Text))
+            if (DownloadedList.HasDownloaded(webSiteName, comicName, chapterNode.Text).Result)
             {
                 chapterNode.NodeFont = boldFont;
                 chapterNode.ForeColor = Color.Blue;

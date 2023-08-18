@@ -4,16 +4,16 @@ public class DownloadedList
 {
     public static void Load()
     {
-        DownloadedDao.CreateTableOnFly();
+        DownloadedDao.CreateTableOnFly().Wait();
     }
 
-    public static bool HasDownloaded(string comicWeb, string comicName, string comicVolumn)
+    public static async Task<bool> HasDownloaded(string comicWeb, string comicName, string comicVolumn)
     {
         try
         {
             comicName = comicName.Replace("'", "''");
             comicVolumn = comicVolumn.Replace("'", "''");
-            return DownloadedDao.InDownloaded(comicWeb, comicName, comicVolumn);
+            return await DownloadedDao.InDownloaded(comicWeb, comicName, comicVolumn);
         }
         catch (Exception ex)
         {
@@ -22,13 +22,13 @@ public class DownloadedList
         }
     }
 
-    public static void AddDownloaded(string comicWeb, string comicName, string comicVolumn)
+    public static async Task AddDownloaded(string comicWeb, string comicName, string comicVolumn)
     {
         try
         {
             comicName = comicName.Replace("'", "''");
             comicVolumn = comicVolumn.Replace("'", "''");
-            DownloadedDao.AddDownloaded(comicWeb, comicName, comicVolumn);
+            await DownloadedDao.AddDownloaded(comicWeb, comicName, comicVolumn);
         }
         catch
         {
