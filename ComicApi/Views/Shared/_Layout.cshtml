@@ -1,21 +1,12 @@
 ﻿@{
-    var cookies = Context.Request.Cookies;
     var userid = Context.Request.Cookies["userid"];
     var username = userid ?? "Guest";
 }
 
-<h2> Hi @username Now the time on the server is @DateTime.Now</h2>
+<h2 style="display: inline-block;"> Hi @username Now is @DateTime.Now</h2>
 @Html.TextBoxFor(t => userid)
 <button onclick="addCookie()">登入</button>
-
+<br/>
 @RenderBody()
 
-
-<script>
-    function addCookie() {
-        var newuserid = document.querySelector('#userid').value;
-        console.log('loginuser = ', newuserid);
-        document.cookie = 'userid=' + newuserid;
-        location.reload();
-    }
-</script>
+<script src="~/comic.js"></script>

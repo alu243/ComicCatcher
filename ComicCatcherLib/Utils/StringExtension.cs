@@ -2,6 +2,27 @@
 
 public static class StringExtension
 {
+    public static string GetUrlDirectoryName(this string s)
+    {
+        if (string.IsNullOrEmpty(s)) return string.Empty;
+        var uri = new Uri(s);
+        return uri.LocalPath.Trim('/');
+    }
+
+    public static string CombineUrl(this string s, params string[] directories)
+    {
+        var uri = new Uri(s);
+        foreach (var directory in directories)
+        {
+            if (false == string.IsNullOrEmpty(directory))
+            {
+                uri = new Uri(uri, directory);
+            }
+        }
+        return uri.ToString();
+    }
+
+
     /// <summary>
     /// 清除有可能會造錯成錯誤目之字串
     /// </summary>

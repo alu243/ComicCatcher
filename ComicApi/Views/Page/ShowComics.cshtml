@@ -1,12 +1,17 @@
-﻿@model ComicApi.Model.PageModel
+﻿@using ComicCatcherLib.Utils
+@model ComicApi.Model.PageModel
 
 @{
     ViewBag.Title = "Pagination";
     Layout = "_Layout";
 }
 
-<h2>@Model.CurrPagination.Caption</h2>
+<h2 style="display: inline-block;">@Model.CurrPagination.Caption</h2>
+<button onclick="location.href='/page/@Model.CurrPagination.TabNumber/true'">顯示全部</button>
+<button onclick="location.href='/page/@Model.CurrPagination.TabNumber'">隱藏</button>
+<br/>
 @{
+
     int i = 0;
     foreach (var p in Model.Paginations)
     {
@@ -24,17 +29,34 @@
 
     var pageCount = 5;
     i = 0;
-    @Html.Raw("<table><tbody>");
-    foreach (var comic in Model.CurrPagination.Comics)
+    @Html.Raw("<table><tbody>")
+
+    foreach (var comic in Model.FilteredComics)
     {
-        if (i % pageCount == 0) @Html.Raw("<tr>");
-        var relativeUrl = new Uri(comic.Url).LocalPath.Trim('/');
+        if (i % pageCount == 0)
+        {
+            @Html.Raw("<tr>")
+        }
         <td>
-            <p><a href="../comic/@relativeUrl"><img src=@comic.IconUrl><br>@comic.Caption</a></p>
+            <p>
+                <a href="../comic/@comic.Url.GetUrlDirectoryName()"><img src=@comic.IconUrl><br>@comic.Caption</a>
+                @if (Model.IgnoreComics.ContainsKey(comic.Url.GetUrlDirectoryName()))
+                {
+                    <button onclick="deleteIgnoreComic('@comic.Url.GetUrlDirectoryName()')">顯示</button>
+                }
+                else
+                {
+                    <button onclick="addIgnoreComic('@comic.Url.GetUrlDirectoryName()', '@comic.Caption')">隱藏</button>
+                }
+            </p>
         </td>
         i++;
-        if (i % pageCount == 0) @Html.Raw("</tr>");
+        if (i % pageCount == 0)
+        {
+            @Html.Raw("</tr>")
+        }
     }
     if (i % pageCount != 0) Html.Raw("</tr>");
-    @Html.Raw("</tbody></table>");
+    @Html.Raw("</tbody></table>")
+    ;
 }

@@ -1,4 +1,8 @@
-﻿using ComicCatcherLib.ComicModels;
+﻿using System.Data;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using ComicApi.Model.Requests;
+using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.DbModel;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
@@ -10,13 +14,15 @@ public class ComicApiRepository
     {
         var env = hostEnvironment;
         ApiSQLiteHelper.SetDbPath(env.WebRootPath);
-        this.CreateComicOnFly();
-        this.CreateApiChapterOnFly();
+        this.CreateComicOnFly().Wait();
+        this.CreateApiChapterOnFly().Wait();
+        this.CreateIgnoreComicOnFly().Wait();
     }
 
-    private void CreateComicOnFly()
+    #region Comic
+    private async Task CreateComicOnFly()
     {
-        ApiSQLiteHelper.ExecuteNonQuery(@"
+        await ApiSQLiteHelper.ExecuteNonQuery(@"
 CREATE TABLE IF NOT EXISTS ApiComic(
 Comic NVARCHAR(200) not NULL,
 Caption NVARCHAR(200) not NULL,
@@ -24,9 +30,9 @@ Url NVARCHAR(200) not NULL,
 IconUrl NVARCHAR(200) not NULL,
 ListState INT no NULL,
 LastUpdateChapter NVARCHAR(100),
-LastUpdateDate NVARCHAR(100)
-);").Wait(); ;
-        ApiSQLiteHelper.ExecuteNonQuery(@"CREATE UNIQUE INDEX IF NOT EXISTS idx_ApiComic ON ApiComic (Comic);").Wait();
+LastUpdateDate NVARCHAR(100),
+UNIQUE (Comic) ON CONFLICT REPLACE
+);");
     }
 
     public async Task<ComicEntity> GetComic(string comic)
@@ -55,20 +61,22 @@ LastUpdateDate NVARCHAR(100)
 ('{comicUrl}','{comic.Caption}','{comic.Url}',{comic.IconUrl}, {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}');";
         await ApiSQLiteHelper.ExecuteNonQuery(sql);
     }
-
+    #endregion
 
     #region Chapter
-    private void CreateApiChapterOnFly()
+    private async Task CreateApiChapterOnFly()
     {
-        ApiSQLiteHelper.ExecuteNonQuery(@"
+        await ApiSQLiteHelper.ExecuteNonQuery(@"
+BEGIN;
 CREATE TABLE IF NOT EXISTS ApiChapter(
 Comic NVARCHAR(200) not NULL,
 Chapter NVARCHAR(200) not NULL,
 Caption NVARCHAR(200) not NULL,
-Url NVARCHAR(200) not NULL
-);").Wait();
-        ApiSQLiteHelper.ExecuteNonQuery(@"CREATE UNIQUE INDEX IF NOT EXISTS idx_ApiChapter ON ApiChapter (Comic, Chapter);").Wait();
-        ApiSQLiteHelper.ExecuteNonQuery(@"
+Url NVARCHAR(200) not NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ApiChapter ON ApiChapter (Comic, Chapter);
+COMMIT;");
+        await ApiSQLiteHelper.ExecuteNonQuery(@"
+BEGIN;
 CREATE TABLE IF NOT EXISTS ApiPage(
 Comic NVARCHAR(200) not NULL,
 Chapter NVARCHAR(200) not NULL,
@@ -76,9 +84,9 @@ PageNumber INT not NULL,
 Caption NVARCHAR(200) not NULL,
 Url NVARCHAR(200) not NULL,
 PageFileName NVARCHAR(20) not NULL,
-Refer NVARCHAR(200) not NULL
-);").Wait();
-        ApiSQLiteHelper.ExecuteNonQuery(@"CREATE UNIQUE INDEX IF NOT EXISTS idx_ApiPage ON ApiPage (Comic, Chapter, PageNumber);").Wait();
+Refer NVARCHAR(200) not NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ApiPage ON ApiPage (Comic, Chapter, PageNumber);
+COMMIT;");
     }
 
     public async Task<ComicChapter> GetComicChapterWithPages(string comic, string chapter)
@@ -147,6 +155,54 @@ Refer NVARCHAR(200) not NULL
         var sql = "SELECT LocalPath AS cnt FROM ApiChapter WHERE Comic = @Comic AND Chapter = @Chapter";
         var path = await ApiSQLiteHelper.ExecuteScalar<string>(sql);
         return path;
+    }
+    #endregion
+
+    #region UserProfiles
+    private async Task CreateIgnoreComicOnFly()
+    {
+        await ApiSQLiteHelper.ExecuteNonQuery(@"
+BEGIN;
+CREATE TABLE IF NOT EXISTS UserIgnoreComic(
+UserId NVARCHAR(20) not NULL,
+Comic NVARCHAR(200) not NULL,
+ComicName NVARCHAR(50) not NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_UserIgnoreComic ON UserIgnoreComic (UserId, Comic);
+COMMIT;");
+    }
+
+    public async Task<Dictionary<string, string>> GetIgnoreComics(string userId)
+    {
+        var sql = $"SELECT * FROM UserIgnoreComic WHERE UserId = '{userId}'";
+        var result = await ApiSQLiteHelper.GetTable(sql);
+        var dic = new Dictionary<string, string>();
+        foreach (DataRow row in result.Rows)
+        {
+            string url = row.GetValue<string>("Comic")?.Trim();
+            string name = row.GetValue<string>("ComicName")?.Trim();
+            dic.TryAdd(url, name);
+        }
+
+        return dic;
+    }
+
+    public async Task AddIgnoreComic(IgnoreComicRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.UserId)) return;
+        var sql = $"INSERT INTO UserIgnoreComic (UserId, Comic, ComicName) VALUES ('{request.UserId}', '{request.Comic}', '{request.ComicName}')";
+        await ApiSQLiteHelper.ExecuteNonQuery(sql);
+    }
+    public async Task DeleteIgnoreComic(IgnoreComicRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.UserId)) return;
+
+        var sql = $"DELETE FROM UserIgnoreComic WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
+        await ApiSQLiteHelper.GetTable(sql);
+    }
+    public async Task ClearIgnoreComics(string userId)
+    {
+        var sql = $"DELETE FROM UserIgnoreComic WHERE UserId = '{userId}'";
+        await ApiSQLiteHelper.GetTable(sql);
     }
     #endregion
 }
