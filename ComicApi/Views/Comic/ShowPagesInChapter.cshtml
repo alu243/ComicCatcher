@@ -1,0 +1,87 @@
+﻿@model ComicCatcherLib.ComicModels.ComicEntity
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<h2>@Model.Caption</h2>
+
+<div id="app">
+    <button @@click="goBack()">上一頁</button>
+    <br />
+    <div v-for="chapter in state.chapters">
+        <center><h2>{{ chapter.currChapter.caption }}</h2></center>
+        <div v-for="x in chapter.currChapter.pages">
+            <img :src="x.url" style="width:98%;" alt="Snow" />
+        </div>
+        <hr />
+    </div>
+    <br />
+    <div v-if="loading">讀取中...</div>
+    <div v-if="ending">已經是最新的了</div>
+    <button @@click="goBack()">上一頁</button>
+
+    <Observer v-if="state.chapters.length > 0 && false == loading" @@intersect="intersected" />
+</div>
+
+<script type="text/javascript">
+    const { createApp, onMounted, onBeforeUnmount, reactive, ref } = Vue;
+    const app = createApp({
+        components: {
+            Observer,
+        },
+        setup() {
+            const state = reactive({
+                chapters: [],
+            });
+            const loading = ref(true);
+            const ending = ref(false);
+
+            const pathArray = window.location.pathname.split('/');
+            const chapter = pathArray[pathArray.length - 1];
+            const comic = pathArray[pathArray.length - 2];
+
+            onMounted(async () => {
+                const response = await fetch(`/api/comic/${comic}/${chapter}`);
+                const chapterResponse = await response.json();
+                state.chapters.push(chapterResponse);
+                loading.value = false;
+            });
+
+            const goBack = function () {
+                const pathArray = window.location.pathname.split('/');
+                const chapter = pathArray[pathArray.length - 1];
+                const comic = pathArray[pathArray.length - 2];
+                location.href = `/comic/${comic}`;
+            }
+
+            const intersected = async function () {
+                console.log("Next~~~");
+                loading.value = true;
+                var lastChapter = state.chapters[state.chapters.length - 1];
+                const response = await fetch(`/api/comic/${lastChapter.comic}/${lastChapter.chapter}/next`);
+                if (response == null) {
+                    ending.value = true;
+                    return;
+                }
+                const chapterResponse = await response.json();
+                history.pushState(chapterResponse, '', `/comic/${chapterResponse.comic}/${chapterResponse.chapter}`);
+                state.chapters.push(chapterResponse);
+                //if (state.chapters.length > 3) state.chapters.shift();
+                loading.value = false;
+            }
+
+            return {
+                state,
+                goBack,
+                intersected,
+                loading,
+                ending
+            }
+        }
+    });
+    //app.component(Observer);
+    app.mount('#app');
+    console.log("start app", app);
+</script>

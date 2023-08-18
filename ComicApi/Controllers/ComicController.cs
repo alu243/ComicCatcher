@@ -14,21 +14,15 @@ namespace ComicApi.Controllers
     {
         private Dm5 dm5;
         private IHostingEnvironment env;
-        private ComicApiRepository repo;
-        private IMemoryCache cache;
-        private MemoryCacheEntryOptions cacheOptions;
+        private ComicApplication app;
 
         public ComicController(Dm5 comic,
             IHostingEnvironment hostEnvironment,
-            ComicApiRepository repository,
-            IMemoryCache memoryCache)
+            ComicApplication comicApplication)
         {
             dm5 = comic;
             env = hostEnvironment;
-            repo = repository;
-            cache = memoryCache;
-            cacheOptions = new();
-            cacheOptions.SetSlidingExpiration(TimeSpan.FromMinutes(Config.CacheMinute));
+            app = comicApplication;
         }
 
         [HttpPost("{comic}/{chapter}")]
@@ -57,91 +51,19 @@ namespace ComicApi.Controllers
 
 
         [HttpGet("{comic}")]
-        public async Task<IActionResult> ShowComic(string comic)
+        public async Task<IActionResult> ShowChaptersInComic(string comic)
         {
-            var comicEntity = await this.GetComic(comic);
+            var comicEntity = await app.GetComic(comic);
             await dm5.LoadChapters(comicEntity);
             return View(new ComicModel() { CurrComic = comicEntity, Comic = comic });
-
-        }
-
-        private async Task<ComicEntity> GetComic(string comic)
-        {
-            string key = $"comic_{comic}";
-            if (!cache.TryGetValue(key, out ComicEntity comicEntity))
-            {
-                //comicEntity = await repo.GetComic(comic);
-                //if (comicEntity == null)
-                //{
-                var url = new Uri(new Uri(dm5.GetRoot().Url), comic).ToString();
-                comicEntity = await dm5.GetSingleComicName(url);
-                //}
-                repo.SaveComic(comicEntity);
-
-                if (comicEntity == null) return null;
-
-                cache.Set(key, comicEntity, cacheOptions);
-            }
-            return comicEntity;
         }
 
         [HttpGet("{comic}/{chapter}")]
-        public async Task<IActionResult> ShowComicChapter(string comic, string chapter)
+        public async Task<IActionResult> ShowPagesInChapter(string comic, string chapter)
         {
-            var comicChapter = await this.GetComicChapter(comic, chapter);
-            var comicEnity = await repo.GetComic(comic);
-            return View(new ChapterModel()
-            {
-                Comic = comic,
-                Chapter = chapter,
-                CurrChapter = comicChapter,
-                ComicName = comicEnity?.Caption ?? comic
-            });
+            var comicEnity = await app.GetComic(comic);
+            return View(comicEnity);
         }
-
-        private async Task<ComicChapter> GetComicChapter(string comic, string chapter)
-        {
-            string key = $"comic_{comic}_chatper_{chapter}";
-            if (!cache.TryGetValue(key, out ComicChapter comicChapter))
-            {
-                var url = new Uri(new Uri(new Uri(dm5.GetRoot().Url), comic), chapter).ToString();
-                comicChapter = await repo.GetComicChapterWithPages(comic, chapter);
-                if (comicChapter == null) comicChapter = await this.GetChapterFromComic(comic, chapter);
-
-                if (comicChapter == null) return null;
-
-                if (comicChapter.ListState == ComicState.Created)
-                {
-                    await dm5.LoadPages(comicChapter);
-                }
-
-                repo.SaveComicChapter(comic, chapter, comicChapter);
-                repo.SaveComicPages(comic, chapter, comicChapter.Pages);
-
-                cache.Set(key, comicChapter, cacheOptions);
-            }
-            return comicChapter;
-        }
-
-        private async Task<ComicChapter> GetChapterFromComic(string comic, string chapter)
-        {
-            var comicEntity = await this.GetComic(comic);
-            await dm5.LoadChapters(comicEntity);
-            var comicChapter = comicEntity.Chapters.FirstOrDefault(c => new Uri(c.Url).LocalPath.Trim('/').Equals(chapter));
-            return comicChapter;
-        }
-
-
-        //[HttpGet("{comic}/{chapter}/{pageFile}")]
-        //public FileResult GetComicPage(string comic, string chapter, string pageFile)
-        //{
-        //    var path = Path.Combine(env.WebRootPath,
-        //        Config.ComicPath,
-        //        comic,
-        //        chapter,
-        //        pageFile);
-        //    return new FileStreamResult(new FileStream(path, FileMode.Open), "image/jpeg");
-        //}
     }
 }
 

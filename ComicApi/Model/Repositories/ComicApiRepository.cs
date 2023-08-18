@@ -89,7 +89,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_ApiPage ON ApiPage (Comic, Chapter, PageNum
 COMMIT;");
     }
 
-    public async Task<ComicChapter> GetComicChapterWithPages(string comic, string chapter)
+    public async Task<ComicChapter> GetComicChapter(string comic, string chapter)
     {
         var sql = $"SELECT * FROM ApiChapter WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
         var table = await ApiSQLiteHelper.GetTable(sql);
@@ -100,9 +100,6 @@ COMMIT;");
             Caption = table.Rows[0].GetValue<string>("Caption"),
             ListState = ComicState.Created
         };
-
-        comicChapter.Pages = await this.GetComicPages(comic, chapter);
-        if (comicChapter.Pages.Count <= 0) comicChapter.ListState = ComicState.ListLoaded;
         return comicChapter;
     }
 
@@ -137,15 +134,22 @@ COMMIT;");
         return true;
     }
 
+    public async Task<bool> DeleteComicPages(string comic, string chapter)
+    {
+        var sql = $"DELETE FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
+        await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        return true;
+    }
+
     public async Task<bool> SaveComicPages(string comic, string chapter, List<ComicPage> pages)
     {
-        var sql = "DELETE FROM ApiPage WHERE Comic = @Comic AND Chapter = @Chapter";
+        var sql = $"DELETE FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
         await ApiSQLiteHelper.ExecuteNonQuery(sql);
         foreach (var page in pages)
         {
             sql = $@"INSERT OR REPLACE INTO ApiComic (Comic, Chapter, PageNumber, Caption, Url, PageFileName, Refer) VALUES
     ('{comic}', '{chapter}', {page.PageNumber}, '{page.Caption}', '{page.Url}', '{page.PageFileName}', '{page.Refer}');";
-            await ApiSQLiteHelper.ExecuteNonQuery(sql);
+            ApiSQLiteHelper.ExecuteNonQuery(sql);
         }
         return true;
     }

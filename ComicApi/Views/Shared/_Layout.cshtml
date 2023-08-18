@@ -6,7 +6,12 @@
 <h2 style="display: inline-block;"> Hi @username Now is @DateTime.Now</h2>
 @Html.TextBoxFor(t => userid)
 <button onclick="addCookie()">登入</button>
-<br/>
-@RenderBody()
+<br />
 
 <script src="~/comic.js"></script>
+<script src="~/vue/vue.global.js"></script>
+<script src="~/observe.js"></script>
+
+@RenderBody()
+
+@RenderSection("Scripts", false)

@@ -1,3 +1,4 @@
+using ComicApi.Controllers;
 using ComicApi.Model.Repositories;
 using ComicCatcherLib.ComicModels.Domains;
 
@@ -10,6 +11,7 @@ builder.Services.AddServerSideBlazor(c => c.DetailedErrors = true);
 
 builder.Services.AddSingleton<Dm5>();
 builder.Services.AddSingleton<ComicApiRepository>();
+builder.Services.AddSingleton<ComicApplication>();
 
 var app = builder.Build();
 
