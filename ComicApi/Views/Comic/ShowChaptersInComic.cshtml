@@ -11,7 +11,7 @@
 @{
     var pageCount = 5;
     var i = 0;
-    @Html.Raw("<table><tbody>")
+    @Html.Raw("<table style='max-width:800px'><tbody>")
 
     foreach (var chapter in Model.CurrComic.Chapters)
     {
@@ -20,7 +20,11 @@
 
         var relativeUrl = new Uri(chapter.Url).LocalPath.Trim('/');
         <td>
-            <p><a href="./@Model.Comic/@relativeUrl">@chapter.Caption</a></p>
+            <p>
+                <div style="min-width=130px;height:40px; padding:5px;margin:5px;background-color:#DDD;text-align: center;" onclick="location.href='./@Model.Comic/@relativeUrl'">
+                    <a href="./@Model.Comic/@relativeUrl">@chapter.Caption</a>
+                </div>
+            </p>
         </td>
         i++;
         if (i % pageCount == 0)

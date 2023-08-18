@@ -11,18 +11,18 @@
     <button @@click="goBack()">上一頁</button>
     <br />
     <div v-for="chapter in state.chapters">
-        <center><h2>{{ chapter.currChapter.caption }}</h2></center>
+        <h2 style="text-align: center;">{{ chapter.currChapter.caption }}</h2>
         <div v-for="x in chapter.currChapter.pages">
             <img :src="x.url" style="width:98%;" alt="Snow" />
         </div>
         <hr />
     </div>
     <br />
-    <div v-if="loading">讀取中...</div>
+    <div v-if="loading && !ending">讀取中...</div>
     <div v-if="ending">已經是最新的了</div>
     <button @@click="goBack()">上一頁</button>
 
-    <Observer v-if="state.chapters.length > 0 && false == loading" @@intersect="intersected" />
+    <Observer v-if="state.chapters.length > 0 && false == loading && false == ending" @@intersect="intersected" />
 </div>
 
 <script type="text/javascript">
@@ -46,7 +46,7 @@
                 const response = await fetch(`/api/comic/${comic}/${chapter}`);
                 const chapterResponse = await response.json();
                 state.chapters.push(chapterResponse);
-                loading.value = false;
+                setTimeout(() => loading.value = false, 1000);
             });
 
             const goBack = function () {
@@ -58,14 +58,19 @@
 
             const intersected = async function () {
                 console.log("Next~~~");
+                if (loading.value == true) return;
                 loading.value = true;
                 var lastChapter = state.chapters[state.chapters.length - 1];
                 const response = await fetch(`/api/comic/${lastChapter.comic}/${lastChapter.chapter}/next`);
-                if (response == null) {
+
+                var text = await response.text();
+                if (text == null || text == "") {
                     ending.value = true;
+                    loading.value = false;
                     return;
                 }
-                const chapterResponse = await response.json();
+                const chapterResponse = await JSON.parse(text);
+
                 history.pushState(chapterResponse, '', `/comic/${chapterResponse.comic}/${chapterResponse.chapter}`);
                 state.chapters.push(chapterResponse);
                 //if (state.chapters.length > 3) state.chapters.shift();
