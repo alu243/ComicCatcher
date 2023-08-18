@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using ComicApi.Controllers;
 using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.DbModel;
@@ -174,7 +175,6 @@ ComicName NVARCHAR(50) not NULL);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_UserIgnoreComic ON UserIgnoreComic (UserId, Comic);
 COMMIT;");
     }
-
     public async Task<Dictionary<string, string>> GetIgnoreComics(string userId)
     {
         var sql = $"SELECT * FROM UserIgnoreComic WHERE UserId = '{userId}'";
@@ -189,7 +189,6 @@ COMMIT;");
 
         return dic;
     }
-
     public async Task AddIgnoreComic(IgnoreComicRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return;
@@ -209,4 +208,54 @@ COMMIT;");
         await ApiSQLiteHelper.GetTable(sql);
     }
     #endregion
+
+    #region Favorite
+    private async Task CreateFavoriteComicOnFly()
+    {
+        await ApiSQLiteHelper.ExecuteNonQuery(@"
+BEGIN;
+CREATE TABLE IF NOT EXISTS UserFavoriteComic(
+UserId NVARCHAR(20) not NULL,
+Comic NVARCHAR(200) not NULL,
+ComicName NVARCHAR(50) not NULL,
+IconUrl NVARCHAR(200) not NULL,);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_UserFavoriteComic ON UserFavoriteComic (UserId, Comic);
+COMMIT;");
+    }
+
+    public async Task AddFavoriteComic(FavoriteComic request)
+    {
+        if (string.IsNullOrWhiteSpace(request.UserId)) return;
+        var sql = $"INSERT INTO UserFavoriteComic (UserId, Comic, ComicName, IconUrl) VALUES ('{request.UserId}', '{request.Comic}', '{request.ComicName}', '{request.IconUrl}')";
+        await ApiSQLiteHelper.ExecuteNonQuery(sql);
+    }
+    public async Task DeleteFavoriteComic(FavoriteComic request)
+    {
+        if (string.IsNullOrWhiteSpace(request.UserId)) return;
+
+        var sql = $"DELETE FROM UserFavoriteComic WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
+        await ApiSQLiteHelper.GetTable(sql);
+    }
+
+    public async Task<List<FavoriteComic>> GetFavoriteComics(string userId)
+    {
+        var sql = $"SELECT * FROM UserFavoriteComic WHERE UserId = '{userId}'";
+        var result = await ApiSQLiteHelper.GetTable(sql);
+        var list = new List<FavoriteComic>();
+        foreach (DataRow row in result.Rows)
+        {
+            var favorite = new FavoriteComic()
+            {
+                Comic = 
+            }
+            string url = row.GetValue<string>("Comic")?.Trim();
+            string name = row.GetValue<string>("ComicName")?.Trim();
+            dic.TryAdd(url, name);
+        }
+
+        return dic;
+    }
+
+    #endregion
+
 }
