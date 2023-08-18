@@ -18,6 +18,7 @@ public class ComicApiRepository
         this.CreateComicOnFly().Wait();
         this.CreateApiChapterOnFly().Wait();
         this.CreateIgnoreComicOnFly().Wait();
+        this.CreateFavoriteComicOnFly().Wait();
     }
 
     #region Comic
@@ -218,23 +219,23 @@ CREATE TABLE IF NOT EXISTS UserFavoriteComic(
 UserId NVARCHAR(20) not NULL,
 Comic NVARCHAR(200) not NULL,
 ComicName NVARCHAR(50) not NULL,
-IconUrl NVARCHAR(200) not NULL,);
+IconUrl NVARCHAR(200) not NULL);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_UserFavoriteComic ON UserFavoriteComic (UserId, Comic);
 COMMIT;");
     }
 
-    public async Task AddFavoriteComic(FavoriteComic request)
+    public async Task<bool> AddFavoriteComic(FavoriteComic request)
     {
-        if (string.IsNullOrWhiteSpace(request.UserId)) return;
+        if (string.IsNullOrWhiteSpace(request.UserId)) return false;
         var sql = $"INSERT INTO UserFavoriteComic (UserId, Comic, ComicName, IconUrl) VALUES ('{request.UserId}', '{request.Comic}', '{request.ComicName}', '{request.IconUrl}')";
-        await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        return await ApiSQLiteHelper.ExecuteNonQuery(sql) > 0;
     }
-    public async Task DeleteFavoriteComic(FavoriteComic request)
+    public async Task<bool> DeleteFavoriteComic(FavoriteComic request)
     {
-        if (string.IsNullOrWhiteSpace(request.UserId)) return;
+        if (string.IsNullOrWhiteSpace(request.UserId)) return false;
 
         var sql = $"DELETE FROM UserFavoriteComic WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
-        await ApiSQLiteHelper.GetTable(sql);
+        return await ApiSQLiteHelper.ExecuteNonQuery(sql) > 0;
     }
 
     public async Task<List<FavoriteComic>> GetFavoriteComics(string userId)
@@ -246,14 +247,14 @@ COMMIT;");
         {
             var favorite = new FavoriteComic()
             {
-                Comic = 
-            }
-            string url = row.GetValue<string>("Comic")?.Trim();
-            string name = row.GetValue<string>("ComicName")?.Trim();
-            dic.TryAdd(url, name);
+                Comic = row.GetValue<string>("Comic")?.Trim(),
+                IconUrl = row.GetValue<string>("IconUrl")?.Trim(),
+                ComicName = row.GetValue<string>("ComicName")?.Trim(),
+                UserId = row.GetValue<string>("UserId")?.Trim(),
+            };
+            list.Add(favorite);
         }
-
-        return dic;
+        return list;
     }
 
     #endregion

@@ -8,10 +8,3 @@ public class IgnoreComicRequest
     public string? ComicName { get; set; }
     [JsonIgnore] public string? UserId { get; set; }
 }
-
-public class FavoriteComicRequest
-{
-    public string Comic { get; set; }
-    public string? ComicName { get; set; }
-    [JsonIgnore] public string? UserId { get; set; }
-}

@@ -1,5 +1,6 @@
 ﻿using ComicApi.Model;
 using ComicApi.Model.Repositories;
+using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.ComicModels.Domains;
 using Microsoft.AspNetCore.Mvc;
@@ -60,6 +61,28 @@ namespace ComicApi.Controllers
         ////////        pageFile);
         ////////    return new FileStreamResult(new FileStream(path, FileMode.Open), "image/jpeg");
         ////////}
+
+        public async Task<ComicPagination> GetPagnitation(int page)
+        {
+            var key = $"Pagination_{page}";
+            if (!cache.TryGetValue(key, out ComicPagination pagination))
+            {
+                pagination = dm5.GetRoot().Paginations[page - 1];
+                await dm5.LoadComicsForWeb(pagination);
+                pagination.Comics.ForEach(c => repo.SaveComic(c));
+                cache.Set(key, pagination, cacheOptions);
+            }
+
+            if (pagination.ListState != ComicState.ListLoaded)
+            {
+                pagination.ListState = ComicState.ListLoaded;
+                await dm5.LoadComicsForWeb(pagination);
+                pagination.Comics.ForEach(c => repo.SaveComic(c));
+                cache.Set(key, pagination, cacheOptions);
+            }
+
+            return pagination;
+        }
 
         public async Task<ComicEntity> GetComic(string comic)
         {
@@ -123,6 +146,37 @@ namespace ComicApi.Controllers
         {
             await this.repo.DeleteComicPages(comic, chapter);
             return await this.GetComicPages(comic, chapter);
+        }
+
+
+        public async Task<bool> AddFavoriteComic(FavoriteComic request)
+        {
+            return await this.repo.AddFavoriteComic(request);
+        }
+
+        public async Task<bool> DeleteFavoriteComic(FavoriteComic request)
+        {
+            return await this.repo.DeleteFavoriteComic(request);
+        }
+
+        public async Task<Dictionary<string, string>> GetIgnoreComics(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return new Dictionary<string, string>();
+            var dic = await this.repo.GetIgnoreComics(userId);
+            return dic;
+        }
+
+        public async Task<Dictionary<string, string>> GetFavoriteComicDic(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return new Dictionary<string, string>();
+            var list = await this.repo.GetFavoriteComics(userId);
+            var dic = new Dictionary<string, string>();
+            foreach (var item in list)
+            {
+                dic.TryAdd(item.Comic, item.ComicName);
+            }
+
+            return dic;
         }
 
     }

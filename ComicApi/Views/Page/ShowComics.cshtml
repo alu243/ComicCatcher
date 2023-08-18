@@ -31,22 +31,48 @@
     i = 0;
     @Html.Raw("<table style='max-width: 1000px;'><tbody>")
 
-    foreach (var comic in Model.FilteredComics)
+    foreach (var comic in Model.ShowComics)
     {
+        var isIgnore = Model.IgnoreComics.ContainsKey(comic.Url.GetUrlDirectoryName());
+        var isFavorite = Model.FavoriteComics.ContainsKey(comic.Url.GetUrlDirectoryName());
         if (i % pageCount == 0)
         {
             @Html.Raw("<tr>")
         }
         <td>
             <p>
-                <a href="../comic/@comic.Url.GetUrlDirectoryName()" target="_comic"><img src=@comic.IconUrl><br>@comic.Caption</a>
-                @if (Model.IgnoreComics.ContainsKey(comic.Url.GetUrlDirectoryName()))
+                <a href="../comic/@comic.Url.GetUrlDirectoryName()" target="_comic">
+                    <img src=@comic.IconUrl><br>
+                    @if (isFavorite)
+                    {
+                        <span style="color:blue;font-weight: 900; padding-top:3px; padding-bottom:3px">@comic.Caption</span>
+                    }
+                    else
+                    {
+                        <span style="color:black; padding-top:3px; padding-bottom:3px">@comic.Caption</span>
+                    }
+                </a>
+
+                <br />
+
+                @if (isIgnore)
                 {
-                    <button style="font-size: 18px;" onclick="deleteIgnoreComic('@comic.Url.GetUrlDirectoryName()')">顯示</button>
+                    <button style="font-size: 16px;" onclick="deleteIgnoreComic('@comic.Url.GetUrlDirectoryName()')">顯示</button>
                 }
                 else
                 {
-                    <button style="font-size: 18px;" onclick="addIgnoreComic('@comic.Url.GetUrlDirectoryName()', '@comic.Caption')">隱藏</button>
+                    <button style="font-size: 16px;" onclick="addIgnoreComic('@comic.Url.GetUrlDirectoryName()', '@comic.Caption')">隱藏</button>
+                }
+
+                &nbsp;&nbsp;&nbsp;
+
+                @if (isFavorite)
+                {
+                    <button style="font-size: 16px;" onclick="deleteFavoriteComic('@comic.Url.GetUrlDirectoryName()')">移除最愛</button>
+                }
+                else
+                {
+                    <button style="font-size: 16px;" onclick="addFavoriteComic('@comic.Url.GetUrlDirectoryName()', '@comic.Caption', '@comic.IconUrl')">加入最愛</button>
                 }
             </p>
         </td>
