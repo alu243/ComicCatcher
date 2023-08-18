@@ -39,7 +39,7 @@
         }
         <td>
             <p>
-                <a href="../comic/@comic.Url.GetUrlDirectoryName()"><img src=@comic.IconUrl><br>@comic.Caption</a>
+                <a href="../comic/@comic.Url.GetUrlDirectoryName()" target="_comic"><img src=@comic.IconUrl><br>@comic.Caption</a>
                 @if (Model.IgnoreComics.ContainsKey(comic.Url.GetUrlDirectoryName()))
                 {
                     <button style="font-size: 18px;" onclick="deleteIgnoreComic('@comic.Url.GetUrlDirectoryName()')">顯示</button>
