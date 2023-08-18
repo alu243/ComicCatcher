@@ -8,7 +8,7 @@
 <h2>@Model.Caption</h2>
 
 <div id="app">
-    <button @@click="goBack()">上一頁</button>
+    <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
     <br />
     <div v-for="chapter in state.chapters">
         <h2 style="text-align: center;">{{ chapter.currChapter.caption }}</h2>
@@ -20,7 +20,7 @@
     <br />
     <div v-if="loading && !ending">讀取中...</div>
     <div v-if="ending">已經是最新的了</div>
-    <button @@click="goBack()">上一頁</button>
+    <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
 
     <Observer v-if="state.chapters.length > 0 && false == loading && false == ending" @@intersect="intersected" />
 </div>

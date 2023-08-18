@@ -9,7 +9,7 @@
 <h2 style="display: inline-block;">@Model.CurrPagination.Caption</h2>
 <button onclick="location.href='/page/@Model.CurrPagination.TabNumber/true'">顯示全部</button>
 <button onclick="location.href='/page/@Model.CurrPagination.TabNumber'">隱藏</button>
-<br/>
+<br />
 @{
 
     int i = 0;
@@ -42,11 +42,11 @@
                 <a href="../comic/@comic.Url.GetUrlDirectoryName()"><img src=@comic.IconUrl><br>@comic.Caption</a>
                 @if (Model.IgnoreComics.ContainsKey(comic.Url.GetUrlDirectoryName()))
                 {
-                    <button onclick="deleteIgnoreComic('@comic.Url.GetUrlDirectoryName()')">顯示</button>
+                    <button style="font-size: 18px;" onclick="deleteIgnoreComic('@comic.Url.GetUrlDirectoryName()')">顯示</button>
                 }
                 else
                 {
-                    <button onclick="addIgnoreComic('@comic.Url.GetUrlDirectoryName()', '@comic.Caption')">隱藏</button>
+                    <button style="font-size: 18px;" onclick="addIgnoreComic('@comic.Url.GetUrlDirectoryName()', '@comic.Caption')">隱藏</button>
                 }
             </p>
         </td>
