@@ -14,22 +14,23 @@
     </span>
     <div v-if="loading">讀取中...</div>
 
-    <div class="row" style="--bs-gutter-x: 0.5rem; --bs-gutter-y: 1rem;">
+    <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5">
         <div class="col" v-for="comic in state.comics">
-            <div class="card" style="width: 14rem;">
+            <div class="card">
                 <a :href="getComicAction(comic)" target="_comic">
-                    <img :src="comic.iconUrl" />
+                    <img style="width:100%" :src="comic.iconUrl" />
                 </a>
-                <div class="card-body">
-                    <button v-if="comic.isIgnore" style="font-size: 16px;" @@click="deleteIgnoreComic(comic)">顯示</button>
-                    <button v-if="!comic.isIgnore" style="font-size: 16px;" @@click="addIgnoreComic(comic)">隱藏</button>
-                    &nbsp;&nbsp;
-                    <button v-if="comic.isFavorite" style="font-size: 16px;" @@click="deleteFavoriteComic(comic)">移除最愛</button>
-                    <button v-if="!comic.isFavorite" style="font-size: 16px;" @@click="addFavoriteComic(comic)">加入最愛</button>
-                    <h5 class="card-title">
+                <div class="card-body" style="padding:3px">
+                    <button v-if="comic.isIgnore" class="btn btn-outline-secondary btn-sm" @@click="deleteIgnoreComic(comic)">顯示</button>
+                    <button v-if="!comic.isIgnore" class="btn btn-outline-secondary btn-sm" @@click="addIgnoreComic(comic)">隱藏</button>
+                    &nbsp;
+                    <button v-if="comic.isFavorite" class="btn btn-outline-primary btn-sm" @@click="deleteFavoriteComic(comic)">移除</button>
+                    <button v-if="!comic.isFavorite" class="btn btn-outline-primary btn-sm" @@click="addFavoriteComic(comic)">加入</button>
+                    <br />
+                    <sapn class="card-title">
                         <span v-if="comic.isFavorite" style="color:blue;font-weight: 900;">{{comic.caption}}</span>
                         <span v-if="!comic.isFavorite" style="font-weight: 600;">{{comic.caption}}</span>
-                    </h5>
+                    </sapn>
                     <p class="card-text" style="color:darkgray">最新：{{comic.readedChapter}}{{comic.readedChapter?'/':''}}{{comic.lastUpdateChapter}}</p>
                 </div>
             </div>
