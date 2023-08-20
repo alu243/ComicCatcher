@@ -1,6 +1,7 @@
 ﻿using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.DbModel;
+using Microsoft.Data.Sqlite;
 using System.Data;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
@@ -57,12 +58,29 @@ UNIQUE (Comic) ON CONFLICT REPLACE
     public async Task<bool> SaveComics(List<ComicEntity> comics)
     {
         var result = 0;
-        foreach (var comic in comics)
+
+        await using var conn = await ApiSQLiteHelper.GetConnection();
+        await conn.OpenAsync();
+        await using var cmd = new SqliteCommand();
+        using var tran = conn.BeginTransaction();
+        cmd.Transaction = tran;
+        try
         {
-            var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
-            var sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
+            foreach (var comic in comics)
+            {
+                var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
+                var sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
 ('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}');";
-            result += await ApiSQLiteHelper.ExecuteNonQuery(sql);
+                cmd.CommandText = sql;
+                result += await cmd.ExecuteNonQueryAsync();
+            }
+            await tran.CommitAsync();
+        }
+        catch (Exception e)
+        {
+            await tran.RollbackAsync();
+            Console.WriteLine(e);
+            throw;
         }
         return result == comics.Count;
     }

@@ -14,6 +14,12 @@ public static class ApiSQLiteHelper
         connStr = $"Data Source={Path.Combine(path, "ComicApi.s3db")};Pooling=true;";
     }
 
+    public static async Task<SqliteConnection> GetConnection()
+    {
+        await using var conn = new SqliteConnection(connStr);
+        return conn;
+    }
+
     public static async Task<DataTable> GetTable(string sql)
     {
         await using var conn = new SqliteConnection(connStr);
