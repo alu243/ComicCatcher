@@ -27,24 +27,10 @@ namespace ComicApi.Controllers
             app = comicApplication;
         }
 
-        [HttpGet("{page}/{showAll:bool?}")]
-        public async Task<IActionResult> ShowComics(int page, bool? showAll)
+        [HttpGet("{page}")]
+        public async Task<IActionResult> ShowComics(int page)
         {
-            var pagination = await app.GetPagnitation(page);
-            if (page > 1) app.GetPagnitation(page - 1);
-            if (page < 300) app.GetPagnitation(page + 1);
-
-            var userId = Request.Cookies["userid"] ?? "";
-            var ignoreComics = await app.GetIgnoreComics(userId);
- 
-            var showComics = pagination.Comics;
-            if (!(true == showAll || string.IsNullOrEmpty(userId)))
-            {
-                showComics = pagination.Comics.Where(c => false == ignoreComics.ContainsKey(c.Url.GetUrlDirectoryName())).ToList();
-            }
-
-            var favorites = await app.GetFavoriteComicDic(userId);
-            return View(new PageModel(dm5.GetRoot().Paginations, pagination, showComics, ignoreComics, favorites));
+            return View();
         }
     }
 }

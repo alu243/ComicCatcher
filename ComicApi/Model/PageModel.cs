@@ -1,28 +1,41 @@
-﻿using ComicApi.Model.Requests;
-using ComicCatcherLib.ComicModels;
+﻿using ComicCatcherLib.ComicModels;
 
 namespace ComicApi.Model
 {
-    public class PageModel
+
+    public class OldPageModel
     {
-        public PageModel(
+        public OldPageModel(
             List<ComicPagination> paginations,
-            ComicPagination currPagination,
-            List<ComicEntity> showComics,
-            Dictionary<string, string> ignoreComics,
-            Dictionary<string, string> favoriteComics)
+            ComicPagination currPagination)
         {
             this.CurrPagination = currPagination;
             this.Paginations = paginations;
-            this.IgnoreComics = ignoreComics;
-            this.ShowComics = showComics;
-            this.FavoriteComics = favoriteComics;
         }
         public List<ComicPagination> Paginations { get; set; }
         public ComicPagination CurrPagination { get; set; }
-        public List<ComicEntity> ShowComics { get; set; }
-        public Dictionary<string, string> IgnoreComics { get; set; }
-        public Dictionary<string, string> FavoriteComics { get; set; }
+    }
+
+    public class PagesModel
+    {
+        public List<ComicPagination> Paginations { get; set; }
+    }
+
+    public class PageModel
+    {
+        public ComicPagination CurrPagination { get; set; }
+        public List<ComicViewModel> Comics { get; set; }
+    }
+
+    public class ComicViewModel
+    {
+        public string Url { get; set; }
+        public string Caption { get; set; }
+        public string IconUrl { get; set; }
+        public string LastUpdateDate { get; set; }
+        public string LastUpdateChapter { get; set; }
+        public bool IsIgnore { get; set; }
+        public bool IsFavorite { get; set; }
     }
 
     public class ComicModel

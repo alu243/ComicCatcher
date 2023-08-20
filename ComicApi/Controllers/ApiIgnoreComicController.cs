@@ -8,8 +8,8 @@ using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 namespace ComicApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class IgnoreComicController : Controller
+    [Route("api/ignorecomic")]
+    public class ApiIgnoreComicController : Controller
     {
         private Dm5 dm5;
         private IHostingEnvironment env;
@@ -17,7 +17,7 @@ namespace ComicApi.Controllers
         private IMemoryCache cache;
         private MemoryCacheEntryOptions cacheOptions;
 
-        public IgnoreComicController(
+        public ApiIgnoreComicController(
             Dm5 dm5,
             IHostingEnvironment hostEnvironment,
             ComicApiRepository repository,
@@ -34,17 +34,8 @@ namespace ComicApi.Controllers
         [HttpPost]
         public async Task<IActionResult> AddIgnoreComics(IgnoreComicRequest request)
         {
-            try
-            {
-                request.UserId = Request.Cookies["userid"] ?? "";
-                await repo.AddIgnoreComic(request);
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            request.UserId = Request.Cookies["userid"] ?? "";
+            await repo.AddIgnoreComic(request);
             return Ok();
         }
 

@@ -11,6 +11,16 @@
         "vue.global.prod.js",
         "vue.global.prod.min.js"
       ]
+    },
+    {
+      "provider": "cdnjs",
+      "library": "bootstrap@5.3.1",
+      "destination": "wwwroot/bootstrap/",
+      "files": [
+        "js/bootstrap.bundle.js",
+        "css/bootstrap.min.css",
+        "js/bootstrap.bundle.min.js"
+      ]
     }
   ]
 }

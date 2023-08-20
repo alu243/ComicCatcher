@@ -56,12 +56,27 @@ UNIQUE (Comic) ON CONFLICT REPLACE
         };
     }
 
-    public async Task SaveComic(ComicEntity comic)
+    public async Task<bool> SaveComics(List<ComicEntity> comics)
+    {
+        var result = 0;
+        foreach (var comic in comics)
+        {
+            var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
+            var sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
+('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}');";
+            result += await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        }
+        return result == comics.Count;
+    }
+
+
+    public async Task<bool> SaveComic(ComicEntity comic)
     {
         var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
         var sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
-('{comicUrl}','{comic.Caption}','{comic.Url}',{comic.IconUrl}, {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}');";
-        await ApiSQLiteHelper.ExecuteNonQuery(sql);
+('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}');";
+        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        return result > 0;
     }
     #endregion
 
@@ -228,14 +243,16 @@ COMMIT;");
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return false;
         var sql = $"INSERT INTO UserFavoriteComic (UserId, Comic, ComicName, IconUrl) VALUES ('{request.UserId}', '{request.Comic}', '{request.ComicName}', '{request.IconUrl}')";
-        return await ApiSQLiteHelper.ExecuteNonQuery(sql) > 0;
+        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql) > 0;
+        return result;
     }
     public async Task<bool> DeleteFavoriteComic(FavoriteComic request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return false;
 
         var sql = $"DELETE FROM UserFavoriteComic WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
-        return await ApiSQLiteHelper.ExecuteNonQuery(sql) > 0;
+        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql) > 0;
+        return result;
     }
 
     public async Task<List<FavoriteComic>> GetFavoriteComics(string userId)

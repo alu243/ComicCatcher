@@ -12,8 +12,8 @@
     <br />
     <div v-for="chapter in state.chapters">
         <h2 style="text-align: center;">{{ chapter.currChapter.caption }}</h2>
-        <div v-for="x in chapter.currChapter.pages">
-            <img :src="x.url" style="width:98%;" alt="Snow" />
+        <div v-for="x in chapter.currChapter.pages" class="center sapce">
+            <img :src="x.url" class="pageImg" alt="Snow" border="2" />
         </div>
         <hr />
     </div>
@@ -25,68 +25,70 @@
     <Observer v-if="state.chapters.length > 0 && false == loading && false == ending" @@intersect="intersected" />
 </div>
 
-<script type="text/javascript">
-    const { createApp, onMounted, onBeforeUnmount, reactive, ref } = Vue;
-    const app = createApp({
-        components: {
-            Observer,
-        },
-        setup() {
-            const state = reactive({
-                chapters: [],
-            });
-            const loading = ref(true);
-            const ending = ref(false);
+@section Scripts {
+    <script type="text/javascript">
+        const { createApp, onMounted, onBeforeUnmount, reactive, ref } = Vue;
+        const app = createApp({
+            components: {
+                Observer,
+            },
+            setup() {
+                const state = reactive({
+                    chapters: [],
+                });
+                const loading = ref(true);
+                const ending = ref(false);
 
-            const pathArray = window.location.pathname.split('/');
-            const chapter = pathArray[pathArray.length - 1];
-            const comic = pathArray[pathArray.length - 2];
-
-            onMounted(async () => {
-                const response = await fetch(`/api/comic/${comic}/${chapter}`);
-                const chapterResponse = await response.json();
-                state.chapters.push(chapterResponse);
-                setTimeout(() => loading.value = false, 1000);
-            });
-
-            const goBack = function () {
                 const pathArray = window.location.pathname.split('/');
                 const chapter = pathArray[pathArray.length - 1];
                 const comic = pathArray[pathArray.length - 2];
-                location.href = `/comic/${comic}`;
-            }
 
-            const intersected = async function () {
-                console.log("Next~~~");
-                if (loading.value == true) return;
-                loading.value = true;
-                var lastChapter = state.chapters[state.chapters.length - 1];
-                const response = await fetch(`/api/comic/${lastChapter.comic}/${lastChapter.chapter}/next`);
+                onMounted(async () => {
+                    const response = await fetch(`/api/comic/${comic}/${chapter}`);
+                    const chapterResponse = await response.json();
+                    state.chapters.push(chapterResponse);
+                    setTimeout(() => loading.value = false, 1000);
+                });
 
-                var text = await response.text();
-                if (text == null || text == "") {
-                    ending.value = true;
-                    loading.value = false;
-                    return;
+                const goBack = function () {
+                    const pathArray = window.location.pathname.split('/');
+                    const chapter = pathArray[pathArray.length - 1];
+                    const comic = pathArray[pathArray.length - 2];
+                    location.href = `/comic/${comic}`;
                 }
-                const chapterResponse = await JSON.parse(text);
 
-                history.pushState(chapterResponse, '', `/comic/${chapterResponse.comic}/${chapterResponse.chapter}`);
-                state.chapters.push(chapterResponse);
-                //if (state.chapters.length > 3) state.chapters.shift();
-                loading.value = false;
-            }
+                const intersected = async function () {
+                    console.log("Next~~~");
+                    if (loading.value == true) return;
+                    loading.value = true;
+                    var lastChapter = state.chapters[state.chapters.length - 1];
+                    const response = await fetch(`/api/comic/${lastChapter.comic}/${lastChapter.chapter}/next`);
 
-            return {
-                state,
-                goBack,
-                intersected,
-                loading,
-                ending
+                    var text = await response.text();
+                    if (text == null || text == "") {
+                        ending.value = true;
+                        loading.value = false;
+                        return;
+                    }
+                    const chapterResponse = await JSON.parse(text);
+
+                    history.pushState(chapterResponse, '', `/comic/${chapterResponse.comic}/${chapterResponse.chapter}`);
+                    state.chapters.push(chapterResponse);
+                    //if (state.chapters.length > 3) state.chapters.shift();
+                    loading.value = false;
+                }
+
+                return {
+                    state,
+                    goBack,
+                    intersected,
+                    loading,
+                    ending
+                }
             }
-        }
-    });
-    //app.component(Observer);
-    app.mount('#app');
-    console.log("start app", app);
-</script>
+        });
+        //app.component(Observer);
+        app.mount('#app');
+        console.log("start app", app);
+    </script>
+}

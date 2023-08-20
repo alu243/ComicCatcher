@@ -11,14 +11,14 @@ namespace ComicApi.Controllers
 {
     [Route("api/comic")]
     [ApiController]
-    public class ComicApiController : ControllerBase
+    public class ApiComicController : ControllerBase
     {
         private Dm5 dm5;
         private IHostingEnvironment env;
         private ComicApplication app;
 
 
-        public ComicApiController(Dm5 comic,
+        public ApiComicController(Dm5 comic,
             IHostingEnvironment hostEnvironment,
             ComicApplication comicApplication)
         {

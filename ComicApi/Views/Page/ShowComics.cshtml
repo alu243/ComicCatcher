@@ -1,88 +1,220 @@
-﻿@using ComicCatcherLib.Utils
-@model ComicApi.Model.PageModel
-
-@{
+﻿@{
     ViewBag.Title = "Pagination";
     Layout = "_Layout";
 }
 
-<h2 style="display: inline-block;">@Model.CurrPagination.Caption</h2>
-<button onclick="location.href='/page/@Model.CurrPagination.TabNumber/true'">顯示全部</button>
-<button onclick="location.href='/page/@Model.CurrPagination.TabNumber'">隱藏</button>
 <br />
-@{
-
-    int i = 0;
-    foreach (var p in Model.Paginations)
-    {
-        var pg = ++i;
-        if (pg < Model.CurrPagination.TabNumber - 2 || pg > Model.CurrPagination.TabNumber + 2) continue;
-        if (pg == Model.CurrPagination.TabNumber)
-        {
-            <b>@p.Caption</b>
-        }
-        else
-        {
-            <a href=@pg>@p.Caption</a>
-        }
-    }
-
-    var pageCount = 5;
-    i = 0;
-    @Html.Raw("<table style='max-width: 1000px;'><tbody>")
-
-    foreach (var comic in Model.ShowComics)
-    {
-        var isIgnore = Model.IgnoreComics.ContainsKey(comic.Url.GetUrlDirectoryName());
-        var isFavorite = Model.FavoriteComics.ContainsKey(comic.Url.GetUrlDirectoryName());
-        if (i % pageCount == 0)
-        {
-            @Html.Raw("<tr>")
-        }
-        <td>
+<div id="app">
+    <button onclick="location.href='/page/1?filter=showAll'">顯示全部</button>
+    <button onclick="location.href='/page/1'">隱藏</button>
+    <br />
+    <span v-for="page in state.pages">
+        <b v-if="isShowPage(page) && page.tabNumber === state.page?.tabNumber">{{page.caption}}</b>
+        <a v-if="isShowPage(page) && page.tabNumber !== state.page?.tabNumber" :href="page.tabNumber">{{page.caption}}</a>
+    </span>
+    <div v-if="loading">讀取中...</div>
+    
+    <div class="row">
+        <div class="col" v-for="comic in state.comics">
             <p>
-                <a href="../comic/@comic.Url.GetUrlDirectoryName()" target="_comic">
-                    <img src=@comic.IconUrl><br>
-                    @if (isFavorite)
-                    {
-                        <span style="color:blue;font-weight: 900; padding-top:3px; padding-bottom:3px">@comic.Caption</span>
-                    }
-                    else
-                    {
-                        <span style="color:black; padding-top:3px; padding-bottom:3px">@comic.Caption</span>
-                    }
-                </a>
+                <div>
+                    <a :href="getComicAction(comic)" target="_comic">
+                        <img :src="comic.iconUrl" />
+                        <span v-if="comic.isFavorite" style="font-size:16px; color:blue;font-weight: 900; padding-top:3px; padding-bottom:3px">{{comic.caption}}</span>
+                        <span v-if="!comic.isFavorite" style="font-size:16px; padding-top:3px; padding-bottom:3px">{{comic.caption}}</span>
+                        <br/><span style="color:darkgray">最新：{{comic.lastUpdateChapter}}</span>
+                    </a>
+                    <br />
+                    <button v-if="comic.isIgnore" style="font-size: 16px; position: relative;" @@click="deleteIgnoreComic(comic)">顯示</button>
+                    <button v-if="!comic.isIgnore" style="font-size: 16px; position: relative;" @@click="addIgnoreComic(comic)">隱藏</button>
 
-                <br />
+                    &nbsp;&nbsp;&nbsp;
 
-                @if (isIgnore)
-                {
-                    <button style="font-size: 16px;" onclick="deleteIgnoreComic('@comic.Url.GetUrlDirectoryName()')">顯示</button>
-                }
-                else
-                {
-                    <button style="font-size: 16px;" onclick="addIgnoreComic('@comic.Url.GetUrlDirectoryName()', '@comic.Caption')">隱藏</button>
-                }
-
-                &nbsp;&nbsp;&nbsp;
-
-                @if (isFavorite)
-                {
-                    <button style="font-size: 16px;" onclick="deleteFavoriteComic('@comic.Url.GetUrlDirectoryName()')">移除最愛</button>
-                }
-                else
-                {
-                    <button style="font-size: 16px;" onclick="addFavoriteComic('@comic.Url.GetUrlDirectoryName()', '@comic.Caption', '@comic.IconUrl')">加入最愛</button>
-                }
+                    <button v-if="comic.isFavorite" style="font-size: 16px; position: relative;" @@click="deleteFavoriteComic(comic)">移除最愛</button>
+                    <button v-if="!comic.isFavorite" style="font-size: 16px; position: relative;" @@click="addFavoriteComic(comic)">加入最愛</button>
+                    <br />
+                </div>
             </p>
-        </td>
-        i++;
-        if (i % pageCount == 0)
-        {
-            @Html.Raw("</tr>")
-        }
-    }
-    if (i % pageCount != 0) Html.Raw("</tr>");
-    @Html.Raw("</tbody></table>")
-    ;
+        </div>
+    </div>
+
+    @*   <table>
+        <tr v-for="comicRow in chunkedList(state.comics)">
+            <td v-for="comic in comicRow">
+                <p>
+                    <div>
+                        <a :href="getComicAction(comic)" target="_comic">
+                            <img :src="comic.iconUrl" />
+                            <span v-if="comic.isFavorite" style="font-size:16px; color:blue;font-weight: 900; padding-top:3px; padding-bottom:3px">{{comic.caption}}</span>
+                            <span v-if="!comic.isFavorite" style="font-size:16px; padding-top:3px; padding-bottom:3px">{{comic.caption}}</span>
+                            <br/><span style="color:darkgray">最新：{{comic.lastUpdateChapter}}</span>
+                        </a>
+                        <br />
+                        <button v-if="comic.isIgnore" style="font-size: 16px; position: relative;" @@click="deleteIgnoreComic(comic)">顯示</button>
+                        <button v-if="!comic.isIgnore" style="font-size: 16px; position: relative;" @@click="addIgnoreComic(comic)">隱藏</button>
+
+                        &nbsp;&nbsp;&nbsp;
+
+                        <button v-if="comic.isFavorite" style="font-size: 16px; position: relative;" @@click="deleteFavoriteComic(comic)">移除最愛</button>
+                        <button v-if="!comic.isFavorite" style="font-size: 16px; position: relative;" @@click="addFavoriteComic(comic)">加入最愛</button>
+                        <br />
+                    </div>
+                </p>
+            </td>
+        </tr>
+    </table>*@
+
+    <span v-for="page in state.pages">
+        <b v-if="isShowPage(page) && page.tabNumber === state.page?.tabNumber">{{page.caption}}</b>
+        <a v-if="isShowPage(page) && page.tabNumber !== state.page?.tabNumber" :href="page.tabNumber">{{page.caption}}</a>
+    </span>
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+        const { createApp, onMounted, onBeforeUnmount, reactive, ref } = Vue;
+        const app = createApp({
+            setup() {
+                const state = reactive({
+                    page: null,
+                    comics: null,
+                    pages: null,
+                });
+                const loading = ref(true);
+
+                const pathArray = window.location.pathname.split('/');
+                const page = pathArray[pathArray.length - 1];
+                const queryString = window.location.search;
+
+                onMounted(async () =>await loadPage());
+
+                async function loadPage(){
+                    const response1 = await fetch(`/api/page`);
+                    const pagesResponse = await response1.json();
+                    state.pages = pagesResponse?.paginations;
+
+                    const response = await fetch(`/api/page/${page}${queryString}`);
+                    const pageResponse = await response.json();
+                    state.page = pageResponse?.currPagination;
+                    state.comics = pageResponse?.comics;
+
+                    setTimeout(() => loading.value = false, 1000);
+                }
+
+                function isShowPage(eachPage) {
+                    const pageSection = 7;
+
+                    let minTabNumber = state.page?.tabNumber - pageSection / 2;
+                    if (minTabNumber <= 0) minTabNumber = 0;
+                    const maxTabNumber = minTabNumber + pageSection;
+                    return minTabNumber <= eachPage.tabNumber &&
+                        eachPage.tabNumber < maxTabNumber;
+                }
+
+                function chunkedList(list) {
+                    if (list == null) return [];
+                    var cols = 5;
+                    return list.reduce((result, item, index) => {
+                        const chunkIndex = Math.floor(index / cols);
+
+                        if (!result[chunkIndex]) {
+                            result[chunkIndex] = [] // start a new chunk
+                        }
+                        result[chunkIndex].push(item)
+
+                        return result;
+                    }, []);
+                }
+
+                function getComic(url) {
+                    url = url.trim().replace(/\/$/g, '');
+                    const pathArray = url.split('/');
+                    const comic = pathArray[pathArray.length - 1];
+                    return comic;
+                }
+
+                function getComicAction(comic) {
+                    const c = getComic(comic.url);
+                    return `../comic/${c}`;
+                }
+
+                function addIgnoreComic(comic, comicName) {
+                    var request = { "comic": getComic(comic.url), "comicName": comic.caption };
+                    fetch("/api/IgnoreComic", {
+                        method: "POST",
+                        credentials: "same-origin", // 帶 cookie
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(request)
+                    }).then(response => {
+                        loadPage();
+                    }).catch((error) => {
+                        console.log(error);
+                        alert("哦哦，被你玩壞了");
+                    })
+                }
+
+                function deleteIgnoreComic(comic) {
+                    var request = { "comic": getComic(comic.url) };
+                    fetch("/api/IgnoreComic", {
+                        method: "DELETE",
+                        credentials: "same-origin", // 帶 cookie
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(request)
+                    }).then(response => {
+                        loadPage();
+                    }).catch((error) => {
+                        console.log(error);
+                        alert("哦哦，被你玩壞了");
+                    })
+                }
+
+
+                function addFavoriteComic(comic) {
+                    var request = { "comic": getComic(comic.url), "comicName": comic.caption, "iconUrl": comic.iconUrl };
+                    fetch("/api/FavoriteComic", {
+                        method: "POST",
+                        credentials: "same-origin", // 帶 cookie
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(request)
+                    }).then(response => {
+                        comic.isFavorite = true;
+                    }).catch((error) => {
+                        console.log(error);
+                        alert("哦哦，被你玩壞了");
+                    })
+                }
+
+                function deleteFavoriteComic(comic) {
+                    var request = { "comic": getComic(comic.url) };
+                    fetch("/api/FavoriteComic", {
+                        method: "DELETE",
+                        credentials: "same-origin", // 帶 cookie
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(request)
+                    }).then(response => {
+                        comic.isFavorite = false;
+                    }).catch((error) => {
+                        console.log(error);
+                        alert("哦哦，被你玩壞了");
+                    })
+                }
+
+                return {
+                    state,
+                    loading,
+                    isShowPage,
+                    chunkedList,
+                    getComicAction,
+                    addIgnoreComic,
+                    deleteIgnoreComic,
+                    addFavoriteComic,
+                    deleteFavoriteComic
+                }
+            }
+        });
+        //app.component(Observer);
+        app.mount('#app');
+        console.log("start app", app);
+    </script>
 }

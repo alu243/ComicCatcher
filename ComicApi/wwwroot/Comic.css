@@ -1,0 +1,36 @@
+﻿a {
+    text-decoration: none;
+    color: black;
+}
+
+.center {
+    display: grid;
+    place-items: center; /* 同时实现水平和垂直居中 */
+}
+
+.sapce {
+    padding: 1px 0px;
+}
+
+/*.center:before {
+    content: "這是筆電333: ";
+}*/
+
+.pageImg {
+    min-width: 1080px;
+}
+
+.vs-button{
+    display:inherit;
+}
+
+@media screen and (max-width: 1080px) {
+    /*    .center:before {
+        content: "這是手機: ";
+    }*/
+
+    .pageImg {
+        width: 99%;
+        min-width: inherit;
+    }
+}

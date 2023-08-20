@@ -2,20 +2,60 @@
     var userid = Context.Request.Cookies["userid"];
     var username = userid ?? "Guest";
 }
-<style>
-    a {
-        text-decoration: none;
-    }
-</style>
-<h2 style="display: inline-block;"> Hi @username Now is @DateTime.Now</h2>
-@Html.TextBoxFor(t => userid)
-<button style="font-size: 18px;" onclick="addCookie()">登入</button>
-<br />
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <link href="~/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/comic.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <form>
+            <div class="row">
+                <h3 style="display: flex;">
+                    @if (string.IsNullOrEmpty(userid))
+                    {
+                        <span>Hi, </span>
+                        <input id="userid" placeholder="輸入代號" class="form-control" style="display:flex; width:100px" value="@username">
+                    }
+                    else
+                    {
+                        <span>Hi, <b>@username</b></span>
+                    }
+                    <span>(@DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"))</span>
+                </h3>
+                @if (string.IsNullOrEmpty(userid))
+                {
+                    <button type="submit" class="btn btn-secondary" onclick="addCookie()">登入</button>
+                }
+                else
+                {
+                    <button class="btn btn-secondary" style="font-size: 18px;" onclick="deleteCookie()">登出</button>
+                }
+            </div>
+        </form>
+    </div>
 
-<script src="~/comic.js"></script>
-<script src="~/vue/vue.global.js"></script>
-<script src="~/observe.js"></script>
+    <script src="~/vue/vue.global.js"></script>
+    <script src="~/observe.js"></script>
+    @RenderBody()
 
-@RenderBody()
+    <script>
+        function addCookie() {
+            var newuserid = document.querySelector('#userid').value;
+            document.cookie = `userid=${newuserid};path=/;`;
+            location.reload();
+        }
+        function deleteCookie() {
+            document.cookie = `userid=;path=/;`;
+            location.reload();
+        }
+    </script>
 
-@RenderSection("Scripts", false)
+    @RenderSection("Scripts", false)
+
+</body>
+</html>
