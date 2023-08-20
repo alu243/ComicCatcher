@@ -21,11 +21,11 @@
                     <img style="width:100%" :src="comic.iconUrl" />
                 </a>
                 <div class="card-body" style="padding:3px">
-                    <button v-if="comic.isIgnore" class="btn btn-outline-secondary btn-sm" @@click="deleteIgnoreComic(comic)">顯示</button>
-                    <button v-if="!comic.isIgnore" class="btn btn-outline-secondary btn-sm" @@click="addIgnoreComic(comic)">隱藏</button>
+                    <button v-if="comic.isIgnore" class="btn btn-outline-secondary btn-sm" style="padding:1px 4px;" @@click="deleteIgnoreComic(comic)">顯示</button>
+                    <button v-if="!comic.isIgnore" class="btn btn-outline-secondary btn-sm" style="padding:1px 4px;"@@click="addIgnoreComic(comic)">隱藏</button>
                     &nbsp;
-                    <button v-if="comic.isFavorite" class="btn btn-outline-primary btn-sm" @@click="deleteFavoriteComic(comic)">移除</button>
-                    <button v-if="!comic.isFavorite" class="btn btn-outline-primary btn-sm" @@click="addFavoriteComic(comic)">加入</button>
+                    <button v-if="comic.isFavorite" class="btn btn-outline-primary btn-sm"style="padding:1px 4px;" @@click="deleteFavoriteComic(comic)">移除</button>
+                    <button v-if="!comic.isFavorite" class="btn btn-outline-primary btn-sm" style="padding:1px 4px;" @@click="addFavoriteComic(comic)">加入</button>
                     <br />
                     <sapn class="card-title">
                         <span v-if="comic.isFavorite" style="color:blue;font-weight: 900;">{{comic.caption}}</span>
