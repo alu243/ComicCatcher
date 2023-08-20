@@ -2,6 +2,7 @@
 using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.ComicModels.Domains;
+using ComicCatcherLib.Utils;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace ComicApi.Controllers
@@ -59,10 +60,24 @@ namespace ComicApi.Controllers
         ////////    return new FileStreamResult(new FileStream(path, FileMode.Open), "image/jpeg");
         ////////}
 
+        public int GetPagnationNumber(string comic)
+        {
+            for (int i = 1; i <= 300; i++)
+            {
+                var key = $"Pagination_{i}";
+                if (!cache.TryGetValue(key, out ComicPagination pagination)) continue;
+                var comicEntity = pagination.Comics?.FirstOrDefault(c => comic.Equals(c.Url.GetUrlDirectoryName(), StringComparison.CurrentCultureIgnoreCase));
+                if (comicEntity == null) continue;
+                return i;
+            }
+
+            return 1;
+        }
+
         public async Task<ComicPagination> GetPagnitation(int page)
         {
             var key = $"Pagination_{page}";
-            
+
             if (!cache.TryGetValue(key, out ComicPagination pagination))
             {
                 pagination = dm5.GetRoot().Paginations[page - 1];
@@ -174,6 +189,21 @@ namespace ComicApi.Controllers
             }
 
             return dic;
+        }
+
+        public async Task<bool> AddFavoriteChapter(FavoriteChapter request)
+        {
+            return await this.repo.AddFavoriteChapter(request);
+        }
+
+        public async Task<FavoriteChapter> GetFavoriteChapter(string userId, string comic)
+        {
+            return await this.repo.GetFavoriteChapter(userId, comic);
+        }
+
+        public async Task<List<FavoriteChapter>> GetFavoriteChapters(string userId)
+        {
+            return await this.repo.GetFavoriteChapters(userId);
         }
 
     }

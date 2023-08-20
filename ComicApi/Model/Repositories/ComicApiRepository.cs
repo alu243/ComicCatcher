@@ -1,10 +1,7 @@
-﻿using System.Data;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using ComicApi.Controllers;
-using ComicApi.Model.Requests;
+﻿using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.DbModel;
+using System.Data;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace ComicApi.Model.Repositories;
@@ -19,6 +16,7 @@ public class ComicApiRepository
         this.CreateApiChapterOnFly().Wait();
         this.CreateIgnoreComicOnFly().Wait();
         this.CreateFavoriteComicOnFly().Wait();
+        this.CreateFavoriteChapterOnFly().Wait();
     }
 
     #region Comic
@@ -147,28 +145,29 @@ COMMIT;");
     {
         string sql = $@"INSERT OR REPLACE INTO ApiChapter (Comic, Chapter, Caption, Url) VALUES
     ('{comic}', '{chapter}', '{comicChapter.Caption}', '{comicChapter.Url}');";
-        await ApiSQLiteHelper.ExecuteNonQuery(sql);
-        return true;
+        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        return result > 0;
     }
 
     public async Task<bool> DeleteComicPages(string comic, string chapter)
     {
         var sql = $"DELETE FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
-        await ApiSQLiteHelper.ExecuteNonQuery(sql);
-        return true;
+        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        return result > 0;
     }
 
     public async Task<bool> SaveComicPages(string comic, string chapter, List<ComicPage> pages)
     {
         var sql = $"DELETE FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
         await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        var result = 0;
         foreach (var page in pages)
         {
             sql = $@"INSERT OR REPLACE INTO ApiComic (Comic, Chapter, PageNumber, Caption, Url, PageFileName, Refer) VALUES
     ('{comic}', '{chapter}', {page.PageNumber}, '{page.Caption}', '{page.Url}', '{page.PageFileName}', '{page.Refer}');";
-            ApiSQLiteHelper.ExecuteNonQuery(sql);
+            result += await ApiSQLiteHelper.ExecuteNonQuery(sql);
         }
-        return true;
+        return result > 0;
     }
 
     public async Task<string> GetLocalPath(string comic, string chapter)
@@ -208,7 +207,7 @@ COMMIT;");
     public async Task AddIgnoreComic(IgnoreComicRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return;
-        var sql = $"INSERT INTO UserIgnoreComic (UserId, Comic, ComicName) VALUES ('{request.UserId}', '{request.Comic}', '{request.ComicName}')";
+        var sql = $"INSERT OR REPLACE INTO UserIgnoreComic (UserId, Comic, ComicName) VALUES ('{request.UserId}', '{request.Comic}', '{request.ComicName}')";
         await ApiSQLiteHelper.ExecuteNonQuery(sql);
     }
     public async Task DeleteIgnoreComic(IgnoreComicRequest request)
@@ -239,20 +238,37 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_UserFavoriteComic ON UserFavoriteComic (Use
 COMMIT;");
     }
 
+    private async Task CreateFavoriteChapterOnFly()
+    {
+        await ApiSQLiteHelper.ExecuteNonQuery(@"
+BEGIN;
+CREATE TABLE IF NOT EXISTS UserFavoriteChapter(
+UserId NVARCHAR(20) not NULL,
+Comic NVARCHAR(200) not NULL,
+Chapter NVARCHAR(200) not NULL,
+ChapterName NVARCHAR(50) not NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_UserFavoriteChapter ON UserFavoriteChapter (UserId, Comic);
+COMMIT;");
+    }
+
     public async Task<bool> AddFavoriteComic(FavoriteComic request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return false;
-        var sql = $"INSERT INTO UserFavoriteComic (UserId, Comic, ComicName, IconUrl) VALUES ('{request.UserId}', '{request.Comic}', '{request.ComicName}', '{request.IconUrl}')";
-        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql) > 0;
-        return result;
+        var sql = $"INSERT OR REPLACE INTO UserFavoriteComic (UserId, Comic, ComicName, IconUrl) VALUES ('{request.UserId}', '{request.Comic}', '{request.ComicName}', '{request.IconUrl}')";
+        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        return result > 0;
     }
+
     public async Task<bool> DeleteFavoriteComic(FavoriteComic request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return false;
 
         var sql = $"DELETE FROM UserFavoriteComic WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
-        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql) > 0;
-        return result;
+        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
+
+        sql = $"DELETE FROM UserFavoriteChapter WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
+        result += await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        return result > 0;
     }
 
     public async Task<List<FavoriteComic>> GetFavoriteComics(string userId)
@@ -274,6 +290,53 @@ COMMIT;");
         return list;
     }
 
+    public async Task<bool> AddFavoriteChapter(FavoriteChapter request)
+    {
+        if (string.IsNullOrWhiteSpace(request.UserId)) return false;
+        var sql = $@"INSERT OR REPLACE INTO UserFavoriteChapter (UserId, Comic, Chapter, ChapterName) VALUES 
+            ('{request.UserId}', '{request.Comic}', '{request.Chapter}', '{request.ChapterName}')";
+        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        return result > 0;
+    }
+
+    public async Task<FavoriteChapter> GetFavoriteChapter(string userId, string comic)
+    {
+        var sql = $"SELECT * FROM UserFavoriteChapter WHERE UserId = '{userId}' AND comic = '{comic}'";
+        var result = await ApiSQLiteHelper.GetTable(sql);
+        var list = new List<FavoriteChapter>();
+        foreach (DataRow row in result.Rows)
+        {
+            var favorite = new FavoriteChapter()
+            {
+                Comic = row.GetValue<string>("Comic")?.Trim(),
+                Chapter = row.GetValue<string>("Chapter")?.Trim(),
+                ChapterName = row.GetValue<string>("ChapterName")?.Trim(),
+                UserId = row.GetValue<string>("UserId")?.Trim(),
+            };
+            list.Add(favorite);
+        }
+        return list.FirstOrDefault();
+    }
+
+
+    public async Task<List<FavoriteChapter>> GetFavoriteChapters(string userId)
+    {
+        var sql = $"SELECT * FROM UserFavoriteChapter WHERE UserId = '{userId}'";
+        var result = await ApiSQLiteHelper.GetTable(sql);
+        var list = new List<FavoriteChapter>();
+        foreach (DataRow row in result.Rows)
+        {
+            var favorite = new FavoriteChapter()
+            {
+                Comic = row.GetValue<string>("Comic")?.Trim(),
+                Chapter = row.GetValue<string>("Chapter")?.Trim(),
+                ChapterName = row.GetValue<string>("ChapterName")?.Trim(),
+                UserId = row.GetValue<string>("UserId")?.Trim(),
+            };
+            list.Add(favorite);
+        }
+        return list;
+    }
     #endregion
 
 }

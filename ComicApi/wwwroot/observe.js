@@ -1,6 +1,6 @@
 ﻿const Observer = Vue.defineComponent({
     name: 'Observer',
-        template: `<div ref="target" class="target" />`,
+        template: `<div ref="target" class="target">scrolling...</div>`,
     setup: (props, context) => {
         let observer;
         const target = Vue.ref()

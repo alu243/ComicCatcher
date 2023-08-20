@@ -27,7 +27,7 @@ public class ApiPageController : Controller
     [HttpGet("{page}/{filter?}")]
     public async Task<PageModel> ShowComicsInPage(int page, string? filter)
     {
-        
+
         var pagination = await app.GetPagnitation(page);
         if (page > 1) app.GetPagnitation(page - 1);
         if (page < 300) app.GetPagnitation(page + 1);
@@ -35,6 +35,8 @@ public class ApiPageController : Controller
         var userId = Request.Cookies["userid"] ?? "";
         var ignoreComics = await app.GetIgnoreComics(userId);
         var favorites = await app.GetFavoriteComicDic(userId);
+        var favoriteChapters = await app.GetFavoriteChapters(userId);
+
 
         var results = pagination.Comics.Select(c => new ComicViewModel()
         {
@@ -42,6 +44,8 @@ public class ApiPageController : Controller
             IconUrl = c.IconUrl,
             IsFavorite = favorites.ContainsKey(c.Url.GetUrlDirectoryName()),
             IsIgnore = ignoreComics.ContainsKey(c.Url.GetUrlDirectoryName()),
+            ReadedChapter = favoriteChapters.FirstOrDefault(f => 
+                f.Comic.Equals(c.Url.GetUrlDirectoryName(), StringComparison.CurrentCultureIgnoreCase))?.ChapterName ?? "",
             LastUpdateChapter = c.LastUpdateChapter,
             LastUpdateDate = c.LastUpdateDate,
             Url = c.Url

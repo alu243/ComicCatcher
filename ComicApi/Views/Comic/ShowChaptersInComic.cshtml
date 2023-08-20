@@ -1,38 +1,92 @@
-﻿@model ComicApi.Model.ComicModel
-@{
+﻿@{
     ViewBag.Title = "Comic";
     Layout = "_Layout";
 }
 
-<h2>@Model.CurrComic.Caption</h2>
-
-<button style="font-size: 20px;" onclick="history.back()">上一頁</button>
-
-@{
-    var pageCount = 5;
-    var i = 0;
-    @Html.Raw("<table style='max-width:800px'><tbody>")
-
-    foreach (var chapter in Model.CurrComic.Chapters)
-    {
-        if (i % pageCount == 0)
-            @Html.Raw("<tr>")
-
-        var relativeUrl = new Uri(chapter.Url).LocalPath.Trim('/');
-        <td>
-            <p>
-                <div style="min-width=130px;height:40px; padding:5px;margin:5px;background-color:#DDD;text-align: center;" onclick="location.href='./@Model.Comic/@relativeUrl'">
-                    <a href="./@Model.Comic/@relativeUrl">@chapter.Caption</a>
-                </div>
-            </p>
-        </td>
-        i++;
-        if (i % pageCount == 0)
-            @Html.Raw("</tr>")
+<style>
+    .chapter {
+        min-width =130px;
+        height: 40px;
+        padding: 5px;
+        margin: 5px;
+        background-color: #DDD;
+        text-align: center;
     }
-    if (i % pageCount != 0) Html.Raw("</tr>");
-    @Html.Raw("</tbody></table>")
+</style>
+
+<div id="app">
+    <h2 class="center">{{state.currComic?.caption}}</h2>
+    <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-4 col-xs-6" v-for="chapter in state.currComic?.chapters">
+            <div class="chapter" @@click="goChapter(chapter)">
+                <p>
+                    <span>{{chapter?.caption}}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+        const { createApp, onMounted, onBeforeUnmount, reactive, ref } = Vue;
+        const app = createApp({
+            components: {
+                Observer,
+            },
+            setup() {
+                const state = reactive({
+                    page: 1,
+                    comic: null,
+                    currComic: null,
+                });
+                const loading = ref(true);
+
+                const pathArray = window.location.pathname.split('/');
+                const comic = pathArray[pathArray.length - 1];
+
+                const getRelativePath = function (url) {
+                    const pathArray = url.split('/');
+                    const result = pathArray[pathArray.length - 1];
+                    return result;
+                }
+
+                onMounted(async () => {
+                    const response = await fetch(`/api/comic/${comic}`);
+                    const comicResponse = await response.json();
+                    state.page = comicResponse.pageNumber ?? 1;
+                    state.comic = comicResponse.comic;
+                    state.currComic = comicResponse.currComic;
+
+                    setTimeout(() => loading.value = false, 1000);
+                });
+
+                const goChapter = function (chapter) {
+                    let url = chapter.url.trim().replace(/\/$/g, '');
+                    var relative = getRelativePath(url);
+                    location.href = `./${state.comic}/${relative}`;
+                }
+
+                const goBack = function () {
+                    location.href = `/page/${state.page}`;
+                }
+
+                return {
+                    state,
+                    goBack,
+                    goChapter,
+                    loading,
+                    getRelativePath
+                }
+            }
+        });
+        //app.component(Observer);
+        app.mount('#app');
+        console.log("start app", app);
+    </script>
 }
-
-
-<button style="font-size: 20px;" onclick="history.back()">上一頁</button>

@@ -2,20 +2,6 @@
 
 namespace ComicApi.Model
 {
-
-    public class OldPageModel
-    {
-        public OldPageModel(
-            List<ComicPagination> paginations,
-            ComicPagination currPagination)
-        {
-            this.CurrPagination = currPagination;
-            this.Paginations = paginations;
-        }
-        public List<ComicPagination> Paginations { get; set; }
-        public ComicPagination CurrPagination { get; set; }
-    }
-
     public class PagesModel
     {
         public List<ComicPagination> Paginations { get; set; }
@@ -34,21 +20,25 @@ namespace ComicApi.Model
         public string IconUrl { get; set; }
         public string LastUpdateDate { get; set; }
         public string LastUpdateChapter { get; set; }
+        public string ReadedChapter { get; set; }
         public bool IsIgnore { get; set; }
         public bool IsFavorite { get; set; }
     }
 
     public class ComicModel
     {
+        public int PageNumber { get; set; }
         public string Comic { get; set; }
         public ComicEntity CurrComic { get; set; }
     }
 
     public class ChapterModel
     {
+
         public string Comic { get; set; }
-        public string Chapter { get; set; }
         public string ComicName { get; set; }
+        public string Chapter { get; set; }
+        public string ChapterName { get; set; }
         public ComicChapter CurrChapter { get; set; }
 
     }

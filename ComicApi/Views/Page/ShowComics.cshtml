@@ -13,56 +13,28 @@
         <a v-if="isShowPage(page) && page.tabNumber !== state.page?.tabNumber" :href="page.tabNumber">{{page.caption}}</a>
     </span>
     <div v-if="loading">讀取中...</div>
-    
-    <div class="row">
+
+    <div class="row" style="--bs-gutter-x: 0.5rem; --bs-gutter-y: 1rem;">
         <div class="col" v-for="comic in state.comics">
-            <p>
-                <div>
-                    <a :href="getComicAction(comic)" target="_comic">
-                        <img :src="comic.iconUrl" />
-                        <span v-if="comic.isFavorite" style="font-size:16px; color:blue;font-weight: 900; padding-top:3px; padding-bottom:3px">{{comic.caption}}</span>
-                        <span v-if="!comic.isFavorite" style="font-size:16px; padding-top:3px; padding-bottom:3px">{{comic.caption}}</span>
-                        <br/><span style="color:darkgray">最新：{{comic.lastUpdateChapter}}</span>
-                    </a>
-                    <br />
-                    <button v-if="comic.isIgnore" style="font-size: 16px; position: relative;" @@click="deleteIgnoreComic(comic)">顯示</button>
-                    <button v-if="!comic.isIgnore" style="font-size: 16px; position: relative;" @@click="addIgnoreComic(comic)">隱藏</button>
-
-                    &nbsp;&nbsp;&nbsp;
-
-                    <button v-if="comic.isFavorite" style="font-size: 16px; position: relative;" @@click="deleteFavoriteComic(comic)">移除最愛</button>
-                    <button v-if="!comic.isFavorite" style="font-size: 16px; position: relative;" @@click="addFavoriteComic(comic)">加入最愛</button>
-                    <br />
+            <div class="card" style="width: 14rem;">
+                <a :href="getComicAction(comic)" target="_comic">
+                    <img :src="comic.iconUrl" />
+                </a>
+                <div class="card-body">
+                    <button v-if="comic.isIgnore" style="font-size: 16px;" @@click="deleteIgnoreComic(comic)">顯示</button>
+                    <button v-if="!comic.isIgnore" style="font-size: 16px;" @@click="addIgnoreComic(comic)">隱藏</button>
+                    &nbsp;&nbsp;
+                    <button v-if="comic.isFavorite" style="font-size: 16px;" @@click="deleteFavoriteComic(comic)">移除最愛</button>
+                    <button v-if="!comic.isFavorite" style="font-size: 16px;" @@click="addFavoriteComic(comic)">加入最愛</button>
+                    <h5 class="card-title">
+                        <span v-if="comic.isFavorite" style="color:blue;font-weight: 900;">{{comic.caption}}</span>
+                        <span v-if="!comic.isFavorite" style="font-weight: 600;">{{comic.caption}}</span>
+                    </h5>
+                    <p class="card-text" style="color:darkgray">最新：{{comic.readedChapter}}{{comic.readedChapter?'/':''}}{{comic.lastUpdateChapter}}</p>
                 </div>
-            </p>
+            </div>
         </div>
     </div>
-
-    @*   <table>
-        <tr v-for="comicRow in chunkedList(state.comics)">
-            <td v-for="comic in comicRow">
-                <p>
-                    <div>
-                        <a :href="getComicAction(comic)" target="_comic">
-                            <img :src="comic.iconUrl" />
-                            <span v-if="comic.isFavorite" style="font-size:16px; color:blue;font-weight: 900; padding-top:3px; padding-bottom:3px">{{comic.caption}}</span>
-                            <span v-if="!comic.isFavorite" style="font-size:16px; padding-top:3px; padding-bottom:3px">{{comic.caption}}</span>
-                            <br/><span style="color:darkgray">最新：{{comic.lastUpdateChapter}}</span>
-                        </a>
-                        <br />
-                        <button v-if="comic.isIgnore" style="font-size: 16px; position: relative;" @@click="deleteIgnoreComic(comic)">顯示</button>
-                        <button v-if="!comic.isIgnore" style="font-size: 16px; position: relative;" @@click="addIgnoreComic(comic)">隱藏</button>
-
-                        &nbsp;&nbsp;&nbsp;
-
-                        <button v-if="comic.isFavorite" style="font-size: 16px; position: relative;" @@click="deleteFavoriteComic(comic)">移除最愛</button>
-                        <button v-if="!comic.isFavorite" style="font-size: 16px; position: relative;" @@click="addFavoriteComic(comic)">加入最愛</button>
-                        <br />
-                    </div>
-                </p>
-            </td>
-        </tr>
-    </table>*@
 
     <span v-for="page in state.pages">
         <b v-if="isShowPage(page) && page.tabNumber === state.page?.tabNumber">{{page.caption}}</b>
@@ -87,9 +59,9 @@
                 const page = pathArray[pathArray.length - 1];
                 const queryString = window.location.search;
 
-                onMounted(async () =>await loadPage());
+                onMounted(async () => await loadPage());
 
-                async function loadPage(){
+                async function loadPage() {
                     const response1 = await fetch(`/api/page`);
                     const pagesResponse = await response1.json();
                     state.pages = pagesResponse?.paginations;
@@ -112,20 +84,20 @@
                         eachPage.tabNumber < maxTabNumber;
                 }
 
-                function chunkedList(list) {
-                    if (list == null) return [];
-                    var cols = 5;
-                    return list.reduce((result, item, index) => {
-                        const chunkIndex = Math.floor(index / cols);
+                //function chunkedList(list) {
+                //    if (list == null) return [];
+                //    var cols = 5;
+                //    return list.reduce((result, item, index) => {
+                //        const chunkIndex = Math.floor(index / cols);
 
-                        if (!result[chunkIndex]) {
-                            result[chunkIndex] = [] // start a new chunk
-                        }
-                        result[chunkIndex].push(item)
+                //        if (!result[chunkIndex]) {
+                //            result[chunkIndex] = [] // start a new chunk
+                //        }
+                //        result[chunkIndex].push(item)
 
-                        return result;
-                    }, []);
-                }
+                //        return result;
+                //    }, []);
+                //}
 
                 function getComic(url) {
                     url = url.trim().replace(/\/$/g, '');
@@ -204,7 +176,7 @@
                     state,
                     loading,
                     isShowPage,
-                    chunkedList,
+                    //chunkedList,
                     getComicAction,
                     addIgnoreComic,
                     deleteIgnoreComic,

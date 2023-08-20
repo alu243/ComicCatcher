@@ -1,4 +1,5 @@
-﻿using ComicApi.Model;
+﻿using System.Collections;
+using ComicApi.Model;
 using ComicApi.Model.Repositories;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.ComicModels.Domains;
@@ -55,7 +56,8 @@ namespace ComicApi.Controllers
         {
             var comicEntity = await app.GetComic(comic);
             await dm5.LoadChapters(comicEntity);
-            return new ComicModel() { CurrComic = comicEntity, Comic = comic };
+            var pageNumber = app.GetPagnationNumber(comic); 
+            return new ComicModel() { CurrComic = comicEntity, Comic = comic, PageNumber = pageNumber };
 
         }
 
@@ -63,16 +65,10 @@ namespace ComicApi.Controllers
         [HttpGet("{comic}/{chapter}")]
         public async Task<ChapterModel> ShowComicPagesInChapter(string comic, string chapter)
         {
-            var comicEnity = await app.GetComic(comic);
+            var comicEntity = await app.GetComic(comic);
             var comicChapter = await app.GetComicChapter(comic, chapter);
             comicChapter.Pages = await app.GetComicPages(comic, chapter);
-            return new ChapterModel()
-            {
-                Comic = comic,
-                Chapter = chapter,
-                CurrChapter = comicChapter,
-                ComicName = comicEnity?.Caption ?? comic
-            };
+            return ComicConverter.Convert(comic, chapter, comicEntity, comicChapter);
         }
 
         [HttpGet("{comic}/{chapter}/next")]
@@ -90,13 +86,7 @@ namespace ComicApi.Controllers
             chapter = comicEntity.Chapters[newChapterIndex - 1].Url.GetUrlDirectoryName();
             var comicChapter = await app.GetComicChapter(comic, chapter);
             comicChapter.Pages = await app.GetComicPages(comic, chapter);
-            return new ChapterModel()
-            {
-                Comic = comic,
-                Chapter = chapter,
-                CurrChapter = comicChapter,
-                ComicName = comicEntity?.Caption ?? comic
-            };
+            return ComicConverter.Convert(comic, chapter, comicEntity, comicChapter);
         }
 
         [HttpPut("{comic}/{chapter}")]
@@ -105,14 +95,8 @@ namespace ComicApi.Controllers
             var comicChapter = await app.GetComicChapter(comic, chapter);
             comicChapter.Pages.Clear();
             comicChapter.Pages = await app.ReloadComicPages(comic, chapter);
-            var comicEnity = await app.GetComic(comic);
-            return new ChapterModel()
-            {
-                Comic = comic,
-                Chapter = chapter,
-                CurrChapter = comicChapter,
-                ComicName = comicEnity?.Caption ?? comic
-            };
+            var comicEntity = await app.GetComic(comic);
+            return ComicConverter.Convert(comic, chapter, comicEntity, comicChapter);
         }
         #endregion
     }

@@ -5,7 +5,7 @@
     Layout = "_Layout";
 }
 
-<h2>@Model.Caption</h2>
+<h2 class="center">@Model.Caption</h2>
 
 <div id="app">
     <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
@@ -21,8 +21,8 @@
     <div v-if="loading && !ending">讀取中...</div>
     <div v-if="ending">已經是最新的了</div>
     <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
-
-    <Observer v-if="state.chapters.length > 0 && false == loading && false == ending" @@intersect="intersected" />
+    
+    <Observer v-if="state.chapters.length > 0 && !loading && !ending" @@intersect="intersected" />
 </div>
 
 @section Scripts {
@@ -43,12 +43,31 @@
                 const chapter = pathArray[pathArray.length - 1];
                 const comic = pathArray[pathArray.length - 2];
 
+                // 更新進度
+                const updateFavoriteChapter = function(comic, chapter, chapterName){
+                    fetch("/api/favoritechapter", {
+                        method: "POST",
+                        credentials: "same-origin", // 帶 cookie
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            "comic": comic,
+                            "chapter": chapter,
+                            "chapterName": chapterName
+                        })
+                    });
+                }
+
                 onMounted(async () => {
                     const response = await fetch(`/api/comic/${comic}/${chapter}`);
                     const chapterResponse = await response.json();
                     state.chapters.push(chapterResponse);
+
+                    // 更新進度
+                    updateFavoriteChapter(chapterResponse.comic, chapterResponse.chapter, chapterResponse.chapterName);
+
                     setTimeout(() => loading.value = false, 1000);
                 });
+
 
                 const goBack = function () {
                     const pathArray = window.location.pathname.split('/');
@@ -63,7 +82,6 @@
                     loading.value = true;
                     var lastChapter = state.chapters[state.chapters.length - 1];
                     const response = await fetch(`/api/comic/${lastChapter.comic}/${lastChapter.chapter}/next`);
-
                     var text = await response.text();
                     if (text == null || text == "") {
                         ending.value = true;
@@ -71,6 +89,9 @@
                         return;
                     }
                     const chapterResponse = await JSON.parse(text);
+
+                    // 更新進度
+                    updateFavoriteChapter(chapterResponse.comic, chapterResponse.chapter, chapterResponse.chapterName);
 
                     history.pushState(chapterResponse, '', `/comic/${chapterResponse.comic}/${chapterResponse.chapter}`);
                     state.chapters.push(chapterResponse);
