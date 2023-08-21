@@ -5,12 +5,12 @@
 
 <br />
 <div id="app">
-    <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=showAll')">全部</button>
+    <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=showAll')" :disabled="queryString == '?filter=showAll'">全部</button>
     &nbsp;
-    <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=favorite')">最愛</button>
+    <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=favorite')" :disabled="queryString == '?filter=favorite'">最愛</button>
     &nbsp;
-    <button class="btn btn-outline-primary" @@click="goto(state.page?.tabNumber ?? 1)">預設</button>
-    <br />
+    <button class="btn btn-outline-primary" @@click="goto(state.page?.tabNumber ?? 1)" :disabled="queryString == ''">預設</button>
+    <br/>
     <span v-for="page in state.pages">
         <b v-if="isShowPage(page) && page.tabNumber === state.page?.tabNumber">{{page.caption}}</b>
         <a v-if="isShowPage(page) && page.tabNumber !== state.page?.tabNumber" :href="page.tabNumber + queryString">{{page.caption}}</a>
@@ -22,7 +22,7 @@
             <div class="card">
                 <div class="g-0 comic-info">
                     <a :href="getComicAction(comic)">
-                        <img style="width:100%" :src="comic.iconUrl" />
+                        <img style="width:100%" :src="comic.iconUrl"/>
                     </a>
                     <button v-if="comic.isIgnore" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="deleteIgnoreComic(comic)"><i class="bi bi-eye-fill"></i></button>
                     <button v-if="!comic.isIgnore" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="addIgnoreComic(comic)"><i class="bi bi-eye-slash-fill"></i></button>
@@ -41,8 +41,8 @@
         <b v-if="isShowPage(page) && page.tabNumber === state.page?.tabNumber">{{page.caption}}</b>
         <a v-if="isShowPage(page) && page.tabNumber !== state.page?.tabNumber" :href="page.tabNumber">{{page.caption}}</a>
     </span>
-    <br />
-    <br />
+    <br/>
+    <br/>
 </div>
 
 
