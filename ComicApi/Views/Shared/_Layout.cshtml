@@ -30,11 +30,11 @@
                 </h3>
                 @if (string.IsNullOrEmpty(userid))
                 {
-                    <button type="submit" class="btn btn-secondary" onclick="addCookie()">登入</button>
+                    <button type="submit" class="btn btn-secondary" onclick="addLoginCookie()">登入</button>
                 }
                 else
                 {
-                    <button class="btn btn-secondary" style="font-size: 18px;" onclick="deleteCookie()">登出</button>
+                    <button class="btn btn-secondary" style="font-size: 18px;" onclick="deleteLoginCookie()">登出</button>
                 }
             </div>
         </form>
@@ -45,12 +45,16 @@
     @RenderBody()
 
     <script>
-        function addCookie() {
+        function addCookie(key,value) {
+            document.cookie = `${key}=${value};path=/;`;
+        }
+
+        function addLoginCookie() {
             var newuserid = document.querySelector('#userid').value;
             document.cookie = `userid=${newuserid};path=/;`;
             location.reload();
         }
-        function deleteCookie() {
+        function deleteLoginCookie() {
             document.cookie = `userid=;path=/;`;
             location.reload();
         }

@@ -3,20 +3,9 @@
     Layout = "_Layout";
 }
 
-<style>
-    .chapter {
-        min-width =130px;
-        height: 90%;
-        padding: 5px;
-        margin: 5px;
-        background-color: #DDD;
-        text-align: center;
-    }
-</style>
-
 <div id="app">
     <h2 class="center">{{state.currComic?.caption}}</h2>
-    <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
+    <button class="btn btn-outline-primary" style="font-size: 20px;" @@click="goBack()">回上一層</button>
     <div v-if="loading">讀取中...</div>
     <div class="row row-cols-md-4 row-cols-3 gx-1 gy-1">
         <div class="col" v-for="chapter in state.currComic?.chapters">
@@ -25,7 +14,7 @@
             </div>
         </div>
     </div>
-    <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
+    <button class="btn btn-outline-primary" style="font-size: 20px;" @@click="goBack()">回上一層</button>
 </div>
 
 

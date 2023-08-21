@@ -4,50 +4,30 @@
 }
 
 <br />
-<style>
-    .embed {
-        position: relative;
-        display: inline-block;
-    }
-
-        .embed .btn {
-            position: absolute;
-            top: calc(100% - 25px);
-            left: 50%;
-            /*        transform: translate(-50%, -50%);
-                        -ms-transform: translate(-50%, -50%);
-                */
-        }
-
-            .embed .btn.btnleft {
-                left: calc(100% - 60px);
-            }
-
-            .embed .btn.btnright {
-                left: calc(100% - 24px);
-            }
-</style>
 <div id="app">
-    <button onclick="location.href='/page/1?filter=showAll'">顯示全部</button>
-    <button onclick="location.href='/page/1'">隱藏</button>
+    <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=showAll')">全部</button>
+    &nbsp;
+    <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=favorite')">最愛</button>
+    &nbsp;
+    <button class="btn btn-outline-primary" @@click="goto(state.page?.tabNumber ?? 1)">預設</button>
     <br />
     <span v-for="page in state.pages">
         <b v-if="isShowPage(page) && page.tabNumber === state.page?.tabNumber">{{page.caption}}</b>
-        <a v-if="isShowPage(page) && page.tabNumber !== state.page?.tabNumber" :href="page.tabNumber">{{page.caption}}</a>
+        <a v-if="isShowPage(page) && page.tabNumber !== state.page?.tabNumber" :href="page.tabNumber + queryString">{{page.caption}}</a>
     </span>
     <div v-if="loading">讀取中...</div>
 
     <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 gx-1">
         <div class="col" v-for="comic in state.comics">
             <div class="card">
-                <div class="g-0 embed">
+                <div class="g-0 comic-info">
                     <a :href="getComicAction(comic)">
                         <img style="width:100%" :src="comic.iconUrl" />
                     </a>
-                <button v-if="comic.isIgnore" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="deleteIgnoreComic(comic)"><i class="bi bi-eye-fill"></i></button>
+                    <button v-if="comic.isIgnore" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="deleteIgnoreComic(comic)"><i class="bi bi-eye-fill"></i></button>
                     <button v-if="!comic.isIgnore" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="addIgnoreComic(comic)"><i class="bi bi-eye-slash-fill"></i></button>
-                <button v-if="comic.isFavorite" class="btn btn-danger btn-sm btnright" style="padding:1px 4px;" @@click="deleteFavoriteComic(comic)"><i class="bi bi-heart-fill"></i></button>
-                <button v-if="!comic.isFavorite" class="btn btn-danger btn-sm btnright" style="padding:1px 4px;" @@click="addFavoriteComic(comic)"><i class="bi bi-heart"></i></button>
+                    <button v-if="comic.isFavorite" class="btn btn-danger btn-sm btnright" style="padding:1px 4px;" @@click="deleteFavoriteComic(comic)"><i class="bi bi-heart-fill"></i></button>
+                    <button v-if="!comic.isFavorite" class="btn btn-danger btn-sm btnright" style="padding:1px 4px;" @@click="addFavoriteComic(comic)"><i class="bi bi-heart"></i></button>
                 </div>
                 <div class="card-body g-1" style="padding:3px">
                     <p :class="{'card-title': true, 'text-primary': comic.isFavorite ,'fw-bold': comic.isFavorite, 'lh-sm':true }" style="font-size:14px;padding-top:3px">{{comic.caption}}</p>
@@ -61,8 +41,8 @@
         <b v-if="isShowPage(page) && page.tabNumber === state.page?.tabNumber">{{page.caption}}</b>
         <a v-if="isShowPage(page) && page.tabNumber !== state.page?.tabNumber" :href="page.tabNumber">{{page.caption}}</a>
     </span>
-    <br/>
-    <br/>
+    <br />
+    <br />
 </div>
 
 
@@ -77,10 +57,10 @@
                     pages: null,
                 });
                 const loading = ref(true);
+                const queryString = ref(window.location.search);
 
                 const pathArray = window.location.pathname.split('/');
                 const page = pathArray[pathArray.length - 1];
-                const queryString = window.location.search;
 
                 onMounted(async () => await loadPage());
 
@@ -89,7 +69,7 @@
                     const pagesResponse = await response1.json();
                     state.pages = pagesResponse?.paginations;
 
-                    const response = await fetch(`/api/page/${page}${queryString}`);
+                    const response = await fetch(`/api/page/${page}${queryString.value}`);
                     const pageResponse = await response.json();
                     state.page = pageResponse?.currPagination;
                     state.comics = pageResponse?.comics;
@@ -148,7 +128,7 @@
                             console.log(error);
                             alert("哦哦，被你玩壞了");
                         })
-                    } 
+                    }
                 }
 
                 function deleteIgnoreComic(comic) {
@@ -197,11 +177,17 @@
                     })
                 }
 
+                function goto(url) {
+                    location.href = url;
+                }
+
                 return {
+                    goto,
                     state,
                     loading,
                     isShowPage,
                     //chunkedList,
+                    queryString,
                     getComicAction,
                     addIgnoreComic,
                     deleteIgnoreComic,

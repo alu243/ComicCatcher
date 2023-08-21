@@ -24,7 +24,7 @@ public class ApiPageController : Controller
         app = comicApplication;
     }
 
-    [HttpGet("{page}/{filter?}")]
+    [HttpGet("{page}")]
     public async Task<PageModel> ShowComicsInPage(int page, string? filter)
     {
 
@@ -52,7 +52,7 @@ public class ApiPageController : Controller
         }).ToList();
 
         if (string.IsNullOrEmpty(userId) ||
-            "all".Equals(filter, StringComparison.CurrentCultureIgnoreCase))
+            "showAll".Equals(filter, StringComparison.CurrentCultureIgnoreCase))
         {
             // doNothing
         }
@@ -72,7 +72,7 @@ public class ApiPageController : Controller
         };
     }
 
-    [HttpGet("")]
+    [HttpGet()]
     public async Task<PagesModel> ShowPaginations()
     {
         return new PagesModel()

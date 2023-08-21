@@ -1,4 +1,5 @@
-﻿a {
+﻿/*共同頁面*/
+a {
     text-decoration: none;
     color: black;
 }
@@ -12,25 +13,87 @@
     padding: 1px 0px;
 }
 
+/*這是分頁段*/
+.comic-info {
+    position: relative;
+    display: inline-block;
+}
+
+    .comic-info .btn {
+        position: absolute;
+        top: calc(100% - 25px);
+        left: 50%;
+        /*        transform: translate(-50%, -50%);
+                            -ms-transform: translate(-50%, -50%);*/
+    }
+
+        .comic-info .btn.btnleft {
+            left: calc(100% - 60px);
+        }
+
+        .comic-info .btn.btnright {
+            left: calc(100% - 24px);
+        }
+/*這是分頁段--結束*/
+
+/*這是章節段*/
+.chapter {
+    min-width =130px;
+    height: 90%;
+    padding: 5px;
+    margin: 5px;
+    background-color: #DDD;
+    text-align: center;
+}
+
+    .chapter:hover {
+        cursor: pointer;
+    }
+/*這是章節段--結束*/
+/*這是頁面段*/
 /*.center:before {
     content: "這是筆電333: ";
 }*/
-
-.pageImg {
-    min-width: 1080px;
+.pagely-img-size {
+    width: calc(100vw - 15px);
+    height: calc(100vh - 16px);
+    object-fit: contain;
 }
 
-.vs-button{
-    display:inherit;
+.continue-img-size {
+    width: calc(100vw - 15px);
 }
+
+.page-info {
+    position: relative;
+    display: inline-block;
+}
+
+    .page-info .prev-page {
+        position: absolute;
+        height: calc(100% - 10px);
+        width:37%;
+        top:5px;
+        left: 3px;
+        /*background-color:blue;*/
+    }
+
+    .page-info .next-page {
+        position: absolute;
+        height: calc(100% - 10px);
+        width: 37%;
+        top: 5px;
+        left: calc(63% - 3px);
+        /*background-color:red;*/
+    }
 
 @media screen and (max-width: 1080px) {
     /*    .center:before {
         content: "這是手機: ";
     }*/
-
-    .pageImg {
+    .comicImg {
         width: 99%;
         min-width: inherit;
     }
 }
+/*這是頁面段-結束*/
