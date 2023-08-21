@@ -6,7 +6,7 @@
 <style>
     .chapter {
         min-width =130px;
-        height: 40px;
+        height: 90%;
         padding: 5px;
         margin: 5px;
         background-color: #DDD;
@@ -17,17 +17,14 @@
 <div id="app">
     <h2 class="center">{{state.currComic?.caption}}</h2>
     <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
-
-    <div class="row">
-        <div class="col-md-2 col-sm-4 col-xs-6" v-for="chapter in state.currComic?.chapters">
-            <div class="chapter" @@click="goChapter(chapter)">
-                <p>
-                    <span>{{chapter?.caption}}</span>
-                </p>
+    <div v-if="loading">讀取中...</div>
+    <div class="row row-cols-md-4 row-cols-3 gx-1 gy-1">
+        <div class="col" v-for="chapter in state.currComic?.chapters">
+            <div style="padding:3px" class="chapter" @@click="goChapter(chapter)">
+                <span :class="{'text-primary': state.readedChapter === getRelativePath(chapter?.url)}">{{chapter?.caption}}</span>
             </div>
         </div>
     </div>
-
     <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
 </div>
 
@@ -44,6 +41,7 @@
                     page: 1,
                     comic: null,
                     currComic: null,
+                    readedChapter: null,
                 });
                 const loading = ref(true);
 
@@ -51,6 +49,7 @@
                 const comic = pathArray[pathArray.length - 1];
 
                 const getRelativePath = function (url) {
+                    url = url.trim().replace(/\/$/g, '');
                     const pathArray = url.split('/');
                     const result = pathArray[pathArray.length - 1];
                     return result;
@@ -62,12 +61,12 @@
                     state.page = comicResponse.pageNumber ?? 1;
                     state.comic = comicResponse.comic;
                     state.currComic = comicResponse.currComic;
+                    state.readedChapter = comicResponse.readedChapter
 
                     setTimeout(() => loading.value = false, 2000);
                 });
 
                 const goChapter = function (chapter) {
-                    let url = chapter.url.trim().replace(/\/$/g, '');
                     var relative = getRelativePath(url);
                     location.href = `./${state.comic}/${relative}`;
                 }

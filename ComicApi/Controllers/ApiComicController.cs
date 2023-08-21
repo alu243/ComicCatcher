@@ -1,11 +1,8 @@
-﻿using System.Collections;
-using ComicApi.Model;
-using ComicApi.Model.Repositories;
+﻿using ComicApi.Model;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.ComicModels.Domains;
 using ComicCatcherLib.Utils;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace ComicApi.Controllers
@@ -56,8 +53,18 @@ namespace ComicApi.Controllers
         {
             var comicEntity = await app.GetComic(comic);
             await dm5.LoadChapters(comicEntity);
-            var pageNumber = app.GetPagnationNumber(comic); 
-            return new ComicModel() { CurrComic = comicEntity, Comic = comic, PageNumber = pageNumber };
+            var pageNumber = app.GetPagnationNumber(comic);
+
+            var userId = Request.Cookies["userid"] ?? "";
+            var favChapter = await app.GetFavoriteChapter(userId, comic);
+            //var comicChapter = comicEntity.Chapters?.FirstOrDefault(c => c.Url.GetUrlDirectoryName().Equals(favChapter?.Chapter));
+            return new ComicModel()
+            {
+                CurrComic = comicEntity,
+                Comic = comic,
+                PageNumber = pageNumber,
+                ReadedChapter = favChapter?.Chapter ?? ""
+            };
 
         }
 

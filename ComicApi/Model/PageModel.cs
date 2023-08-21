@@ -30,6 +30,7 @@ namespace ComicApi.Model
         public int PageNumber { get; set; }
         public string Comic { get; set; }
         public ComicEntity CurrComic { get; set; }
+        public string ReadedChapter { get; set; }
     }
 
     public class ChapterModel

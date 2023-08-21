@@ -4,6 +4,29 @@
 }
 
 <br />
+<style>
+    .embed {
+        position: relative;
+        display: inline-block;
+    }
+
+        .embed .btn {
+            position: absolute;
+            top: calc(100% - 25px);
+            left: 50%;
+            /*        transform: translate(-50%, -50%);
+                        -ms-transform: translate(-50%, -50%);
+                */
+        }
+
+            .embed .btn.btnleft {
+                left: calc(100% - 60px);
+            }
+
+            .embed .btn.btnright {
+                left: calc(100% - 24px);
+            }
+</style>
 <div id="app">
     <button onclick="location.href='/page/1?filter=showAll'">顯示全部</button>
     <button onclick="location.href='/page/1'">隱藏</button>
@@ -14,24 +37,21 @@
     </span>
     <div v-if="loading">讀取中...</div>
 
-    <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5">
+    <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 gx-1">
         <div class="col" v-for="comic in state.comics">
             <div class="card">
-                <a :href="getComicAction(comic)" target="_comic">
-                    <img style="width:100%" :src="comic.iconUrl" />
-                </a>
-                <div class="card-body" style="padding:3px">
-                    <button v-if="comic.isIgnore" class="btn btn-outline-secondary btn-sm" style="padding:1px 4px;" @@click="deleteIgnoreComic(comic)">顯示</button>
-                    <button v-if="!comic.isIgnore" class="btn btn-outline-secondary btn-sm" style="padding:1px 4px;"@@click="addIgnoreComic(comic)">隱藏</button>
-                    &nbsp;
-                    <button v-if="comic.isFavorite" class="btn btn-outline-primary btn-sm"style="padding:1px 4px;" @@click="deleteFavoriteComic(comic)">移除</button>
-                    <button v-if="!comic.isFavorite" class="btn btn-outline-primary btn-sm" style="padding:1px 4px;" @@click="addFavoriteComic(comic)">加入</button>
-                    <br />
-                    <sapn class="card-title">
-                        <span v-if="comic.isFavorite" style="color:blue;font-weight: 900;">{{comic.caption}}</span>
-                        <span v-if="!comic.isFavorite" style="font-weight: 600;">{{comic.caption}}</span>
-                    </sapn>
-                    <p class="card-text" style="color:darkgray">最新：{{comic.readedChapter}}{{comic.readedChapter?'/':''}}{{comic.lastUpdateChapter}}</p>
+                <div class="g-0 embed">
+                    <a :href="getComicAction(comic)">
+                        <img style="width:100%" :src="comic.iconUrl" />
+                    </a>
+                <button v-if="comic.isIgnore" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="deleteIgnoreComic(comic)"><i class="bi bi-eye-fill"></i></button>
+                    <button v-if="!comic.isIgnore" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="addIgnoreComic(comic)"><i class="bi bi-eye-slash-fill"></i></button>
+                <button v-if="comic.isFavorite" class="btn btn-danger btn-sm btnright" style="padding:1px 4px;" @@click="deleteFavoriteComic(comic)"><i class="bi bi-heart-fill"></i></button>
+                <button v-if="!comic.isFavorite" class="btn btn-danger btn-sm btnright" style="padding:1px 4px;" @@click="addFavoriteComic(comic)"><i class="bi bi-heart"></i></button>
+                </div>
+                <div class="card-body g-1" style="padding:3px">
+                    <p :class="{'card-title': true, 'text-primary': comic.isFavorite ,'fw-bold': comic.isFavorite, 'lh-sm':true }" style="font-size:14px;padding-top:3px">{{comic.caption}}</p>
+                    <p class="card-text lh-sm center" style="font-size:14px; color:darkgray">>{{comic.readedChapter}}{{comic.readedChapter?'/':''}}{{comic.lastUpdateChapter}}<</p>
                 </div>
             </div>
         </div>
@@ -112,19 +132,21 @@
                     return `../comic/${c}`;
                 }
 
-                function addIgnoreComic(comic, comicName) {
-                    var request = { "comic": getComic(comic.url), "comicName": comic.caption };
-                    fetch("/api/IgnoreComic", {
-                        method: "POST",
-                        credentials: "same-origin", // 帶 cookie
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(request)
-                    }).then(response => {
-                        loadPage();
-                    }).catch((error) => {
-                        console.log(error);
-                        alert("哦哦，被你玩壞了");
-                    })
+                function addIgnoreComic(comic) {
+                    if (confirm(`要隱藏[${comic.caption}]嗎？`) == true) {
+                        var request = { "comic": getComic(comic.url), "comicName": comic.caption };
+                        fetch("/api/IgnoreComic", {
+                            method: "POST",
+                            credentials: "same-origin", // 帶 cookie
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(request)
+                        }).then(response => {
+                            loadPage();
+                        }).catch((error) => {
+                            console.log(error);
+                            alert("哦哦，被你玩壞了");
+                        })
+                    } 
                 }
 
                 function deleteIgnoreComic(comic) {

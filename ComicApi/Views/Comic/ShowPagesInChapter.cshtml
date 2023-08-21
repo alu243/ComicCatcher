@@ -8,9 +8,9 @@
 <h2 class="center">@Model.Caption</h2>
 
 <div id="app">
-    <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
     <br />
     <div v-for="chapter in state.chapters">
+        <button style="font-size: 20px;" @@click="goBack()">上一頁</button>
         <h2 style="text-align: center;">{{ chapter.currChapter.caption }}</h2>
         <div v-for="x in chapter.currChapter.pages" class="center sapce">
             <img :src="x.url" class="pageImg" alt="Snow" border="2" />
