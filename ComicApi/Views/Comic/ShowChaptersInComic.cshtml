@@ -67,7 +67,7 @@
                 });
 
                 const goChapter = function (chapter) {
-                    var relative = getRelativePath(url);
+                    var relative = getRelativePath(chapter.url);
                     location.href = `./${state.comic}/${relative}`;
                 }
 
