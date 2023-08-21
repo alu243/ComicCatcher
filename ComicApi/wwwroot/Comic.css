@@ -81,9 +81,9 @@ a {
     .page-info .next-page {
         position: absolute;
         height: calc(100% - 10px);
-        width: 37%;
+        width: 42%;
         top: 5px;
-        left: calc(63% - 3px);
+        left: calc(58% - 3px);
         /*background-color:red;*/
     }
 
