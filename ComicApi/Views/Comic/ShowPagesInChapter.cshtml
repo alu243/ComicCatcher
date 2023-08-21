@@ -96,9 +96,11 @@
                     if (ending.value == true || loading.value == true) return;
 
                     loading.value = true;
+                    document.body.style.cursor = "wait";
                     var lastChapter = state.chapters[state.chapters.length - 1];
                     const response = await fetch(`/api/comic/${lastChapter.comic}/${lastChapter.chapter}/next`);
                     var text = await response.text();
+                    document.body.style.cursor = "default";
                     if (text == null || text == "") {
                         ending.value = true;
                         loading.value = false;
@@ -135,24 +137,33 @@
 
                     console.log("取新章前：", comicChapter?.chapter)
                     // 取一次新章節後再找一次有沒有下一頁
-                    await intersected();
-                    var newChapter = state.chapters[state.chapters.length - 1];
-                    console.log("取新章後：", newChapter?.chapter)
-
-                    if (newChapter.chapter !== comicChapter.chapter) // 有不一樣的章節才是新章節
-                    {
-                        comicChapter = newChapter;
-                        for (const comicPage of comicChapter.currChapter.pages) {
-                            console.log("比較的頁面：", `${comicChapter.chapter}_${comicPage.pageNumber}`);
-
-                            if (prevIndex === currIndex) {
-                                gotoAnchor(`#${comicChapter.chapter}_${comicPage.pageNumber}`);
-                                return;
-                            }
-                            prevIndex = `${comicChapter.chapter}_${comicPage.pageNumber}`;
-                        }
+                    if (ending == true) {
+                        alert("已經是最後頁了");
+                        return;
                     }
-                    alert("已經是最後頁了");
+
+                    await intersected();
+                    document.body.style.cursor = "wait";
+                    setTimeout(() => {
+                    document.body.style.cursor = "default";
+                        var newChapter = state.chapters[state.chapters.length - 1];
+                        console.log("取新章後：", newChapter?.chapter)
+
+                        if (newChapter.chapter !== comicChapter.chapter) // 有不一樣的章節才是新章節
+                        {
+                            comicChapter = newChapter;
+                            for (const comicPage of comicChapter.currChapter.pages) {
+                                console.log("比較的頁面：", `${comicChapter.chapter}_${comicPage.pageNumber}`);
+
+                                if (prevIndex === currIndex) {
+                                    gotoAnchor(`#${comicChapter.chapter}_${comicPage.pageNumber}`);
+                                    return;
+                                }
+                                prevIndex = `${comicChapter.chapter}_${comicPage.pageNumber}`;
+                            }
+                        }
+                        alert("已經是最後頁了");
+                    }, 300);
                 }
 
                 const prevPage = function (chapter, page) {

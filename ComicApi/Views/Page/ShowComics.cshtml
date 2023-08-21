@@ -74,7 +74,7 @@
                     state.page = pageResponse?.currPagination;
                     state.comics = pageResponse?.comics;
 
-                    addCookie("currentPage", page);
+                    addCookie("currentPage", page + queryString.value ?? "");
 
                     setTimeout(() => loading.value = false, 1000);
                 }
