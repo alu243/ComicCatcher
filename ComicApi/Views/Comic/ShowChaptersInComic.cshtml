@@ -61,7 +61,9 @@
                 }
 
                 const goBack = function () {
-                    location.href = `/page/${state.page}`;
+                    var page = getCookie("currentPage");
+                    if (!page || page == undefined) page = state.page;
+                    location.href = `/page/${page}`;
                 }
 
                 return {
