@@ -60,9 +60,9 @@ UNIQUE (Comic) ON CONFLICT REPLACE
         var result = 0;
 
         await using var conn = await ApiSQLiteHelper.GetConnection();
+        await using var cmd = conn.CreateCommand();
         await conn.OpenAsync();
-        await using var cmd = new SqliteCommand();
-        using var tran = conn.BeginTransaction();
+        var tran = conn.BeginTransaction();
         cmd.Transaction = tran;
         try
         {
