@@ -91,9 +91,20 @@ a {
     /*    .center:before {
         content: "這是手機: ";
     }*/
-    .comicImg {
+/*    .comicImg {
         width: 99%;
         min-width: inherit;
+    }*/
+
+    .pagely-img-size {
+        width: calc(100vw - 2px);
     }
+
+    .continue-img-size {
+        width: calc(100vw - 2px);
+/*        width: 99%;
+        min-width: inherit;*/
+    }
+
 }
 /*這是頁面段-結束*/
