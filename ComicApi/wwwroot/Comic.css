@@ -64,16 +64,23 @@ a {
     width: calc(100vw - 15px);
 }
 
+.page-info-title {
+    width: 100%;
+    border-bottom: 1px solid
+}
+
+
 .page-info {
     position: relative;
     display: inline-block;
+    border: 2px solid;
 }
 
     .page-info .prev-page {
         position: absolute;
         height: calc(100% - 10px);
-        width:37%;
-        top:5px;
+        width: 37%;
+        top: 5px;
         left: 3px;
         /*background-color:blue;*/
     }
@@ -81,17 +88,18 @@ a {
     .page-info .next-page {
         position: absolute;
         height: calc(100% - 10px);
-        width: 42%;
+        width: 37%;
         top: 5px;
-        left: calc(58% - 3px);
+        left: calc(63% - 3px);
         /*background-color:red;*/
     }
+
 
 @media screen and (max-width: 1080px) {
     /*    .center:before {
         content: "這是手機: ";
     }*/
-/*    .comicImg {
+    /*    .comicImg {
         width: 99%;
         min-width: inherit;
     }*/
@@ -102,9 +110,17 @@ a {
 
     .continue-img-size {
         width: calc(100vw - 2px);
-/*        width: 99%;
+        /*        width: 99%;
         min-width: inherit;*/
     }
 
+    .page-info .next-page {
+        position: absolute;
+        height: calc(100% - 10px);
+        width: 50%;
+        top: 5px;
+        left: calc(50% - 3px);
+        /*background-color: red;*/
+    }
 }
 /*這是頁面段-結束*/

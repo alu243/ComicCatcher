@@ -20,7 +20,8 @@
         <button class="btn btn-outline-secondary center" style="font-size: 20px;" @@click="goBack()">回上一層</button>
         <h2 style="text-align: center;">{{ chapter.currChapter.caption }}</h2>
         <div v-for="x in chapter.currChapter.pages" :id="`${chapter.chapter}_${x.pageNumber}`" class="center sapce page-info">
-            <img :src="x.url" :class="{'continue-img-size':!pagely, 'pagely-img-size':pagely}" alt="Snow" border="2" />
+            <div v-if="pagely" style="width:100%;border-bottom: 1px solid"><span class="fw-bold center">{{chapter.currChapter.caption}}：第{{x.pageNumber}}頁/共{{chapter.currChapter.pages.length}}頁</span></div>
+            <img :src="x.url" :class="{'continue-img-size':!pagely, 'pagely-img-size':pagely}" alt="Snow" />
             <div class="prev-page" @@click="prevPage(chapter.chapter, x)"></div>
             <div class="next-page" @@click="nextPage(chapter.chapter, x)"></div>
         </div>
