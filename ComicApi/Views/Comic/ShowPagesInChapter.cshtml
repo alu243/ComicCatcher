@@ -145,7 +145,7 @@
                     await intersected();
                     document.body.style.cursor = "wait";
                     setTimeout(() => {
-                    document.body.style.cursor = "default";
+                        document.body.style.cursor = "default";
                         var newChapter = state.chapters[state.chapters.length - 1];
                         console.log("取新章後：", newChapter?.chapter)
 
@@ -162,7 +162,7 @@
                                 prevIndex = `${comicChapter.chapter}_${comicPage.pageNumber}`;
                             }
                         }
-                        alert("已經是最後頁了");
+                        alert(ending ? "已經是最後頁了" : "再等等...");
                     }, 300);
                 }
 
