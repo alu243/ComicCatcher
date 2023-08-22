@@ -29,9 +29,9 @@
     </div>
     <br />
     <div v-if="loading && !ending">讀取中...</div>
-    <div v-if="ending">已經是最新的了</div>
     <button class="btn btn-outline-secondary center" style="font-size: 20px;" @@click="goBack()">回上一層</button>
-
+    <div v-if="ending">已經是最新的了</div>
+    <br /><br /><br />
     <Observer v-if="state.chapters.length > 0 && !loading && !ending" @@intersect="intersected" />
 </div>
 
@@ -85,6 +85,9 @@
                     }
                     else if (event.key === "ArrowRight") {
                         nextPage(nowChapter.value, { pageNumber: nowPage.value });
+                    }else if (event.key === "Escape")
+                    {
+                        goBack();
                     }
                 }
                 onMounted(async () => {
