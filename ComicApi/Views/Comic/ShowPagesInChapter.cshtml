@@ -50,6 +50,10 @@
                 const ending = ref(false);
                 const pagely = ref(getCookie('pagely') === "true");
 
+                const nowChapter = ref(null);
+                const nowPage = ref(null);
+
+
                 const pathArray = window.location.pathname.split('/');
                 const chapter = pathArray[pathArray.length - 1];
                 const comic = pathArray[pathArray.length - 2];
@@ -72,18 +76,34 @@
                         })
                     });
                 }
-
+                const onKeydown = function (event) {
+                    console.log('onKeydown', event.key);
+                    console.log('onKeydown', nowChapter);
+                    console.log('onKeydown', nowPage);
+                    if (event.key === "ArrowLeft") {
+                        prevPage(nowChapter.value, { pageNumber: nowPage.value });
+                    }
+                    else if (event.key === "ArrowRight") {
+                        nextPage(nowChapter.value, { pageNumber: nowPage.value });
+                    }
+                }
                 onMounted(async () => {
                     const response = await fetch(`/api/comic/${comic}/${chapter}`);
                     const chapterResponse = await response.json();
                     state.chapters.push(chapterResponse);
 
+                    nowChapter.value = chapterResponse.chapter;
+                    nowPage.value = 1;
+
                     // 更新進度
                     updateFavoriteChapter(chapterResponse.comic, chapterResponse.chapter, chapterResponse.chapterName);
 
-                    setTimeout(() => loading.value = false, 1000);
+                    setTimeout(() => {
+                        loading.value = false;
+                        if (pagely.value) gotoAnchor(`#${nowChapter.value}_${nowPage.value}`)
+                        document.addEventListener("keydown", onKeydown, false);
+                    }, 1000);
                 });
-
 
                 const goBack = function () {
                     const pathArray = window.location.pathname.split('/');
@@ -192,6 +212,8 @@
                 }
 
                 const gotoAnchor = function (anchor) {
+                    nowChapter.value = anchor.split('_')[0].replace("#", "");
+                    nowPage.value = parseInt(anchor.split('_')[1]);
                     var url = location.href;
                     location.href = anchor;
                     history.replaceState(null, null, url);
@@ -200,14 +222,18 @@
 
                 return {
                     state,
-                    pagely,
                     goBack,
-                    intersected,
                     loading,
                     ending,
+
+                    pagely,
                     togglePagely,
+
                     nextPage,
-                    prevPage
+                    prevPage,
+                    nowChapter,
+                    nowPage,
+                    intersected
                 }
             }
         });
