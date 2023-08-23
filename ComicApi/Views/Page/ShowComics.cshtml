@@ -13,14 +13,14 @@
     <br />
     <nav class="center">
         <ul class="pagination">
-            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber - 1 <= 0 ? state.page?.tabNumber : state.page?.tabNumber - 1) + queryString">前一頁</a></li>
+            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber - 1 <= 0 ? state.page?.tabNumber : state.page?.tabNumber - 1) + queryString"><<</a></li>
             <li :class="{'page-item':true, 'active':page.tabNumber === state.page?.tabNumber}" v-for="page in getShowPages(state.pages)">
                 <a class="page-link"
                    :href="page.tabNumber + queryString">
-                    {{page.caption}}
+                    {{page.tabNumber}}
                 </a>
             </li>
-            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber + 1 > 300 ? 300 : state.page?.tabNumber + 1) + queryString">後一頁</a></li>
+            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber + 1 > 300 ? 300 : state.page?.tabNumber + 1) + queryString">>></a></li>
         </ul>
     </nav>
     <div v-if="loading" class="loader-background"><div class="loader"></div></div>
@@ -48,14 +48,14 @@
     <br />
     <nav class="center">
         <ul class="pagination">
-            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber - 1 <= 0 ? state.page?.tabNumber : state.page?.tabNumber - 1) + queryString">前一頁</a></li>
+            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber - 1 <= 0 ? state.page?.tabNumber : state.page?.tabNumber - 1) + queryString"><<</a></li>
             <li :class="{'page-item':true, 'active':page.tabNumber === state.page?.tabNumber}" v-for="page in getShowPages(state.pages)">
                 <a class="page-link"
                    :href="page.tabNumber + queryString">
-                    {{page.caption}}
+                    {{page.tabNumber}}
                 </a>
             </li>
-            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber + 1 > 300 ? 300 : state.page?.tabNumber + 1) + queryString">後一頁</a></li>
+            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber + 1 > 300 ? 300 : state.page?.tabNumber + 1) + queryString">>></a></li>
         </ul>
     </nav>
     <br />
@@ -111,7 +111,6 @@
                     const maxTabNumber = minTabNumber + pageSection;
 
                     var pages = [];
-                    console.log("pages", state.pages)
                     for (var eachPage of state.pages) {
                         if (minTabNumber <= eachPage.tabNumber && eachPage.tabNumber < maxTabNumber) {
                             pages.push(eachPage);
