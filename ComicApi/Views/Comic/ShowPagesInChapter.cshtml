@@ -120,7 +120,7 @@
 
                 const intersected = async function () {
                     console.log("Next~~~");
-                    if (ending.value == true || loading.value == true) return;
+                    if (ending.value || loading.value) return;
 
                     loading.value = true;
                     document.body.style.cursor = "wait";
@@ -146,9 +146,10 @@
                 }
 
                 const nextPage = async function (chapter, page) {
+                    if (loading.value) return;
+
                     const currIndex = `${chapter}_${page.pageNumber}`;
                     console.log("目前頁：", currIndex);
-
                     let prevIndex = "";
                     let comicChapter = null;
                     for (comicChapter of state.chapters) {
