@@ -87,9 +87,7 @@
 
                 onMounted(async () => {
                     await loadPage();
-                    setTimeout(() => {
-                        window.scrollTo(0, 1);
-                    }, 300);
+                    setTimeout(() => { window.scrollTo(0, 1); }, 1500);
                 });
 
                 async function loadPage() {
