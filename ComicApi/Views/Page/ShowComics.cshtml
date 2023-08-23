@@ -3,14 +3,18 @@
     Layout = "_Layout";
 }
 
-<br />
 <div id="app">
-    <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=showAll')" :disabled="queryString == '?filter=showAll'">全部</button>
-    &nbsp;
-    <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=favorite')" :disabled="queryString == '?filter=favorite'">最愛</button>
-    &nbsp;
-    <button class="btn btn-outline-primary" @@click="goto(state.page?.tabNumber ?? 1)" :disabled="queryString == ''">預設</button>
-    <br />
+    <div style="padding:10px 0px;display: flex">
+        <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=showAll')" :disabled="queryString == '?filter=showAll'">全部</button>
+        &nbsp;
+        <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=favorite')" :disabled="queryString == '?filter=favorite'">最愛</button>
+        &nbsp;
+        <button class="btn btn-outline-primary" @@click="goto(state.page?.tabNumber ?? 1)" :disabled="queryString == ''">預設</button>
+        &nbsp;
+        <select class="form-select" style="width:80px" @@change="goto($event.target.value + queryString)">
+            <option v-for="page in state.pages" :value="page.tabNumber" :selected="page.tabNumber === state.page?.tabNumber">{{page.tabNumber}}</option>
+        </select>
+    </div>
     <nav class="center">
         <ul class="pagination">
             <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber - 1 <= 0 ? state.page?.tabNumber : state.page?.tabNumber - 1) + queryString"><<</a></li>
@@ -23,7 +27,9 @@
             <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber + 1 > 300 ? 300 : state.page?.tabNumber + 1) + queryString">>></a></li>
         </ul>
     </nav>
-    <div v-if="loading" class="loader-background"><div class="loader"></div></div>
+    <div v-if="loading" class="loader-background">
+        <div class="loader"></div>
+    </div>
 
     <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 gx-1">
         <div class="col" v-for="comic in state.comics">
@@ -82,7 +88,7 @@
                 onMounted(async () => {
                     await loadPage();
                     setTimeout(() => {
-                        window.scroll(0, 1);
+                        window.scrollTo(0, 1);
                     }, 300);
                 });
 
@@ -104,7 +110,7 @@
                 const getShowPages = function () {
                     if (state.pages == null) return [];
 
-                    const pageSection = 7;
+                    const pageSection = 5;
 
                     let minTabNumber = state.page?.tabNumber - pageSection / 2;
                     if (minTabNumber <= 0) minTabNumber = 0;

@@ -127,7 +127,7 @@ a {
 /*這是頁面段-結束*/
 
 .loader-background {
-    position: relative;
+    position: fixed;
     top: 0;
     left: 0;
     background: rgba(0, 0, 0, 0.3);
@@ -137,12 +137,12 @@ a {
 }
 
 .loader {
-    position: absolute;
+    position: fixed;
     border: 16px solid #f3f3f3;
     border-radius: 50%;
     border-top: 16px solid #3498db;
-    top: 50vh;
-    left: 50vw;
+    top: calc(45vh - 60px);
+    left: calc(50vw - 60px);
     width: 120px;
     height: 120px;
     -webkit-animation: spin 2s linear infinite; /* Safari */

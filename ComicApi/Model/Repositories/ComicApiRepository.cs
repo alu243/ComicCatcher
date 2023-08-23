@@ -1,7 +1,6 @@
 ﻿using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.DbModel;
-using Microsoft.Data.Sqlite;
 using System.Data;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
@@ -64,12 +63,13 @@ UNIQUE (Comic) ON CONFLICT REPLACE
         await conn.OpenAsync();
         var tran = conn.BeginTransaction();
         cmd.Transaction = tran;
+        string sql = "";
         try
         {
             foreach (var comic in comics)
             {
                 var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
-                var sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
+                sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
 ('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}');";
                 cmd.CommandText = sql;
                 result += await cmd.ExecuteNonQueryAsync();

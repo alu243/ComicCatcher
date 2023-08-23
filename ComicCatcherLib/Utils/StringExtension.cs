@@ -41,6 +41,7 @@ public static class StringExtension
         ss = ss.Replace("<", "＜");
         ss = ss.Replace("|", "");
         ss = ss.Replace("\"", "");
+        ss = ss.Replace("'", "");
         ss = ss.Replace("...", "…");
         ss = ss.Replace(@"""", " ");
         ss = ss.Replace("..", "").Replace("..", "").Replace("..", "").Replace("..", "").Replace("..", "").Replace("..", "");
