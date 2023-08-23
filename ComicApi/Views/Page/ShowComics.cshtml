@@ -10,19 +10,27 @@
     <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=favorite')" :disabled="queryString == '?filter=favorite'">最愛</button>
     &nbsp;
     <button class="btn btn-outline-primary" @@click="goto(state.page?.tabNumber ?? 1)" :disabled="queryString == ''">預設</button>
-    <br/>
-    <span v-for="page in state.pages">
-        <b v-if="isShowPage(page) && page.tabNumber === state.page?.tabNumber">{{page.caption}}</b>
-        <a v-if="isShowPage(page) && page.tabNumber !== state.page?.tabNumber" :href="page.tabNumber + queryString">{{page.caption}}</a>
-    </span>
-    <div v-if="loading">讀取中...</div>
+    <br />
+    <nav class="center">
+        <ul class="pagination">
+            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber - 1 <= 0 ? state.page?.tabNumber : state.page?.tabNumber - 1) + queryString">前一頁</a></li>
+            <li :class="{'page-item':true, 'active':page.tabNumber === state.page?.tabNumber}" v-for="page in getShowPages(state.pages)">
+                <a class="page-link"
+                   :href="page.tabNumber + queryString">
+                    {{page.caption}}
+                </a>
+            </li>
+            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber + 1 > 300 ? 300 : state.page?.tabNumber + 1) + queryString">後一頁</a></li>
+        </ul>
+    </nav>
+    <div v-if="loading" class="loader-background"><div class="loader"></div></div>
 
     <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 gx-1">
         <div class="col" v-for="comic in state.comics">
             <div class="card">
                 <div class="g-0 comic-info">
                     <a :href="getComicAction(comic)">
-                        <img style="width:100%" :src="comic.iconUrl"/>
+                        <img style="width:100%" :src="comic.iconUrl" />
                     </a>
                     <button v-if="comic.isIgnore" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="deleteIgnoreComic(comic)"><i class="bi bi-eye-fill"></i></button>
                     <button v-if="!comic.isIgnore" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="addIgnoreComic(comic)"><i class="bi bi-eye-slash-fill"></i></button>
@@ -37,12 +45,21 @@
         </div>
     </div>
 
-    <span v-for="page in state.pages">
-        <b v-if="isShowPage(page) && page.tabNumber === state.page?.tabNumber">{{page.caption}}</b>
-        <a v-if="isShowPage(page) && page.tabNumber !== state.page?.tabNumber" :href="page.tabNumber">{{page.caption}}</a>
-    </span>
-    <br/>
-    <br/>
+    <br />
+    <nav class="center">
+        <ul class="pagination">
+            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber - 1 <= 0 ? state.page?.tabNumber : state.page?.tabNumber - 1) + queryString">前一頁</a></li>
+            <li :class="{'page-item':true, 'active':page.tabNumber === state.page?.tabNumber}" v-for="page in getShowPages(state.pages)">
+                <a class="page-link"
+                   :href="page.tabNumber + queryString">
+                    {{page.caption}}
+                </a>
+            </li>
+            <li class="page-item"><a class="page-link" :href="(state.page?.tabNumber + 1 > 300 ? 300 : state.page?.tabNumber + 1) + queryString">後一頁</a></li>
+        </ul>
+    </nav>
+    <br />
+    <br />
 </div>
 
 
@@ -62,7 +79,12 @@
                 const pathArray = window.location.pathname.split('/');
                 const page = pathArray[pathArray.length - 1];
 
-                onMounted(async () => await loadPage());
+                onMounted(async () => {
+                    await loadPage();
+                    setTimeout(() => {
+                        window.scroll(0, 1);
+                    }, 300);
+                });
 
                 async function loadPage() {
                     const response1 = await fetch(`/api/page`);
@@ -76,17 +98,26 @@
 
                     addCookie("currentPage", page + queryString.value ?? "");
 
-                    setTimeout(() => loading.value = false, 1000);
+                    setTimeout(() => loading.value = false, 100);
                 }
 
-                function isShowPage(eachPage) {
+                const getShowPages = function () {
+                    if (state.pages == null) return [];
+
                     const pageSection = 7;
 
                     let minTabNumber = state.page?.tabNumber - pageSection / 2;
                     if (minTabNumber <= 0) minTabNumber = 0;
                     const maxTabNumber = minTabNumber + pageSection;
-                    return minTabNumber <= eachPage.tabNumber &&
-                        eachPage.tabNumber < maxTabNumber;
+
+                    var pages = [];
+                    console.log("pages", state.pages)
+                    for (var eachPage of state.pages) {
+                        if (minTabNumber <= eachPage.tabNumber && eachPage.tabNumber < maxTabNumber) {
+                            pages.push(eachPage);
+                        }
+                    }
+                    return pages;
                 }
 
                 //function chunkedList(list) {
@@ -187,7 +218,7 @@
                     goto,
                     state,
                     loading,
-                    isShowPage,
+                    getShowPages,
                     //chunkedList,
                     queryString,
                     getComicAction,

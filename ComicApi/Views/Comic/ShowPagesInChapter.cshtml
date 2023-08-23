@@ -28,7 +28,7 @@
         <hr />
     </div>
     <br />
-    <div v-if="loading && !ending">讀取中...</div>
+    <div v-if="loading && !ending" class="loader-background"><div class="loader"></div></div>
     <button class="btn btn-outline-secondary center" style="font-size: 20px;" @@click="goBack()">回上一層</button>
     <div v-if="ending">已經是最新的了</div>
     <br /><br /><br />
@@ -105,7 +105,12 @@
                         loading.value = false;
                         if (pagely.value) gotoAnchor(`#${nowChapter.value}_${nowPage.value}`)
                         document.addEventListener("keydown", onKeydown, false);
-                    }, 1000);
+                    }, 300);
+
+                    setTimeout(() => {
+                        window.scroll(0, 1);
+                    }, 300);
+
                 });
 
                 const goBack = function () {
@@ -127,18 +132,19 @@
                     document.body.style.cursor = "default";
                     if (text == null || text == "") {
                         ending.value = true;
-                        loading.value = false;
+                        setTimeout(() => loading.value = false, 100);
                         return;
                     }
                     const chapterResponse = await JSON.parse(text);
 
+                    history.pushState(chapterResponse, '', `/comic/${chapterResponse.comic}/${chapterResponse.chapter}`);
+                    state.chapters.push(chapterResponse);
+
                     // 更新進度
                     updateFavoriteChapter(chapterResponse.comic, chapterResponse.chapter, chapterResponse.chapterName);
 
-                    history.pushState(chapterResponse, '', `/comic/${chapterResponse.comic}/${chapterResponse.chapter}`);
-                    state.chapters.push(chapterResponse);
                     //if (state.chapters.length > 3) state.chapters.shift();
-                    loading.value = false;
+                    setTimeout(() => loading.value = false, 100);
                 }
 
                 const nextPage = async function (chapter, page) {
