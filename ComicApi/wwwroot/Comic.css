@@ -1,8 +1,26 @@
 ﻿/*共同頁面*/
+[v-cloak] {
+    display: none;
+}
+
 a {
     text-decoration: none;
     color: black;
 }
+
+html {
+    overflow: -moz-hidden-unscrollable;
+}
+
+body {
+    overflow-x: hidden;
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+}
+
+    body::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+    }
 
 .center {
     display: grid;
@@ -55,14 +73,14 @@ a {
     content: "這是筆電333: ";
 }*/
 .pagely-img-size {
-    width: calc(100vw - 15px);
+    width: 100vw;
     height: calc(100vh - 45px);
     object-fit: contain;
     object-position: 50% 10%;
 }
 
 .continue-img-size {
-    width: calc(100vw - 15px);
+    width: 100vw;
 }
 
 .page-info-title {
@@ -74,7 +92,8 @@ a {
 .page-info {
     position: relative;
     display: inline-block;
-    border: 2px solid;
+    border-top: 2px solid;
+    border-bottom: 2px solid;
 }
 
     .page-info .prev-page {
@@ -106,11 +125,11 @@ a {
     }*/
 
     .pagely-img-size {
-        width: calc(100vw - 2px);
+        width: 100vw;
     }
 
     .continue-img-size {
-        width: calc(100vw - 2px);
+        width: 100vw;
         /*        width: 99%;
         min-width: inherit;*/
     }

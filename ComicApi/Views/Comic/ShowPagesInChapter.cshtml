@@ -5,8 +5,8 @@
     Layout = "_Layout";
 }
 
-<div id="app">
-    <div class="row">
+<div id="app" v-cloak>
+    <div class="row gx-0">
         <div class="col-8">
             <h2 class="center">@Model.Caption</h2>
         </div>
@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <div v-for="chapter in state.chapters">
+    <div class="gx-0" v-for="chapter in state.chapters">
         <button class="btn btn-outline-secondary center" style="font-size: 20px;" @@click="goBack()">回上一層</button>
         <h2 style="text-align: center;">{{ chapter.currChapter.caption }}</h2>
         <div v-for="x in chapter.currChapter.pages" :id="`${chapter.chapter}_${x.pageNumber}`" class="center sapce page-info">

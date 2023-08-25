@@ -1,14 +1,18 @@
 ﻿function addCookie(key, value) {
-    document.cookie = `${key}=${value};path=/;`;
+    var dt = new Date();
+    dt.setTime(dt.getTime() + (365 * 24 * 60 * 60 * 1000)); // 最久就一年 //24 * 60 * 60 * 1000
+    document.cookie = `${key}=${value};expires=${dt.toGMTString()};path=/;`;
 }
 
 function addLoginCookie() {
+    var dt = new Date();
+    dt.setTime(dt.getTime() + (365 * 24 * 60 * 60 * 1000)); // 最久就一年 //24 * 60 * 60 * 1000
     var newuserid = document.querySelector('#userid').value;
-    document.cookie = `userid=${newuserid};path=/;`;
+    document.cookie = `userid=${newuserid};expires=${dt.toGMTString()};path=/;`;
     location.reload();
 }
 function deleteLoginCookie() {
-    document.cookie = `userid=;path=/;`;
+    document.cookie = `userid=;max-age=-1;path=/;`;
     location.reload();
 }
 

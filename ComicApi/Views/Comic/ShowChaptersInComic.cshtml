@@ -3,12 +3,12 @@
     Layout = "_Layout";
 }
 
-<div id="app">
+<div id="app" v-cloak>
     <h2 class="center">{{state.currComic?.caption}}</h2>
     <button class="btn btn-outline-primary" style="font-size: 20px;" @@click="goBack()">回上一層</button>
     <div v-if="loading" class="loader-background"><div class="loader"></div></div>
-    <div class="row row-cols-md-4 row-cols-3 gx-1 gy-1">
-        <div class="col" v-for="chapter in state.currComic?.chapters">
+    <div class="row row-cols-md-4 row-cols-3 gx-0 gy-1">
+        <div class="col gx-1" v-for="chapter in state.currComic?.chapters">
             <div style="padding:3px" class="chapter" @@click="goChapter(chapter)">
                 <span :class="{'text-primary': state.readedChapter === getRelativePath(chapter?.url)}">{{chapter?.caption}}</span>
             </div>

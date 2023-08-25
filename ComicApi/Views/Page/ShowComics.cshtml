@@ -3,7 +3,7 @@
     Layout = "_Layout";
 }
 
-<div id="app">
+<div id="app" v-cloak>
     <div style="padding:10px 0px;display: flex">
         <button class="btn btn-outline-primary" @@click="goto((state.page?.tabNumber ?? 1)+'?filter=showAll')" :disabled="queryString == '?filter=showAll'">全部</button>
         &nbsp;
@@ -31,8 +31,8 @@
         <div class="loader"></div>
     </div>
 
-    <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 gx-1">
-        <div class="col" v-for="comic in state.comics">
+    <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 gx-0">
+        <div class="col gx-1" v-for="comic in state.comics">
             <div class="card">
                 <div class="g-0 comic-info">
                     <a :href="getComicAction(comic)">
