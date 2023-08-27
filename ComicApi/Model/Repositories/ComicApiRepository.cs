@@ -11,7 +11,9 @@ public class ComicApiRepository
     public ComicApiRepository(IHostingEnvironment hostEnvironment)
     {
         var env = hostEnvironment;
-        ApiSQLiteHelper.SetDbPath(env.WebRootPath);
+        if (!Directory.Exists(Path.Combine(env.ContentRootPath, "db")))
+            Directory.CreateDirectory(Path.Combine(env.ContentRootPath, "db"));
+        ApiSQLiteHelper.SetDbPath(Path.Combine(env.ContentRootPath, "db"));
         this.CreateComicOnFly().Wait();
         this.CreateApiChapterOnFly().Wait();
         this.CreateIgnoreComicOnFly().Wait();

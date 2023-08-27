@@ -44,7 +44,9 @@
                     <button v-if="!comic.isFavorite" class="btn btn-danger btn-sm btnright" style="padding:1px 4px;" @@click="addFavoriteComic(comic)"><i class="bi bi-heart"></i></button>
                 </div>
                 <div class="card-body g-1" style="padding:3px">
-                    <p :class="{'card-title': true, 'text-primary': comic.isFavorite ,'fw-bold': comic.isFavorite, 'lh-sm':true }" style="font-size:14px;padding-top:3px">{{comic.caption}}</p>
+                    <a :href="getComicAction(comic)">
+                        <p :class="{'card-title': true, 'text-primary': comic.isFavorite ,'fw-bold': comic.isFavorite, 'lh-sm':true }" style="font-size:14px;padding-top:3px">{{comic.caption}}</p>
+                    </a>
                     <span class="card-text lh-sm center" style="font-size:14px; color:darkgray">{{comic.lastUpdateDate}}</span>
                     <span class="card-text lh-sm center" style="font-size:14px; color:darkgray">>{{comic.readedChapter}}{{comic.readedChapter?'/':''}}{{comic.lastUpdateChapter}}<</span>
                 </div>
