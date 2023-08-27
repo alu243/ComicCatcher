@@ -134,12 +134,22 @@ body {
         min-width: inherit;*/
     }
 
+
+    .page-info .prev-page {
+        position: absolute;
+        height: calc(100% - 10px);
+        width: 30%;
+        top: 5px;
+        left: 3px;
+        /*background-color:blue;*/
+    }
+
     .page-info .next-page {
         position: absolute;
         height: calc(100% - 10px);
-        width: 50%;
+        width: 55%;
         top: 5px;
-        left: calc(50% - 3px);
+        left: calc(45% - 3px);
         /*background-color: red;*/
     }
 }
