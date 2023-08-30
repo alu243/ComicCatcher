@@ -73,8 +73,16 @@ namespace ComicApi.Controllers
         public async Task<ChapterModel> ShowComicPagesInChapter(string comic, string chapter)
         {
             var comicEntity = await app.GetComic(comic);
+            if (comicEntity.Chapters.Count <= 0)
+            {
+                comicEntity.ListState = ComicState.Created;
+                await dm5.LoadChapters(comicEntity);
+            }
+
             var comicChapter = await app.GetComicChapter(comic, chapter);
             comicChapter.Pages = await app.GetComicPages(comic, chapter);
+            // 預讀下一章
+            ShowComicPagesInNextChapter(comic, chapter);
             return ComicConverter.Convert(comic, chapter, comicEntity, comicChapter);
         }
 
@@ -82,18 +90,11 @@ namespace ComicApi.Controllers
         public async Task<ChapterModel> ShowComicPagesInNextChapter(string comic, string chapter)
         {
             var comicEntity = await app.GetComic(comic);
-            if (comicEntity.Chapters.Count <= 0)
-            {
-                comicEntity.ListState = ComicState.Created;
-                await dm5.LoadChapters(comicEntity);
-            }
-            var newChapterIndex = comicEntity.Chapters.FindIndex(c => c.Url.GetUrlDirectoryName().Equals(chapter, StringComparison.CurrentCultureIgnoreCase));
+            var nextChapter = await app.GetNextChapter(comicEntity, chapter);
 
-            if (newChapterIndex <= 0) return null;
-            chapter = comicEntity.Chapters[newChapterIndex - 1].Url.GetUrlDirectoryName();
-            var comicChapter = await app.GetComicChapter(comic, chapter);
-            comicChapter.Pages = await app.GetComicPages(comic, chapter);
-            return ComicConverter.Convert(comic, chapter, comicEntity, comicChapter);
+            var comicChapter = await app.GetComicChapter(comic, nextChapter);
+            comicChapter.Pages = await app.GetComicPages(comic, nextChapter);
+            return ComicConverter.Convert(comic, nextChapter, comicEntity, comicChapter);
         }
 
         [HttpPut("{comic}/{chapter}")]

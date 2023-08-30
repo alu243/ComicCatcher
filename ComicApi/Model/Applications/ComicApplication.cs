@@ -14,6 +14,7 @@ namespace ComicApi.Controllers
         private ComicApiRepository repo;
         private IMemoryCache cache;
         private MemoryCacheEntryOptions cacheOptions;
+        private MemoryCacheEntryOptions pageCacheOptions;
 
         public ComicApplication(Dm5 comic,
             //IHostingEnvironment hostEnvironment,
@@ -26,6 +27,8 @@ namespace ComicApi.Controllers
             cache = memoryCache;
             cacheOptions = new();
             cacheOptions.SetSlidingExpiration(TimeSpan.FromMinutes(Config.CacheMinute));
+            pageCacheOptions = new();
+            pageCacheOptions.SetSlidingExpiration(TimeSpan.FromMinutes(Config.PageCacheMinute));
         }
 
         ////////public async Task<ResponseModel> DownloadComicChapter(string comic, string chapter)
@@ -127,6 +130,20 @@ namespace ComicApi.Controllers
             return comicChapter;
         }
 
+        public async Task<string> GetNextChapter(ComicEntity comicEntity, string chapter)
+        {
+            if (comicEntity.Chapters.Count <= 0)
+            {
+                comicEntity.ListState = ComicState.Created;
+                await dm5.LoadChapters(comicEntity);
+            }
+            var newChapterIndex = comicEntity.Chapters.FindIndex(c => c.Url.GetUrlDirectoryName().Equals(chapter, StringComparison.CurrentCultureIgnoreCase));
+
+            if (newChapterIndex <= 0) return string.Empty;
+            return comicEntity.Chapters[newChapterIndex - 1].Url.GetUrlDirectoryName();
+        }
+
+
         private async Task<ComicChapter> GetChapterFromComic(string comic, string chapter)
         {
             var comicEntity = await this.GetComic(comic);
@@ -147,9 +164,9 @@ namespace ComicApi.Controllers
                     comicChapter.ListState = ComicState.Created;
                     await dm5.LoadPages(comicChapter);
                     comicPages.AddRange(comicChapter.Pages);
+                    repo.SaveComicPages(comic, chapter, comicPages);
                 }
-                repo.SaveComicPages(comic, chapter, comicPages);
-                cache.Set(key, comicPages, cacheOptions);
+                cache.Set(key, comicPages, pageCacheOptions);
             }
             return comicPages;
         }

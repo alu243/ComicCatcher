@@ -178,16 +178,35 @@ COMMIT;");
 
     public async Task<bool> SaveComicPages(string comic, string chapter, List<ComicPage> pages)
     {
-        var sql = $"DELETE FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
-        await ApiSQLiteHelper.ExecuteNonQuery(sql);
-        var result = 0;
-        foreach (var page in pages)
+        await using var conn = await ApiSQLiteHelper.GetConnection();
+        await using var cmd = conn.CreateCommand();
+        await conn.OpenAsync();
+        var tran = conn.BeginTransaction();
+        cmd.Transaction = tran;
+        try
         {
-            sql = $@"INSERT OR REPLACE INTO ApiComic (Comic, Chapter, PageNumber, Caption, Url, PageFileName, Refer) VALUES
+            var sql = $"DELETE FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
+            cmd.CommandText = sql;
+            await cmd.ExecuteNonQueryAsync();
+
+            var result = 0;
+            foreach (var page in pages)
+            {
+                sql = $@"INSERT OR REPLACE INTO ApiComic (Comic, Chapter, PageNumber, Caption, Url, PageFileName, Refer) VALUES
     ('{comic}', '{chapter}', {page.PageNumber}, '{page.Caption}', '{page.Url}', '{page.PageFileName}', '{page.Refer}');";
-            result += await ApiSQLiteHelper.ExecuteNonQuery(sql);
+
+                cmd.CommandText = sql;
+                result += await cmd.ExecuteNonQueryAsync();
+            }
+            await tran.CommitAsync();
+            return result == pages.Count;
         }
-        return result > 0;
+        catch (Exception e)
+        {
+            await tran.RollbackAsync();
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task<string> GetLocalPath(string comic, string chapter)
