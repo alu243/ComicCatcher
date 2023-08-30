@@ -11,5 +11,6 @@ namespace ComicApi
         public static string GetDbPath() => "volume/comic";
 
         public static int CacheMinute => 5;
+        public static int PageCacheMinute => 30;
     }
 }
