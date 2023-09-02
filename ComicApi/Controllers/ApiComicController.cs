@@ -73,16 +73,11 @@ namespace ComicApi.Controllers
         public async Task<ChapterModel> ShowComicPagesInChapter(string comic, string chapter)
         {
             var comicEntity = await app.GetComic(comic);
-            if (comicEntity.Chapters.Count <= 0)
-            {
-                comicEntity.ListState = ComicState.Created;
-                await dm5.LoadChapters(comicEntity);
-            }
+            var comicChapter = await app.GetComicChapterWithPage(comic, chapter);
 
-            var comicChapter = await app.GetComicChapter(comic, chapter);
-            comicChapter.Pages = await app.GetComicPages(comic, chapter);
             // 預讀下一章
-            ShowComicPagesInNextChapter(comic, chapter);
+            var nextChapter = await app.GetNextChapter(comicEntity, chapter);
+            app.GetComicChapterWithPage(comic, nextChapter);
             return ComicConverter.Convert(comic, chapter, comicEntity, comicChapter);
         }
 
@@ -91,24 +86,20 @@ namespace ComicApi.Controllers
         {
             var comicEntity = await app.GetComic(comic);
             var nextChapter = await app.GetNextChapter(comicEntity, chapter);
+            var comicChapter = await app.GetComicChapterWithPage(comic, nextChapter);
 
-            var comicChapter = await app.GetComicChapter(comic, nextChapter);
-            comicChapter.Pages = await app.GetComicPages(comic, nextChapter);
-            if (comicChapter?.Pages?.Count > 0)
-            {
-                // 預讀下一章
-                ShowComicPagesInNextChapter(comic, chapter);
-            }
+            // 預讀下下一章
+            var nextnextChapter = await app.GetNextChapter(comicEntity, nextChapter);
+            app.GetComicChapterWithPage(comic, nextnextChapter);
+
             return ComicConverter.Convert(comic, nextChapter, comicEntity, comicChapter);
         }
 
         [HttpPut("{comic}/{chapter}")]
         public async Task<ChapterModel> ReloadComicPagesInChapter(string comic, string chapter)
         {
-            var comicChapter = await app.GetComicChapter(comic, chapter);
-            comicChapter.Pages.Clear();
-            comicChapter.Pages = await app.ReloadComicPages(comic, chapter);
             var comicEntity = await app.GetComic(comic);
+            var comicChapter = await app.GetChapterAndReloadComicPages(comic, chapter);
             return ComicConverter.Convert(comic, chapter, comicEntity, comicChapter);
         }
         #endregion

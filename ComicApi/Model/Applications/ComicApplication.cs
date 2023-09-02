@@ -116,7 +116,14 @@ namespace ComicApi.Controllers
             return comicEntity;
         }
 
-        public async Task<ComicChapter> GetComicChapter(string comic, string chapter)
+        public async Task<ComicChapter> GetComicChapterWithPage(string comic, string chapter)
+        {
+            var comicChapter = await this.GetComicChapter(comic, chapter);
+            comicChapter.Pages = await this.GetComicPages(comic, chapter);
+            return comicChapter;
+        }
+
+        private async Task<ComicChapter> GetComicChapter(string comic, string chapter)
         {
             string key = $"comic_{comic}_chatper_{chapter}";
             if (!cache.TryGetValue(key, out ComicChapter comicChapter))
@@ -171,10 +178,13 @@ namespace ComicApi.Controllers
             return comicPages;
         }
 
-        public async Task<List<ComicPage>> ReloadComicPages(string comic, string chapter)
+        public async Task<ComicChapter> GetChapterAndReloadComicPages(string comic, string chapter)
         {
+            var comicChapter = await this.GetComicChapter(comic, chapter);
+            comicChapter.Pages.Clear();
             await this.repo.DeleteComicPages(comic, chapter);
-            return await this.GetComicPages(comic, chapter);
+            comicChapter.Pages = await this.GetComicPages(comic, chapter);
+            return comicChapter;
         }
 
 
