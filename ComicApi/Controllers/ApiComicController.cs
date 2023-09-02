@@ -94,6 +94,11 @@ namespace ComicApi.Controllers
 
             var comicChapter = await app.GetComicChapter(comic, nextChapter);
             comicChapter.Pages = await app.GetComicPages(comic, nextChapter);
+            if (comicChapter?.Pages?.Count > 0)
+            {
+                // 預讀下一章
+                ShowComicPagesInNextChapter(comic, chapter);
+            }
             return ComicConverter.Convert(comic, nextChapter, comicEntity, comicChapter);
         }
 
