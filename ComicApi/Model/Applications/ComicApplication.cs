@@ -159,7 +159,7 @@ namespace ComicApi.Controllers
             return comicChapter;
         }
 
-        public async Task<List<ComicPage>> GetComicPages(string comic, string chapter)
+        private async Task<List<ComicPage>> GetComicPages(string comic, string chapter)
         {
             string key = $"comic_{comic}_chatper_{chapter}_pages";
             if (!cache.TryGetValue(key, out List<ComicPage> comicPages) || comicPages.Count <= 0)
