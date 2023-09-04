@@ -84,13 +84,15 @@ namespace ComicApi.Controllers
             if (!cache.TryGetValue(key, out ComicPagination pagination))
             {
                 pagination = dm5.GetRoot().Paginations[page - 1];
+                pagination.ListState = ComicState.Created;
                 await dm5.LoadComicsForWeb(pagination);
                 repo.SaveComics(pagination.Comics);
                 cache.Set(key, pagination, cacheOptions);
             }
-            else if (pagination.ListState != ComicState.ListLoaded)
+
+            if (pagination.ListState != ComicState.ListLoaded)
             {
-                pagination.ListState = ComicState.ListLoaded;
+                pagination.ListState = ComicState.Created;
                 await dm5.LoadComicsForWeb(pagination);
                 repo.SaveComics(pagination.Comics);
                 cache.Set(key, pagination, cacheOptions);

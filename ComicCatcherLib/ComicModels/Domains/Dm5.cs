@@ -188,7 +188,7 @@ public class Dm5 : IComicCatcher
         }).Where(c => c != null).ToList();
 
         pagination.Comics.AddRange(results);
-        pagination.ListState = ComicState.Created;
+        pagination.ListState = ComicState.ListLoaded;
     }
 
     private async Task LoadIconImage(ComicEntity comic)
