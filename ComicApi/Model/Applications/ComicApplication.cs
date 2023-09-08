@@ -1,4 +1,5 @@
-﻿using ComicApi.Model.Repositories;
+﻿using ComicApi.Model;
+using ComicApi.Model.Repositories;
 using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.ComicModels.Domains;
@@ -189,6 +190,29 @@ namespace ComicApi.Controllers
             return comicChapter;
         }
 
+        public async Task<List<ComicViewModel>> GetComicsAreFavorite(string userId)
+        {
+            var comics = await this.repo.GetComicsAreFavorite(userId);
+            var nullComics = comics.Where(c => string.IsNullOrEmpty(c.Url)).ToList();
+            var comicEntities = new List<ComicEntity>();
+            foreach (var nullComic in nullComics)
+            {
+                var comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{nullComic.Comic}/");
+                nullComic.Caption = comicEntity.Caption;
+                nullComic.IconUrl = comicEntity.IconUrl;
+                nullComic.Url = comicEntity.Url;
+                nullComic.LastUpdateChapter = comicEntity.LastUpdateChapter;
+                nullComic.LastUpdateDate = comicEntity.LastUpdateDate;
+                //nullComic.Comic = nullComic.Comic;
+                //nullComic.IsFavorite = true;
+                //nullComic.IsIgnore = false;
+                //nullComic.ReadedChapter = nullComic.ReadedChapter;
+                comicEntities.Add(comicEntity);
+            }
+            this.repo.SaveComics(comicEntities);
+            return comics;
+        }
+
 
         public async Task<bool> AddFavoriteComic(FavoriteComic request)
         {
@@ -234,7 +258,6 @@ namespace ComicApi.Controllers
         {
             return await this.repo.GetFavoriteChapters(userId);
         }
-
     }
 }
 

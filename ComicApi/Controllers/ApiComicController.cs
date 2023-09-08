@@ -1,7 +1,6 @@
 ﻿using ComicApi.Model;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.ComicModels.Domains;
-using ComicCatcherLib.Utils;
 using Microsoft.AspNetCore.Mvc;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 

@@ -15,6 +15,7 @@ namespace ComicApi.Model
 
     public class ComicViewModel
     {
+        public string Comic { get; set; }
         public string Url { get; set; }
         public string Caption { get; set; }
         public string IconUrl { get; set; }

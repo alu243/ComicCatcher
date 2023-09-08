@@ -1,0 +1,89 @@
+﻿@{
+    ViewBag.Title = "Favorites";
+    Layout = "_Layout";
+}
+
+<div id="app" v-cloak>
+    <br />
+    <div v-if="loading" class="loader-background">
+        <div class="loader"></div>
+    </div>
+
+    <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 gx-0">
+        <div class="col gx-1" v-for="comic in state.comics">
+            <div class="card">
+                <div class="g-0 comic-info">
+                    <a :href="getComicAction(comic)">
+                        <img style="width:100%" :src="comic.iconUrl" />
+                    </a>
+                </div>
+                <div class="card-body g-1" style="padding:3px">
+                    <a :href="getComicAction(comic)">
+                        <p :class="{'card-title': true, 'text-primary': comic.isFavorite ,'fw-bold': comic.isFavorite, 'lh-sm':true }" style="font-size:14px;padding-top:3px">{{comic.caption}}</p>
+                    </a>
+                    <span class="card-text lh-sm center" style="font-size:14px; color:darkgray">{{comic.lastUpdateDate}}</span>
+                    <span class="card-text lh-sm center" style="font-size:14px; color:darkgray">>{{comic.readedChapter}}{{comic.readedChapter?'/':''}}{{comic.lastUpdateChapter}}<</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br />
+    <br />
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+        const { createApp, onMounted, onBeforeUnmount, reactive, ref } = Vue;
+        const app = createApp({
+            setup() {
+                const state = reactive({
+                    comics: null,
+                });
+                const loading = ref(true);
+
+                const pathArray = window.location.pathname.split('/');
+                const page = pathArray[pathArray.length - 1];
+
+                onMounted(async () => {
+                    await loadFavorites();
+                    //setTimeout(() => { window.scrollTo(0, 1); }, 1500);
+                });
+
+                async function loadFavorites() {
+                    const response = await fetch(`/api/favoritecomic`);
+                    const favoriteComics = await response.json();
+                    state.comics = favoriteComics?.comics;
+
+                    setTimeout(() => loading.value = false, 100);
+                }
+
+                function getComic(url) {
+                    url = url.trim().replace(/\/$/g, '');
+                    const pathArray = url.split('/');
+                    const comic = pathArray[pathArray.length - 1];
+                    return comic;
+                }
+
+                function getComicAction(comic) {
+                    const c = getComic(comic.url);
+                    return `../comic/${c}`;
+                }
+
+                function goto(url) {
+                    location.href = url;
+                }
+
+                return {
+                    goto,
+                    state,
+                    loading,
+                    getComicAction
+                }
+            }
+        });
+        app.mount('#app');
+        console.log("start app", app);
+    </script>
+}

@@ -3,10 +3,10 @@
 namespace ComicApi.Controllers
 {
     [Route("[controller]")]
-    public class PageController : Controller
+    public class FavoriteController : Controller
     {
-        [HttpGet("{page}")]
-        public async Task<IActionResult> ShowComics(int page)
+        [HttpGet]
+        public async Task<IActionResult> ShowComics()
         {
             return View("ShowComics");
         }

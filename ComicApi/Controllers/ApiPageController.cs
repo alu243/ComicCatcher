@@ -48,7 +48,8 @@ public class ApiPageController : Controller
                 f.Comic.Equals(c.Url.GetUrlDirectoryName(), StringComparison.CurrentCultureIgnoreCase))?.ChapterName ?? "",
             LastUpdateChapter = c.LastUpdateChapter,
             LastUpdateDate = c.LastUpdateDate,
-            Url = c.Url
+            Url = c.Url,
+            Comic = c.Url.GetUrlDirectoryName(),
         }).ToList();
 
         if (string.IsNullOrEmpty(userId) ||

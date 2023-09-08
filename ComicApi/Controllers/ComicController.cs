@@ -1,11 +1,4 @@
-﻿using ComicApi.Model;
-using ComicApi.Model.Repositories;
-using ComicCatcherLib.ComicModels;
-using ComicCatcherLib.ComicModels.Domains;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
-using System.Text;
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace ComicApi.Controllers
 {

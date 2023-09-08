@@ -2,6 +2,7 @@
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.DbModel;
 using System.Data;
+using ComicCatcherLib.Utils;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace ComicApi.Model.Repositories;
@@ -325,6 +326,37 @@ COMMIT;");
                 UserId = row.GetValue<string>("UserId")?.Trim(),
             };
             list.Add(favorite);
+        }
+        return list;
+    }
+
+    public async Task<List<ComicViewModel>> GetComicsAreFavorite(string userId)
+    {
+        var sql = @$"SELECT f.Comic, c.Caption, c.Url, c.IconUrl, c.ListState, 
+                    c.LastUpdateChapter, c.LastUpdateDate
+                    FROM UserFavoriteComic f
+                    LEFT JOIN ApiComic c on f.Comic = c.Comic WHERE f.UserId = '{userId}'
+                    ORDER BY c.LastUpdateDate DESC";
+        var result = await ApiSQLiteHelper.GetTable(sql);
+        var list = new List<ComicViewModel>();
+        var chapters = await this.GetFavoriteChapters(userId);
+        foreach (DataRow row in result.Rows)
+        {
+            var comic = new ComicViewModel()
+            {
+                Comic = row.GetValue<string>("Comic"),
+                Url = row.GetValue<string>("Url"),
+                Caption = row.GetValue<string>("Caption"),
+                IconUrl = row.GetValue<string>("IconUrl"),
+                LastUpdateChapter = row.GetValue<string>("LastUpdateChapter"),
+                LastUpdateDate = row.GetValue<string>("LastUpdateDate"),
+                IsFavorite = true,
+                IsIgnore = false,
+                ReadedChapter = null,
+            };
+            var favoriteChapter = chapters.FirstOrDefault(chapter => chapter.Comic.Equals(comic.Comic, StringComparison.CurrentCultureIgnoreCase));
+            comic.ReadedChapter = favoriteChapter?.ChapterName ?? "";
+            list.Add(comic);
         }
         return list;
     }

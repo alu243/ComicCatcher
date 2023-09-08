@@ -233,7 +233,42 @@ public class Dm5 : IComicCatcher
         //<p class="zl"> 17分钟前更新 </p>
         //Regex rLastUpdateDate = new Regex(@"\d{4}年\d{1,2}月\d{1,2}日：", RegexOptions.Compiled);
         Regex rLastUpdateDate = new Regex(@"<p class=""zl"">(.|\n)*?</p>", RegexOptions.Compiled);
-        return rLastUpdateDate.Match(matchedData).Value.Replace(@"<p class=""zl"">", "").Replace("</p>", "").Trim();
+        var lastUpdateDate = rLastUpdateDate.Match(matchedData).Value.Replace(@"<p class=""zl"">", "").Replace("</p>", "").Trim();
+        lastUpdateDate = lastUpdateDate.Replace("更新", "").Trim();
+        DateTime lastTime;
+        if (DateTime.TryParse(lastUpdateDate, out lastTime))
+        {
+            return lastTime.ToString("yyyy/MM/dd");
+        }
+
+        if (DateTime.TryParseExact(DateTime.Now.Year + "年" + lastUpdateDate, "yyyy年MM月dd号", null,
+                System.Globalization.DateTimeStyles.None, out lastTime))
+        {
+            return lastTime.ToString("yyyy/MM/dd");
+        }
+
+        var now = DateTime.UtcNow.AddHours(8); // GMT+8
+        if (lastUpdateDate.Contains("前天"))
+        {
+            return now.AddDays(-2).ToString("yyyy/MM/dd") + " " + lastUpdateDate.Replace("前天", "").Trim() + ":00";
+        }
+        if (lastUpdateDate.Contains("昨天"))
+        {
+            return now.AddDays(-1).ToString("yyyy/MM/dd") + " " + lastUpdateDate.Replace("昨天", "").Trim() + ":00";
+        }
+        if (lastUpdateDate.Contains("今天"))
+        {
+            return now.ToString("yyyy/MM/dd") + " " + lastUpdateDate.Replace("今天", "").Trim() + ":00";
+        }
+
+        if (lastUpdateDate.Contains("分钟前更新"))
+        {
+            if (int.TryParse(lastUpdateDate.Replace("分钟前更新", "").Trim(), out int minute))
+            {
+                now.AddMinutes(-minute).ToString("yyyy/MM/dd HH:mm:ss");
+            }
+        }
+        return lastUpdateDate;
     }
 
     private string RetriveComicName_LastUpdateInfo(string matchedData)
