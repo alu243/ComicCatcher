@@ -332,8 +332,8 @@ COMMIT;");
 
     public async Task<List<ComicViewModel>> GetComicsAreFavorite(string userId)
     {
-        var sql = @$"SELECT distinct f.Comic, c.Caption, c.Url, c.IconUrl, c.ListState, 
-                    c.LastUpdateChapter, c.LastUpdateDate
+        var sql = @$"SELECT distinct f.Comic, IFNULL(c.Caption, '') Caption, IFNULL(c.Url, '') Url, IFNULL(c.IconUrl, '') IconUrl, IFNULL(c.ListState, 0) ListState, 
+                    IFNULL(c.LastUpdateChapter, '') LastUpdateChapter, IFNULL(c.LastUpdateDate, '') LastUpdateDate
                     FROM UserFavoriteComic f
                     LEFT JOIN ApiComic c on f.Comic = c.Comic WHERE f.UserId = '{userId}'
                     ORDER BY c.LastUpdateDate DESC";
@@ -349,8 +349,8 @@ COMMIT;");
 
     public async Task<List<ComicViewModel>> GetAllComicsAreFavorite()
     {
-        var sql = @$"SELECT distinct f.Comic, c.Caption, c.Url, c.IconUrl, c.ListState, 
-                    c.LastUpdateChapter, c.LastUpdateDate
+        var sql = @$"SELECT distinct f.Comic, IFNULL(c.Caption, '') Caption, IFNULL(c.Url, '') Url, IFNULL(c.IconUrl, '') IconUrl, IFNULL(c.ListState, 0) ListState, 
+                    IFNULL(c.LastUpdateChapter, '') LastUpdateChapter, IFNULL(c.LastUpdateDate, '') LastUpdateDate
                     FROM UserFavoriteComic f
                     LEFT JOIN ApiComic c on f.Comic = c.Comic
                     ORDER BY c.LastUpdateDate DESC";
