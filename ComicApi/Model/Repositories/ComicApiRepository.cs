@@ -332,7 +332,7 @@ COMMIT;");
 
     public async Task<List<ComicViewModel>> GetComicsAreFavorite(string userId)
     {
-        var sql = @$"SELECT f.Comic, c.Caption, c.Url, c.IconUrl, c.ListState, 
+        var sql = @$"SELECT distinct f.Comic, c.Caption, c.Url, c.IconUrl, c.ListState, 
                     c.LastUpdateChapter, c.LastUpdateDate
                     FROM UserFavoriteComic f
                     LEFT JOIN ApiComic c on f.Comic = c.Comic WHERE f.UserId = '{userId}'
@@ -349,7 +349,7 @@ COMMIT;");
 
     public async Task<List<ComicViewModel>> GetAllComicsAreFavorite()
     {
-        var sql = @$"SELECT f.Comic, c.Caption, c.Url, c.IconUrl, c.ListState, 
+        var sql = @$"SELECT distinct f.Comic, c.Caption, c.Url, c.IconUrl, c.ListState, 
                     c.LastUpdateChapter, c.LastUpdateDate
                     FROM UserFavoriteComic f
                     LEFT JOIN ApiComic c on f.Comic = c.Comic
