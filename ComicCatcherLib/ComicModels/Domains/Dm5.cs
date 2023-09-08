@@ -104,7 +104,7 @@ public class Dm5 : IComicCatcher
         {
             IconUrl = rTitle_IconUrl.Match(title).Value.Replace(@"<img src=", "").Trim('"').Trim(),
             // 取得最近更新日期
-            LastUpdateDate = CharsetConvertUtil.ToTraditional(rLastUpdate_Date.Match(lastUpdate).Value.Replace("</a>&nbsp;", "").Trim('<').Trim()),
+            LastUpdateDate = Parse_LastUpdateDate(rLastUpdate_Date.Match(lastUpdate).Value.Replace("</a>&nbsp;", "").Trim('<').Trim()),
             // 取得最近更新回數
             LastUpdateChapter = CharsetConvertUtil.ToTraditional(rLastUpdate_Chapter.Match(lastUpdate).Value.Replace("title=", "").Trim('"').Trim()),
             Caption = caption.TrimEscapeString(),
@@ -234,6 +234,12 @@ public class Dm5 : IComicCatcher
         //Regex rLastUpdateDate = new Regex(@"\d{4}年\d{1,2}月\d{1,2}日：", RegexOptions.Compiled);
         Regex rLastUpdateDate = new Regex(@"<p class=""zl"">(.|\n)*?</p>", RegexOptions.Compiled);
         var lastUpdateDate = rLastUpdateDate.Match(matchedData).Value.Replace(@"<p class=""zl"">", "").Replace("</p>", "").Trim();
+        lastUpdateDate = Parse_LastUpdateDate(lastUpdateDate);
+        return lastUpdateDate;
+    }
+
+    private string Parse_LastUpdateDate(string lastUpdateDate)
+    {
         lastUpdateDate = lastUpdateDate.Replace("更新", "").Trim();
         DateTime lastTime;
         if (DateTime.TryParse(lastUpdateDate, out lastTime))

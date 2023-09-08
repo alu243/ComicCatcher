@@ -15,7 +15,7 @@ namespace ComicApi.Model.Jobs
         }
         public Task Execute(IJobExecutionContext context)
         {
-            Console.WriteLine($"Hello World! {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            this.app.RefreshAllComicsAreFavorite();
             return Task.CompletedTask;
         }
     }

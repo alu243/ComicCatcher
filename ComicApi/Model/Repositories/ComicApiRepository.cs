@@ -337,9 +337,32 @@ COMMIT;");
                     FROM UserFavoriteComic f
                     LEFT JOIN ApiComic c on f.Comic = c.Comic WHERE f.UserId = '{userId}'
                     ORDER BY c.LastUpdateDate DESC";
+        var results = await this.GetComicViews(sql);
+        var chapters = await this.GetFavoriteChapters(userId);
+        foreach (var comic in results)
+        {
+            var favoriteChapter = chapters.FirstOrDefault(chapter => chapter.Comic.Equals(comic.Comic, StringComparison.CurrentCultureIgnoreCase));
+            comic.ReadedChapter = favoriteChapter?.ChapterName ?? "";
+        }
+        return results;
+    }
+
+    public async Task<List<ComicViewModel>> GetAllComicsAreFavorite()
+    {
+        var sql = @$"SELECT f.Comic, c.Caption, c.Url, c.IconUrl, c.ListState, 
+                    c.LastUpdateChapter, c.LastUpdateDate
+                    FROM UserFavoriteComic f
+                    LEFT JOIN ApiComic c on f.Comic = c.Comic
+                    ORDER BY c.LastUpdateDate DESC";
+        var results = await this.GetComicViews(sql);
+        results = results.GroupBy(r => r.Comic).Select(g => g.First()).ToList();
+        return results;
+    }
+
+    private async Task<List<ComicViewModel>> GetComicViews(string sql)
+    {
         var result = await ApiSQLiteHelper.GetTable(sql);
         var list = new List<ComicViewModel>();
-        var chapters = await this.GetFavoriteChapters(userId);
         foreach (DataRow row in result.Rows)
         {
             var comic = new ComicViewModel()
@@ -354,8 +377,6 @@ COMMIT;");
                 IsIgnore = false,
                 ReadedChapter = null,
             };
-            var favoriteChapter = chapters.FirstOrDefault(chapter => chapter.Comic.Equals(comic.Comic, StringComparison.CurrentCultureIgnoreCase));
-            comic.ReadedChapter = favoriteChapter?.ChapterName ?? "";
             list.Add(comic);
         }
         return list;

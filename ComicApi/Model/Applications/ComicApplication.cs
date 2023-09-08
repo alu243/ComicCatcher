@@ -213,6 +213,20 @@ namespace ComicApi.Controllers
             return comics;
         }
 
+        public async Task<List<ComicViewModel>> RefreshAllComicsAreFavorite()
+        {
+            var comics = await this.repo.GetAllComicsAreFavorite();
+            var comicEntities = new List<ComicEntity>();
+            foreach (var comic in comics)
+            {
+                var comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
+                comicEntities.Add(comicEntity);
+            }
+            await this.repo.SaveComics(comicEntities);
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comics.Count} comics are refreshed");
+            return comics;
+        }
+
 
         public async Task<bool> AddFavoriteComic(FavoriteComic request)
         {

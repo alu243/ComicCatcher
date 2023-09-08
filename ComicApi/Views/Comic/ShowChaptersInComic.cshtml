@@ -77,7 +77,11 @@
                 const goBack = function () {
                     var page = getCookie("currentPage");
                     if (!page || page == undefined) page = state.page;
-                    location.href = `/page/${page}`;
+                    if (page === "favorite") {
+                        location.href = `/favorite`;
+                    } else {
+                        location.href = `/page/${page}`;
+                    }
                 }
 
                 return {
