@@ -228,7 +228,11 @@ namespace ComicCatcher
 
                 txtUrl.Text = tvComicTree.SelectedNode.Name;
                 lblUpdateDate.Text = comic.LastUpdateDate.Replace("今天", today).Replace("昨天", yestoday).Replace("前天", beforeYestoday);
-                if (lblUpdateDate.Text.Contains("分钟前更新"))
+                if (lblUpdateDate.Text.Contains("分钟前"))
+                {
+                    lblUpdateDate.Text = today + lblUpdateDate.Text;
+                }
+                if (lblUpdateDate.Text.Contains("分钟"))
                 {
                     lblUpdateDate.Text = today + lblUpdateDate.Text;
                 }

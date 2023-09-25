@@ -274,6 +274,13 @@ public class Dm5 : IComicCatcher
                 now.AddMinutes(-minute).ToString("yyyy/MM/dd HH:mm:ss");
             }
         }
+        if (lastUpdateDate.Contains("分钟前"))
+        {
+            if (int.TryParse(lastUpdateDate.Replace("分钟前", "").Trim(), out int minute))
+            {
+                now.AddMinutes(-minute).ToString("yyyy/MM/dd HH:mm:ss");
+            }
+        }
         return lastUpdateDate;
     }
 
