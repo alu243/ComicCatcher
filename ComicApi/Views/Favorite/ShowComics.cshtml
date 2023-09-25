@@ -4,7 +4,14 @@
 }
 
 <div id="app" v-cloak>
-    <br />
+    <div style="padding:10px 0px;display: flex">
+        <button class="btn btn-outline-primary" @@click="goto('?filter=notreaded')" :disabled="queryString == '?filter=notreaded'">未讀</button>
+        &nbsp;
+        <button class="btn btn-outline-primary" @@click="goto('')" :disabled="queryString == ''">預設</button>
+        &nbsp;&nbsp;
+        <button class="btn btn-outline-success" @@click="goto('/page/1')">到分頁區</button>
+    </div>
+
     <div v-if="loading" class="loader-background">
         <div class="loader"></div>
     </div>
@@ -43,6 +50,8 @@
                 });
                 const loading = ref(true);
 
+                const queryString = ref(window.location.search);
+
                 const pathArray = window.location.pathname.split('/');
                 const page = pathArray[pathArray.length - 1];
 
@@ -52,7 +61,12 @@
                 });
 
                 async function loadFavorites() {
-                    const response = await fetch(`/api/favoritecomic`);
+                    let level = "";
+                    if (page != 'favorite') {
+                        level = `/${page}`
+                    }
+
+                    const response = await fetch(`/api/favoritecomic${level}${queryString.value}`);
                     const favoriteComics = await response.json();
                     state.comics = favoriteComics?.comics;
 
@@ -74,13 +88,18 @@
                 }
 
                 function goto(url) {
-                    location.href = url;
+                    if (url) {
+                        location.href = url;
+                    } else {
+                        location.href = location.toString().replace(location.search, url);
+                    }
                 }
 
                 return {
                     goto,
                     state,
                     loading,
+                    queryString,
                     getComicAction
                 }
             }

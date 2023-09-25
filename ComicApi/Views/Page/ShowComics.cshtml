@@ -14,6 +14,8 @@
         <select class="form-select" style="width:80px" @@change="goto($event.target.value + queryString)">
             <option v-for="page in state.pages" :value="page.tabNumber" :selected="page.tabNumber === state.page?.tabNumber">{{page.tabNumber}}</option>
         </select>
+        &nbsp;&nbsp;
+        <button class="btn btn-outline-success" @@click="goto('/favorite')">到最愛區</button>
     </div>
     <nav class="center">
         <ul class="pagination">

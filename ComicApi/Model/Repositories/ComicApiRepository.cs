@@ -3,6 +3,7 @@ using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.DbModel;
 using System.Data;
 using ComicCatcherLib.Utils;
+using Quartz.Impl.Matchers;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace ComicApi.Model.Repositories;
@@ -19,6 +20,7 @@ public class ComicApiRepository
         this.CreateApiChapterOnFly().Wait();
         this.CreateIgnoreComicOnFly().Wait();
         this.CreateFavoriteComicOnFly().Wait();
+        this.CreateFavoriteComicLevelOnFly().Wait();
         this.CreateFavoriteChapterOnFly().Wait();
     }
 
@@ -273,11 +275,25 @@ CREATE TABLE IF NOT EXISTS UserFavoriteComic(
 UserId NVARCHAR(20) not NULL,
 Comic NVARCHAR(200) not NULL,
 ComicName NVARCHAR(50) not NULL,
-IconUrl NVARCHAR(200) not NULL);
+IconUrl NVARCHAR(200) not NULL,
+Level INT not NULL DEFAULT 1);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_UserFavoriteComic ON UserFavoriteComic (UserId, Comic);
 COMMIT;");
     }
 
+    private async Task CreateFavoriteComicLevelOnFly()
+    {
+        string sql = "SELECT Level FROM UserFavoriteComic limit 1";
+        try
+        {
+            await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        }
+        catch (Exception a)
+        {
+            sql = "ALTER TABLE UserFavoriteComic ADD Level INT NOT NULL DEFAULT 1;";
+            await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        }
+    }
     private async Task CreateFavoriteChapterOnFly()
     {
         await ApiSQLiteHelper.ExecuteNonQuery(@"
@@ -311,9 +327,10 @@ COMMIT;");
         return result > 0;
     }
 
-    public async Task<List<FavoriteComic>> GetFavoriteComics(string userId)
+    public async Task<List<FavoriteComic>> GetFavoriteComics(string userId, int? level = null)
     {
         var sql = $"SELECT * FROM UserFavoriteComic WHERE UserId = '{userId}'";
+        if (level != null) sql += $" AND Level = {level}";
         var result = await ApiSQLiteHelper.GetTable(sql);
         var list = new List<FavoriteComic>();
         foreach (DataRow row in result.Rows)
