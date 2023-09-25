@@ -22,6 +22,8 @@ namespace ComicApi.Model
         public string LastUpdateDate { get; set; }
         public string LastUpdateChapter { get; set; }
         public string ReadedChapter { get; set; }
+        public string LastUpdateChapterLink { get; set; }
+        public string ReadedChapterLink { get; set; }
         public bool IsIgnore { get; set; }
         public bool IsFavorite { get; set; }
     }

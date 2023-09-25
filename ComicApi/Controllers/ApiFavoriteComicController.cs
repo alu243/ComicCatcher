@@ -21,13 +21,12 @@ namespace ComicApi.Controllers
         public async Task<FavoriteComicModel> GetComicsAreFavorite(int? level, string? filter)
         {
             var userId = Request.Cookies["userid"] ?? "";
-            var comics =  await app.GetComicsAreFavorite(userId);
+            var comics = await app.GetComicsAreFavorite(userId);
             if (true == filter?.Equals("notreaded", StringComparison.CurrentCultureIgnoreCase))
             {
-                //comics = comics.Where(c =>
-                //{
-                //    return true;
-                //});
+                // todo:已讀功能的簡易(比對名稱)先作一下
+                // 之後再作比對連結
+                comics = comics.Where(c => c.LastUpdateChapter != c.ReadedChapter).ToList();
             }
             return new FavoriteComicModel()
             {
