@@ -34,7 +34,7 @@ builder.Services.AddQuartz(quartz =>
     {
         opts.ForJob(jobKey);
         opts.WithIdentity("HelloWordTrigger", "HelloWordGroup");
-        opts.WithSimpleSchedule(x => x.WithIntervalInMinutes(40).RepeatForever());
+        opts.WithSimpleSchedule(x => x.WithIntervalInMinutes(45).RepeatForever());
     });
 });
 

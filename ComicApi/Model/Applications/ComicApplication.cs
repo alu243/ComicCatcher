@@ -193,6 +193,7 @@ namespace ComicApi.Controllers
         public async Task<List<ComicViewModel>> GetComicsAreFavorite(string userId)
         {
             var comics = await this.repo.GetComicsAreFavorite(userId);
+            // nullComics = 有記 favorite 但沒有記 comic
             var nullComics = comics.Where(c => string.IsNullOrEmpty(c.Url)).ToList();
             var comicEntities = new List<ComicEntity>();
             foreach (var nullComic in nullComics)
@@ -220,9 +221,10 @@ namespace ComicApi.Controllers
             foreach (var comic in comics)
             {
                 var comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
+                await dm5.LoadChapters(comicEntity);
                 comicEntities.Add(comicEntity);
             }
-            await this.repo.SaveComics(comicEntities);
+            await this.repo.SaveComics(comicEntities, true);
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comics.Count} comics are refreshed");
             return comics;
         }

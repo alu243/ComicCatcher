@@ -24,9 +24,9 @@ namespace ComicApi.Controllers
             var comics = await app.GetComicsAreFavorite(userId);
             if (true == filter?.Equals("notreaded", StringComparison.CurrentCultureIgnoreCase))
             {
-                // todo:已讀功能的簡易(比對名稱)先作一下
-                // 之後再作比對連結
-                comics = comics.Where(c => c.LastUpdateChapter != c.ReadedChapter).ToList();
+                comics = comics.Where(c => 
+                    string.IsNullOrWhiteSpace(c.LastUpdateChapterLink) || 
+                    c.LastUpdateChapterLink != c.ReadedChapterLink).ToList();
             }
             return new FavoriteComicModel()
             {

@@ -5,6 +5,7 @@ using System.Data;
 using ComicCatcherLib.Utils;
 using Quartz.Impl.Matchers;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+using ComicCatcherLib.ComicModels.Domains;
 
 namespace ComicApi.Model.Repositories;
 
@@ -17,6 +18,7 @@ public class ComicApiRepository
             Directory.CreateDirectory(Path.Combine(env.ContentRootPath, "db"));
         ApiSQLiteHelper.SetDbPath(Path.Combine(env.ContentRootPath, "db"));
         this.CreateComicOnFly().Wait();
+        this.CreateComicLastUpdateChapterLinkOnFly().Wait();
         this.CreateApiChapterOnFly().Wait();
         this.CreateIgnoreComicOnFly().Wait();
         this.CreateFavoriteComicOnFly().Wait();
@@ -35,9 +37,24 @@ Url NVARCHAR(200) not NULL,
 IconUrl NVARCHAR(200) not NULL,
 ListState INT no NULL,
 LastUpdateChapter NVARCHAR(100),
+LastUpdateChapterLink NVARCHAR(100),
 LastUpdateDate NVARCHAR(100),
 UNIQUE (Comic) ON CONFLICT REPLACE
 );");
+    }
+
+    private async Task CreateComicLastUpdateChapterLinkOnFly()
+    {
+        string sql = "SELECT LastUpdateChapterLink FROM ApiComic limit 1";
+        try
+        {
+            await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        }
+        catch (Exception a)
+        {
+            sql = "ALTER TABLE ApiComic ADD LastUpdateChapterLink NVARCHAR(100);";
+            await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        }
     }
 
     public async Task<ComicEntity> GetComic(string comic)
@@ -59,7 +76,7 @@ UNIQUE (Comic) ON CONFLICT REPLACE
         };
     }
 
-    public async Task<bool> SaveComics(List<ComicEntity> comics)
+    public async Task<bool> SaveComics(List<ComicEntity> comics, bool updateLastChapterLink = false)
     {
         var result = 0;
 
@@ -73,9 +90,18 @@ UNIQUE (Comic) ON CONFLICT REPLACE
         {
             foreach (var comic in comics)
             {
+                var lastUpdateChapterLink = comic.Chapters?.FirstOrDefault()?.Url?.GetUrlDirectoryName() ?? "";
                 var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
-                sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
+                if (updateLastChapterLink)
+                {
+                    sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateChapterLink, LastUpdateDate) VALUES 
+('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{lastUpdateChapterLink}', '{comic.LastUpdateDate}');";
+                }
+                else
+                {
+                    sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
 ('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}');";
+                }
                 cmd.CommandText = sql;
                 result += await cmd.ExecuteNonQueryAsync();
             }
@@ -90,7 +116,6 @@ UNIQUE (Comic) ON CONFLICT REPLACE
         return result == comics.Count;
     }
 
-
     public async Task<bool> SaveComic(ComicEntity comic)
     {
         var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
@@ -98,6 +123,12 @@ UNIQUE (Comic) ON CONFLICT REPLACE
 ('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}');";
         var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
         return result > 0;
+    }
+
+    public async Task<bool> UpdateComicLastUpdateChapterLink(string comic, string lastUpdateChapterLink)
+    {
+        string sql = $@"UPDATE ApiComic SET LastUpdateChapterLink = '{lastUpdateChapterLink}' WHERE Comic = '{comic}';";
+        return await ApiSQLiteHelper.ExecuteNonQuery(sql) > 0;
     }
     #endregion
 
@@ -350,7 +381,9 @@ COMMIT;");
     public async Task<List<ComicViewModel>> GetComicsAreFavorite(string userId)
     {
         var sql = @$"SELECT distinct f.Comic, IFNULL(c.Caption, '') Caption, IFNULL(c.Url, '') Url, IFNULL(c.IconUrl, '') IconUrl, IFNULL(c.ListState, 0) ListState, 
-                    IFNULL(c.LastUpdateChapter, '') LastUpdateChapter, IFNULL(c.LastUpdateDate, '') LastUpdateDate
+                    IFNULL(c.LastUpdateChapter, '') LastUpdateChapter,
+                    IFNULL(c.LastUpdateChapterLink, '') LastUpdateChapterLink,
+                    IFNULL(c.LastUpdateDate, '') LastUpdateDate
                     FROM UserFavoriteComic f
                     LEFT JOIN ApiComic c on f.Comic = c.Comic WHERE f.UserId = '{userId}'
                     ORDER BY c.LastUpdateDate DESC";
@@ -359,6 +392,7 @@ COMMIT;");
         foreach (var comic in results)
         {
             var favoriteChapter = chapters.FirstOrDefault(chapter => chapter.Comic.Equals(comic.Comic, StringComparison.CurrentCultureIgnoreCase));
+            comic.ReadedChapterLink = favoriteChapter?.Chapter ?? "";
             comic.ReadedChapter = favoriteChapter?.ChapterName ?? "";
         }
         return results;
