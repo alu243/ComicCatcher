@@ -91,7 +91,7 @@
                     state.comics = favoriteComics?.comics;
 
                     if (queryString.value) {
-                        addCookie("currentPage", `favorite/${level}/${queryString.value}`);
+                        addCookie("currentPage", `favorite/${level}${queryString.value}`);
                     } else {
                         addCookie("currentPage", `favorite/${level}`);
                     }
