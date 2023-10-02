@@ -8,6 +8,13 @@
         <button class="btn btn-outline-primary" @@click="goto('?filter=notreaded')" :disabled="queryString == '?filter=notreaded'">未讀</button>
         &nbsp;
         <button class="btn btn-outline-primary" @@click="goto('')" :disabled="queryString == ''">預設</button>
+        &nbsp;
+        <select class="form-select" style="width:140px" @@change="goto($event.target.value + queryString)">
+            <option value="0" :selected="level === '0'">所有最愛</option>
+            <option value="1" :selected="level === '1'">一般最愛(1)</option>
+            <option value="2" :selected="level === '2'">追進度中(2)</option>
+            <option value="3" :selected="level === '3'">完結收藏(3)</option>
+        </select>
         &nbsp;&nbsp;
         <button class="btn btn-outline-success" @@click="goto('/page/1')">到分頁區</button>
     </div>
@@ -23,6 +30,15 @@
                     <a :href="getComicAction(comic)">
                         <img style="width:100%" :src="comic.iconUrl" />
                     </a>
+                    <button v-if="comic.level == 1" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="setFavoriteLevel(comic, 2)"><i class="bi bi-arrow-up-circle"></i></button>
+                    <button v-if="comic.level == 2" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="setFavoriteLevel(comic, 3)"><i class="bi bi-arrow-up-circle"></i></button>
+                    <button v-if="comic.level == 2" class="btn btn-danger btn-sm btnright" style="padding:1px 4px;" @@click="setFavoriteLevel(comic, 1)"><i class="bi bi-arrow-down-circle"></i></button>
+                    <button v-if="comic.level == 3" class="btn btn-danger btn-sm btnright" style="padding:1px 4px;" @@click="setFavoriteLevel(comic, 2)"><i class="bi bi-arrow-down-circle"></i></button>
+
+                    <button v-if="comic.level == 1" class="btn btn-success btn-sm btnleft2" style="padding:1px 4px;"><i class="bi bi-1-square"></i></button>
+                    <button v-if="comic.level == 2" class="btn btn-success btn-sm btnleft2" style="padding:1px 4px;"><i class="bi bi-2-square"></i></button>
+                    <button v-if="comic.level == 3" class="btn btn-success btn-sm btnleft2" style="padding:1px 4px;"><i class="bi bi-3-square"></i></button>
+
                 </div>
                 <div class="card-body g-1" style="padding:3px">
                     <a :href="getComicAction(comic)">
@@ -54,6 +70,10 @@
 
                 const pathArray = window.location.pathname.split('/');
                 const page = pathArray[pathArray.length - 1];
+                if (page === 'favorite') {
+                    goto('favorite/0' + queryString.value)
+                }
+                const level = page === 'favorite' ? '' : page;
 
                 onMounted(async () => {
                     await loadFavorites();
@@ -70,7 +90,11 @@
                     const favoriteComics = await response.json();
                     state.comics = favoriteComics?.comics;
 
-                    addCookie("currentPage", "favorite");
+                    if (queryString.value) {
+                        addCookie("currentPage", `favorite/${level}/${queryString.value}`);
+                    } else {
+                        addCookie("currentPage", `favorite/${level}`);
+                    }
 
                     setTimeout(() => loading.value = false, 100);
                 }
@@ -88,6 +112,7 @@
                 }
 
                 function goto(url) {
+                    console.log("goto", url)
                     if (url) {
                         location.href = url;
                     } else {
@@ -95,12 +120,34 @@
                     }
                 }
 
+                function setFavoriteLevel(comic, level) {
+                    if (confirm(`要修改[${comic.caption}]最愛等級嗎？`) == true) {
+                        var request = {
+                            "comic": getComic(comic.url),
+                            "level": level
+                        };
+                        fetch("/api/favoritecomic/level", {
+                            method: "POST",
+                            credentials: "same-origin", // 帶 cookie
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(request)
+                        }).then(response => {
+                            loadFavorites();
+                        }).catch((error) => {
+                            console.log(error);
+                            alert("哦哦，被你玩壞了");
+                        })
+                    }
+                }
+
                 return {
+                    level,
                     goto,
                     state,
                     loading,
                     queryString,
-                    getComicAction
+                    getComicAction,
+                    setFavoriteLevel
                 }
             }
         });

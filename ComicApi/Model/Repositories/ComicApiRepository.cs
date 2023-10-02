@@ -431,7 +431,7 @@ COMMIT;");
         {
             var comic = new ComicViewModel()
             {
-                Level = row.GetValue<int>("Level"),
+                Level = row.GetValue<long>("Level"),
                 Comic = row.GetValue<string>("Comic"),
                 Url = row.GetValue<string>("Url"),
                 Caption = row.GetValue<string>("Caption"),

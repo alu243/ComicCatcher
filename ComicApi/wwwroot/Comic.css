@@ -52,6 +52,11 @@ body {
         .comic-info .btn.btnright {
             left: calc(100% - 24px);
         }
+
+        .comic-info .btn.btnleft2 {
+            left: 1px;
+        }
+
 /*這是分頁段--結束*/
 
 /*這是章節段*/
