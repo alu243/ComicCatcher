@@ -21,7 +21,7 @@ namespace ComicApi.Controllers
         public async Task<FavoriteComicModel> GetComicsAreFavorite(int? level, string? filter)
         {
             var userId = Request.Cookies["userid"] ?? "";
-            var comics = await app.GetComicsAreFavorite(userId);
+            var comics = await app.GetComicsAreFavorite(userId, level);
             if (true == filter?.Equals("notreaded", StringComparison.CurrentCultureIgnoreCase))
             {
                 comics = comics.Where(c => 
@@ -32,6 +32,23 @@ namespace ComicApi.Controllers
             {
                 Comics = comics
             };
+        }
+
+        [HttpPost]
+        public async Task<bool> UpdateFavoriteComicLevel(FavoriteComicLevel request)
+        {
+            try
+            {
+                var userId = Request.Cookies["userid"] ?? "";
+                if (string.IsNullOrEmpty(userId)) return false;
+                request.UserId = userId;
+                return await app.UpdateFavoriteComicLevel(request);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
 

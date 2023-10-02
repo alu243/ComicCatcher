@@ -10,6 +10,13 @@ public class FavoriteComic
     public string? IconUrl { get; set; }
 }
 
+public class FavoriteComicLevel
+{
+    public string? UserId { get; set; }
+    public string? Comic { get; set; }
+    public int? Level { get; set; }
+}
+
 public class FavoriteChapter
 {
     public string? UserId { get; set; }

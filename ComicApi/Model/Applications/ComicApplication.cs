@@ -190,7 +190,7 @@ namespace ComicApi.Controllers
             return comicChapter;
         }
 
-        public async Task<List<ComicViewModel>> GetComicsAreFavorite(string userId)
+        public async Task<List<ComicViewModel>> GetComicsAreFavorite(string userId, int? level)
         {
             var comics = await this.repo.GetComicsAreFavorite(userId);
             // nullComics = 有記 favorite 但沒有記 comic
@@ -211,6 +211,11 @@ namespace ComicApi.Controllers
                 comicEntities.Add(comicEntity);
             }
             this.repo.SaveComics(comicEntities);
+
+            if (level > 0)
+            {
+                comics = comics.Where(c => c.Level == level).ToList();
+            }
             return comics;
         }
 
@@ -233,6 +238,11 @@ namespace ComicApi.Controllers
         public async Task<bool> AddFavoriteComic(FavoriteComic request)
         {
             return await this.repo.AddFavoriteComic(request);
+        }
+
+        public async Task<bool> UpdateFavoriteComicLevel(FavoriteComicLevel request)
+        {
+            return await this.repo.UpdateFavoriteComicLevel(request);
         }
 
         public async Task<bool> DeleteFavoriteComic(FavoriteComic request)

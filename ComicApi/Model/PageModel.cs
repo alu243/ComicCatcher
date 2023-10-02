@@ -26,6 +26,8 @@ namespace ComicApi.Model
         public string ReadedChapterLink { get; set; }
         public bool IsIgnore { get; set; }
         public bool IsFavorite { get; set; }
+        // For Favorite Comic property
+        public int Level { get; set; }
     }
 
     public class ComicModel

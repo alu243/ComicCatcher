@@ -346,6 +346,14 @@ COMMIT;");
         return result > 0;
     }
 
+    public async Task<bool> UpdateFavoriteComicLevel(FavoriteComicLevel request)
+    {
+        if (string.IsNullOrWhiteSpace(request.UserId)) return false;
+        var sql = $"UPDATE UserFavoriteComic SET Level = {request.Level} WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
+        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        return result > 0;
+    }
+
     public async Task<bool> DeleteFavoriteComic(FavoriteComic request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return false;
@@ -380,7 +388,12 @@ COMMIT;");
 
     public async Task<List<ComicViewModel>> GetComicsAreFavorite(string userId)
     {
-        var sql = @$"SELECT distinct f.Comic, IFNULL(c.Caption, '') Caption, IFNULL(c.Url, '') Url, IFNULL(c.IconUrl, '') IconUrl, IFNULL(c.ListState, 0) ListState, 
+        var sql = @$"SELECT distinct f.Comic,
+                    f.Level,
+                    IFNULL(c.Caption, '') Caption, 
+                    IFNULL(c.Url, '') Url, 
+                    IFNULL(c.IconUrl, '') IconUrl, 
+                    IFNULL(c.ListState, 0) ListState, 
                     IFNULL(c.LastUpdateChapter, '') LastUpdateChapter,
                     IFNULL(c.LastUpdateChapterLink, '') LastUpdateChapterLink,
                     IFNULL(c.LastUpdateDate, '') LastUpdateDate
@@ -418,6 +431,7 @@ COMMIT;");
         {
             var comic = new ComicViewModel()
             {
+                Level = row.GetValue<int>("Level"),
                 Comic = row.GetValue<string>("Comic"),
                 Url = row.GetValue<string>("Url"),
                 Caption = row.GetValue<string>("Caption"),
