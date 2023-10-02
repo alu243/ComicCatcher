@@ -424,6 +424,7 @@ COMMIT;");
                 IconUrl = row.GetValue<string>("IconUrl"),
                 LastUpdateChapter = row.GetValue<string>("LastUpdateChapter"),
                 LastUpdateDate = row.GetValue<string>("LastUpdateDate"),
+                LastUpdateChapterLink = row.GetValue<string>("LastUpdateChapterLink"),
                 IsFavorite = true,
                 IsIgnore = false,
                 ReadedChapter = null,

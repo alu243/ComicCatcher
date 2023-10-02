@@ -76,7 +76,10 @@ namespace ComicApi.Controllers
 
             // 預讀下一章
             var nextChapter = await app.GetNextChapter(comicEntity, chapter);
-            app.GetComicChapterWithPage(comic, nextChapter);
+            if (false == string.IsNullOrWhiteSpace(nextChapter))
+            {
+                app.GetComicChapterWithPage(comic, nextChapter);
+            }
             return ComicConverter.Convert(comic, chapter, comicEntity, comicChapter);
         }
 
@@ -85,8 +88,9 @@ namespace ComicApi.Controllers
         {
             var comicEntity = await app.GetComic(comic);
             var nextChapter = await app.GetNextChapter(comicEntity, chapter);
-            var comicChapter = await app.GetComicChapterWithPage(comic, nextChapter);
+            if (string.IsNullOrWhiteSpace(nextChapter)) return null;
 
+            ComicChapter comicChapter = await app.GetComicChapterWithPage(comic, nextChapter);
             // 預讀下下一章
             var nextnextChapter = await app.GetNextChapter(comicEntity, nextChapter);
             app.GetComicChapterWithPage(comic, nextnextChapter);
