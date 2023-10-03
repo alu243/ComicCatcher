@@ -94,13 +94,17 @@ UNIQUE (Comic) ON CONFLICT REPLACE
                 var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
                 if (updateLastChapterLink)
                 {
-                    sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateChapterLink, LastUpdateDate) VALUES 
-('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{lastUpdateChapterLink}', '{comic.LastUpdateDate}');";
+                    sql = $@"INSERT INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateChapterLink, LastUpdateDate) VALUES 
+('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{lastUpdateChapterLink}', '{comic.LastUpdateDate}')
+ON CONFLICT(Comic) DO UPDATE SET 
+Caption = '{comic.Caption}',Url = '{comic.Url}', IconUrl = '{comic.IconUrl}',ListState = {(int)comic.ListState}, LastUpdateChapter = '{comic.LastUpdateChapter}', LastUpdateChapterLink = '{lastUpdateChapterLink}', LastUpdateDate = '{comic.LastUpdateDate}';";
                 }
                 else
                 {
-                    sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
-('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}');";
+                    sql = $@"INSERT INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
+('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}')
+ON CONFLICT(Comic) DO UPDATE SET 
+Caption = '{comic.Caption}',Url = '{comic.Url}', IconUrl = '{comic.IconUrl}',ListState = {(int)comic.ListState}, LastUpdateChapter = '{comic.LastUpdateChapter}', LastUpdateDate = '{comic.LastUpdateDate}';";
                 }
                 cmd.CommandText = sql;
                 result += await cmd.ExecuteNonQueryAsync();
@@ -114,15 +118,6 @@ UNIQUE (Comic) ON CONFLICT REPLACE
             throw;
         }
         return result == comics.Count;
-    }
-
-    public async Task<bool> SaveComic(ComicEntity comic)
-    {
-        var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
-        var sql = $@"INSERT OR REPLACE INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
-('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}');";
-        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
-        return result > 0;
     }
 
     public async Task<bool> UpdateComicLastUpdateChapterLink(string comic, string lastUpdateChapterLink)
@@ -413,8 +408,15 @@ COMMIT;");
 
     public async Task<List<ComicViewModel>> GetAllComicsAreFavorite()
     {
-        var sql = @$"SELECT distinct f.Comic, IFNULL(c.Caption, '') Caption, IFNULL(c.Url, '') Url, IFNULL(c.IconUrl, '') IconUrl, IFNULL(c.ListState, 0) ListState, 
-                    IFNULL(c.LastUpdateChapter, '') LastUpdateChapter, IFNULL(c.LastUpdateDate, '') LastUpdateDate
+        var sql = @$"SELECT distinct f.Comic,
+                    f.Level,
+                    IFNULL(c.Caption, '') Caption, 
+                    IFNULL(c.Url, '') Url, 
+                    IFNULL(c.IconUrl, '') IconUrl, 
+                    IFNULL(c.ListState, 0) ListState, 
+                    IFNULL(c.LastUpdateChapter, '') LastUpdateChapter, 
+                    IFNULL(c.LastUpdateChapterLink, '') LastUpdateChapterLink,
+                    IFNULL(c.LastUpdateDate, '') LastUpdateDate
                     FROM UserFavoriteComic f
                     LEFT JOIN ApiComic c on f.Comic = c.Comic
                     ORDER BY c.LastUpdateDate DESC";

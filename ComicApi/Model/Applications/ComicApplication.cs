@@ -82,6 +82,7 @@ namespace ComicApi.Controllers
         {
             var key = $"Pagination_{page}";
 
+
             if (!cache.TryGetValue(key, out ComicPagination pagination))
             {
                 pagination = dm5.GetRoot().Paginations[page - 1];
@@ -110,7 +111,7 @@ namespace ComicApi.Controllers
                 // 因為 comicentity 會有最後更新時間，所以這個方法不從資料庫拿出來
                 var url = new Uri(new Uri(dm5.GetRoot().Url), comic).ToString();
                 comicEntity = await dm5.GetSingleComicName(url);
-                repo.SaveComic(comicEntity);
+                repo.SaveComics(new List<ComicEntity>() { comicEntity });
 
                 if (comicEntity == null) return null;
 

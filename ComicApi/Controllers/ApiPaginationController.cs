@@ -9,13 +9,13 @@ namespace ComicApi.Controllers;
 
 [Route("api/page")]
 [ApiController]
-public class ApiPageController : Controller
+public class ApiPaginationController : Controller
 {
     private Dm5 dm5;
     private IHostingEnvironment env;
     private ComicApplication app;
 
-    public ApiPageController(Dm5 comic,
+    public ApiPaginationController(Dm5 comic,
         IHostingEnvironment hostEnvironment,
         ComicApplication comicApplication)
     {

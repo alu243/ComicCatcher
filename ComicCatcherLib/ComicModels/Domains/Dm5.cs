@@ -271,14 +271,14 @@ public class Dm5 : IComicCatcher
         {
             if (int.TryParse(lastUpdateDate.Replace("分钟前更新", "").Trim(), out int minute))
             {
-                now.AddMinutes(-minute).ToString("yyyy/MM/dd HH:mm:ss");
+                return now.AddMinutes(-minute).ToString("yyyy/MM/dd HH:mm:ss");
             }
         }
         if (lastUpdateDate.Contains("分钟前"))
         {
             if (int.TryParse(lastUpdateDate.Replace("分钟前", "").Trim(), out int minute))
             {
-                now.AddMinutes(-minute).ToString("yyyy/MM/dd HH:mm:ss");
+                return now.AddMinutes(-minute).ToString("yyyy/MM/dd HH:mm:ss");
             }
         }
         return lastUpdateDate;
@@ -290,7 +290,7 @@ public class Dm5 : IComicCatcher
         // <a href="/m582240/" title="番外2" target="_blank">番外2 </a>
         //Regex rLastUpdateInfoOuter = new Regex(@"\[(.|\n)*?\]", RegexOptions.Compiled);
         //Regex rLastUpdateInfoInner = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
-        Regex rLastUpdateInfoOuter = new Regex(@"<span>最新(.|\n)*?</a>", RegexOptions.Compiled);
+        Regex rLastUpdateInfoOuter = new Regex(@"<span>(最新|完结)(.|\n)*?</a>", RegexOptions.Compiled);
         Regex rLastUpdateInfoInner = new Regex(@"title=""(.|\n)*?""", RegexOptions.Compiled);
 
         string simplified = rLastUpdateInfoInner.Match(rLastUpdateInfoOuter.Match(matchedData).Value).Value.Replace("title=", "").Trim('"');
