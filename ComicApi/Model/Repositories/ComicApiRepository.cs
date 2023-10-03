@@ -221,7 +221,7 @@ COMMIT;");
             var result = 0;
             foreach (var page in pages)
             {
-                sql = $@"INSERT OR REPLACE INTO ApiComic (Comic, Chapter, PageNumber, Caption, Url, PageFileName, Refer) VALUES
+                sql = $@"INSERT OR REPLACE INTO ApiPage (Comic, Chapter, PageNumber, Caption, Url, PageFileName, Refer) VALUES
     ('{comic}', '{chapter}', {page.PageNumber}, '{page.Caption}', '{page.Url}', '{page.PageFileName}', '{page.Refer}');";
 
                 cmd.CommandText = sql;
