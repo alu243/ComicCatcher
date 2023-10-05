@@ -182,7 +182,7 @@ COMMIT;");
                 Url = table.Rows[0].GetValue<string>("Url"),
                 Caption = table.Rows[0].GetValue<string>("Caption"),
                 PageFileName = table.Rows[0].GetValue<string>("PageFileName"),
-                PageNumber = table.Rows[0].GetValue<int>("PageNumber"),
+                PageNumber =Convert.ToInt32(table.Rows[0].GetValue<long>("PageNumber")),
                 Refer = table.Rows[0].GetValue<string>("Refer"),
             };
             pages.Add(page);
