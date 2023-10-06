@@ -175,15 +175,15 @@ COMMIT;");
         var table = await ApiSQLiteHelper.GetTable(sql);
 
         var pages = new List<ComicPage>();
-        foreach (var row in table.Rows)
+        foreach (DataRow row in table.Rows)
         {
             var page = new ComicPage()
             {
-                Url = table.Rows[0].GetValue<string>("Url"),
-                Caption = table.Rows[0].GetValue<string>("Caption"),
-                PageFileName = table.Rows[0].GetValue<string>("PageFileName"),
-                PageNumber =Convert.ToInt32(table.Rows[0].GetValue<long>("PageNumber")),
-                Refer = table.Rows[0].GetValue<string>("Refer"),
+                Url = row.GetValue<string>("Url"),
+                Caption = row.GetValue<string>("Caption"),
+                PageFileName = row.GetValue<string>("PageFileName"),
+                PageNumber =Convert.ToInt32(row.GetValue<long>("PageNumber")),
+                Refer = row.GetValue<string>("Refer"),
             };
             pages.Add(page);
         }
