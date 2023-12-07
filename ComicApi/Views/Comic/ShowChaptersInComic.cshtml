@@ -7,7 +7,6 @@
     <h2 class="center">{{state.currComic?.caption}}</h2>
     <button class="btn btn-outline-primary" style="font-size: 20px;" @@click="goBack()">回上一層</button>
     &nbsp;&nbsp;&nbsp;
-    {{state}}
     <button class="btn btn-outline-primary" style="font-size: 20px;" @@click="addFavoriteComic()">加到最愛</button>
     <div v-if="loading" class="loader-background"><div class="loader"></div></div>
     <div class="row row-cols-md-4 row-cols-3 gx-0 gy-1">
