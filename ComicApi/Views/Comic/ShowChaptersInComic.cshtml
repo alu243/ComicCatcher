@@ -6,6 +6,9 @@
 <div id="app" v-cloak>
     <h2 class="center">{{state.currComic?.caption}}</h2>
     <button class="btn btn-outline-primary" style="font-size: 20px;" @@click="goBack()">回上一層</button>
+    &nbsp;&nbsp;&nbsp;
+    {{state}}
+    <button class="btn btn-outline-primary" style="font-size: 20px;" @@click="addFavoriteComic()">加到最愛</button>
     <div v-if="loading" class="loader-background"><div class="loader"></div></div>
     <div class="row row-cols-md-4 row-cols-3 gx-0 gy-1">
         <div class="col gx-1" v-for="chapter in state.currComic?.chapters">
@@ -83,13 +86,37 @@
                         location.href = `/page/${page}`;
                     }
                 }
+                const getComic = function(url) {
+                    url = url.trim().replace(/\/$/g, '');
+                    const pathArray = url.split('/');
+                    const comic = pathArray[pathArray.length - 1];
+                    return comic;
+                }
+
+
+                const addFavoriteComic = function () {
+                    let comic = state.currComic;
+                    var request = { "comic": getComic(comic.url), "comicName": comic.caption, "iconUrl": comic.iconUrl };
+                    fetch("/api/FavoriteComic", {
+                        method: "POST",
+                        credentials: "same-origin", // 帶 cookie
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(request)
+                    }).then(response => {
+                        comic.isFavorite = true;
+                    }).catch((error) => {
+                        console.log(error);
+                        alert("哦哦，被你玩壞了");
+                    })
+                }
 
                 return {
                     state,
                     goBack,
                     goChapter,
                     loading,
-                    getRelativePath
+                    getRelativePath,
+                    addFavoriteComic
                 }
             }
         });
