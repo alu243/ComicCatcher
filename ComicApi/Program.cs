@@ -6,6 +6,7 @@ using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 //builder.Services.AddSystemWebAdapters();
@@ -53,5 +54,4 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
 app.UseStaticFiles();
-
 app.Run();
