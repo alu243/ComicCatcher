@@ -238,9 +238,33 @@ namespace ComicApi.Controllers
             }
             await this.repo.SaveComics(comicEntities, true);
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comics.Count} comics are refreshed");
+            Task.Run(async () => await this.RefreshAllUnReadedChapters(comics, comicEntities));
+            //this.RefreshAllUnReadedChapters(comics, comicEntities);
             return comics;
         }
 
+        private async Task RefreshAllUnReadedChapters(List<ComicViewModel> comics, List<ComicEntity> comicEntities)
+        {
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comicEntities.Count} comics are start cache unreaded chapters");
+            int count = 0;
+            foreach (var comic in comics)
+            {
+                var comicEntity = comicEntities.FirstOrDefault(e => e.Url.Contains(comic.Comic));
+                if (comicEntity == null) { continue; }
+
+                foreach (var chapterEntity in comicEntity.Chapters)
+                {
+                    var chapterList = chapterEntity.Url.Split('/');
+                    if (chapterList.Length <= 3) continue;
+                    var chapter = chapterList[3];
+                    if (chapter.Equals(comic.ReadedChapter ?? "")) break;
+
+                    await this.GetComicPages(comic.Comic, chapter);
+                    count++;
+                }
+            }
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {count} chapters of comic are cached unreaded chapters");
+        }
 
         public async Task<bool> AddFavoriteComic(FavoriteComic request)
         {
