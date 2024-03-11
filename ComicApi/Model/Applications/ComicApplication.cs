@@ -259,7 +259,7 @@ namespace ComicApi.Controllers
             }
             await this.repo.SaveComics(comicEntities, true);
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comics.Count} comics are refreshed");
-            Task.Run(async () => await this.RefreshAllUnReadedChapters(comics, comicEntities));
+            //Task.Run(async () => await this.RefreshAllUnReadedChapters(comics, comicEntities));
             //this.RefreshAllUnReadedChapters(comics, comicEntities);
             return comics;
         }
@@ -282,6 +282,7 @@ namespace ComicApi.Controllers
 
                     await this.GetComicPages(comic.Comic, chapter);
                     count++;
+                    await Task.Delay(1000);
                 }
             }
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {count} chapters of comic are cached unreaded chapters");
