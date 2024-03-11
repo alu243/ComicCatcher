@@ -16,6 +16,8 @@ body {
     overflow-x: hidden;
     -ms-overflow-style: none; /* Internet Explorer 10+ */
     scrollbar-width: none; /* Firefox */
+    background-color: #222;
+    color: #ccc;
 }
 
     body::-webkit-scrollbar {
@@ -65,7 +67,7 @@ body {
     height: 90%;
     padding: 5px;
     margin: 5px;
-    background-color: #DDD;
+    background-color: #444;
     text-align: center;
 }
 

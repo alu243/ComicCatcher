@@ -17,7 +17,7 @@
     </div>
 
     <div class="gx-0" v-for="chapter in state.chapters">
-        <button class="btn btn-outline-secondary center" style="font-size: 20px;" @@click="goBack()">回上一層</button>
+        <button class="btn btn-outline-primary center" style="font-size: 20px;" @@click="goBack()">回上一層</button>
         <h2 style="text-align: center;">{{ chapter.currChapter.caption }}</h2>
         <div v-for="x in chapter.currChapter.pages" :id="`${chapter.chapter}_${x.pageNumber}`" class="center sapce page-info">
             <div v-if="pagely" style="width:100%;border-bottom: 1px solid"><span class="fw-bold center">{{chapter.currChapter.caption}}：第{{x.pageNumber}}頁/共{{chapter.currChapter.pages.length}}頁</span></div>
@@ -29,7 +29,7 @@
     </div>
     <br />
     <div v-if="loading && !ending" class="loader-background"><div class="loader"></div></div>
-    <button class="btn btn-outline-secondary center" style="font-size: 20px;" @@click="goBack()">回上一層</button>
+    <button class="btn btn-outline-primary center" style="font-size: 20px;" @@click="goBack()">回上一層</button>
     <div v-if="ending">已經是最新的了</div>
     <br /><br /><br />
     <Observer v-if="state.chapters.length > 0 && !loading && !ending" @@intersect="intersected" />

@@ -229,9 +229,10 @@ namespace ComicApi.Controllers
             {
                 var comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
                 await dm5.LoadChapters(comicEntity);
-                string key = $"comic_{comic}";
+                string key = $"comic_{comic.Comic}";
                 MemoryCacheEntryOptions options = new();
-                options.SetSlidingExpiration(TimeSpan.FromMinutes(60));
+                options.SetSlidingExpiration(TimeSpan.FromMinutes(80));
+                cache.Remove(key);
                 cache.Set(key, comicEntity, options);
                 comicEntities.Add(comicEntity);
             }
