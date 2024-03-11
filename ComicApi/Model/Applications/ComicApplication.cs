@@ -178,11 +178,11 @@ namespace ComicApi.Controllers
                     comicPages.AddRange(comicChapter.Pages);
                     repo.SaveComicPages(comic, chapter, comicPages);
                 }
-                else
-                {
-                    // compare if dm5 has new comicPage's data
-                    Task.Run(async () => await CompareComicPagesBG(comic, chapter, comicPages));
-                }
+                //else
+                //{
+                //    // compare if dm5 has new comicPage's data
+                //    Task.Run(async () => await CompareComicPagesBG(comic, chapter, comicPages));
+                //}
                 cache.Set(key, comicPages, pageCacheOptions);
             }
             return comicPages;
