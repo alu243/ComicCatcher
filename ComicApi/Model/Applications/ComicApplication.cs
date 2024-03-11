@@ -1,4 +1,5 @@
-﻿using ComicApi.Model;
+﻿using System.Collections;
+using ComicApi.Model;
 using ComicApi.Model.Repositories;
 using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
@@ -177,9 +178,29 @@ namespace ComicApi.Controllers
                     comicPages.AddRange(comicChapter.Pages);
                     repo.SaveComicPages(comic, chapter, comicPages);
                 }
+                else
+                {
+                    // compare if dm5 has new comicPage's data
+                    Task.Run(async () => await CompareComicPagesBG(comic, chapter, comicPages));
+                }
                 cache.Set(key, comicPages, pageCacheOptions);
             }
             return comicPages;
+        }
+
+        private async Task CompareComicPagesBG(string comic, string chapter, List<ComicPage> dbPages)
+        {
+            var comicChapter = await this.GetComicChapter(comic, chapter);
+            comicChapter.ListState = ComicState.Created;
+            await dm5.LoadPages(comicChapter);
+            var newPages = comicChapter.Pages;
+
+            if (newPages.Count != dbPages.Count ||
+                newPages.FirstOrDefault()?.Url != dbPages.FirstOrDefault()?.Url ||
+                newPages.LastOrDefault()?.Url != dbPages.LastOrDefault()?.Url)
+            {
+                repo.SaveComicPages(comic, chapter, newPages);
+            }
         }
 
         public async Task<ComicChapter> GetChapterAndReloadComicPages(string comic, string chapter)
