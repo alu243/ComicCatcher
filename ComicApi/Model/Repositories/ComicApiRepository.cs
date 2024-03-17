@@ -6,6 +6,7 @@ using ComicCatcherLib.Utils;
 using Quartz.Impl.Matchers;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 using ComicCatcherLib.ComicModels.Domains;
+using System.Runtime.CompilerServices;
 
 namespace ComicApi.Model.Repositories;
 
@@ -88,26 +89,36 @@ UNIQUE (Comic) ON CONFLICT REPLACE
         string sql = "";
         try
         {
-            foreach (var comic in comics)
+            int i = 0;
+            int size = 20;
+            var batch = comics.Skip(i * size).ToList();
+            while (batch.Count > 0)
             {
-                var lastUpdateChapterLink = comic.Chapters?.FirstOrDefault()?.Url?.GetUrlDirectoryName() ?? "";
-                var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
-                if (updateLastChapterLink)
+                sql = "";
+                foreach (var comic in batch)
                 {
-                    sql = $@"INSERT INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateChapterLink, LastUpdateDate) VALUES 
+                    var lastUpdateChapterLink = comic.Chapters?.FirstOrDefault()?.Url?.GetUrlDirectoryName() ?? "";
+                    var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
+                    if (updateLastChapterLink)
+                    {
+                        sql += $@"INSERT INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateChapterLink, LastUpdateDate) VALUES 
 ('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{lastUpdateChapterLink}', '{comic.LastUpdateDate}')
 ON CONFLICT(Comic) DO UPDATE SET 
 Caption = '{comic.Caption}',Url = '{comic.Url}', IconUrl = '{comic.IconUrl}',ListState = {(int)comic.ListState}, LastUpdateChapter = '{comic.LastUpdateChapter}', LastUpdateChapterLink = '{lastUpdateChapterLink}', LastUpdateDate = '{comic.LastUpdateDate}';";
-                }
-                else
-                {
-                    sql = $@"INSERT INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
+                    }
+                    else
+                    {
+                        sql += $@"INSERT INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
 ('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}')
 ON CONFLICT(Comic) DO UPDATE SET 
 Caption = '{comic.Caption}',Url = '{comic.Url}', IconUrl = '{comic.IconUrl}',ListState = {(int)comic.ListState}, LastUpdateChapter = '{comic.LastUpdateChapter}', LastUpdateDate = '{comic.LastUpdateDate}';";
+                    }
                 }
                 cmd.CommandText = sql;
                 result += await cmd.ExecuteNonQueryAsync();
+
+                i++;
+                batch = comics.Skip(i * size).ToList();
             }
             await tran.CommitAsync();
         }
@@ -182,7 +193,7 @@ COMMIT;");
                 Url = row.GetValue<string>("Url"),
                 Caption = row.GetValue<string>("Caption"),
                 PageFileName = row.GetValue<string>("PageFileName"),
-                PageNumber =Convert.ToInt32(row.GetValue<long>("PageNumber")),
+                PageNumber = Convert.ToInt32(row.GetValue<long>("PageNumber")),
                 Refer = row.GetValue<string>("Refer"),
             };
             pages.Add(page);
@@ -219,13 +230,24 @@ COMMIT;");
             await cmd.ExecuteNonQueryAsync();
 
             var result = 0;
-            foreach (var page in pages)
-            {
-                sql = $@"INSERT OR REPLACE INTO ApiPage (Comic, Chapter, PageNumber, Caption, Url, PageFileName, Refer) VALUES
-    ('{comic}', '{chapter}', {page.PageNumber}, '{page.Caption}', '{page.Url}', '{page.PageFileName}', '{page.Refer}');";
 
+            int i = 0;
+            int size = 20;
+            var batch = pages.Skip(size * i).Take(size).ToList();
+            while (batch.Count > 0)
+            {
+                sql = "";
+                foreach (var page in batch)
+                {
+                    sql += $@"INSERT OR REPLACE INTO ApiPage (Comic, Chapter, PageNumber, Caption, Url, PageFileName, Refer) VALUES
+                        ('{comic}', '{chapter}', {page.PageNumber}, '{page.Caption}', '{page.Url}', '{page.PageFileName}', '{page.Refer}');";
+
+                }
                 cmd.CommandText = sql;
                 result += await cmd.ExecuteNonQueryAsync();
+
+                i++;
+                batch = pages.Skip(size * i).Take(size).ToList();
             }
             await tran.CommitAsync();
             return result == pages.Count;
