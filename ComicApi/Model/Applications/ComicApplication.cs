@@ -260,14 +260,16 @@ namespace ComicApi.Controllers
             await this.repo.SaveComics(comicEntities, true);
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comics.Count} comics are refreshed");
             //Task.Run(async () => await this.RefreshAllUnReadedChapters(comics, comicEntities));
-            //this.RefreshAllUnReadedChapters(comics, comicEntities);
+            this.RefreshAllUnReadedChapters(comicEntities);
             return comics;
         }
 
-        private async Task RefreshAllUnReadedChapters(List<ComicViewModel> comics, List<ComicEntity> comicEntities)
+        private async Task RefreshAllUnReadedChapters(List<ComicEntity> comicEntities)
         {
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comicEntities.Count} comics are start cache unreaded chapters");
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: comics are start cache unreaded chapters");
+            var comics = (await this.repo.GetAllComicsAreFavorite()).Where(c => c.LastUpdateChapterLink != c.ReadedChapterLink).Take(200).ToList();
             int count = 0;
+            
             foreach (var comic in comics)
             {
                 var comicEntity = comicEntities.FirstOrDefault(e => e.Url.Contains(comic.Comic));
@@ -278,7 +280,7 @@ namespace ComicApi.Controllers
                     var chapterList = chapterEntity.Url.Split('/');
                     if (chapterList.Length <= 3) continue;
                     var chapter = chapterList[3];
-                    if (chapter.Equals(comic.ReadedChapter ?? "")) break;
+                    if (chapter.Equals(comic.ReadedChapterLink ?? "")) break;
 
                     await this.GetComicPages(comic.Comic, chapter);
                     count++;
