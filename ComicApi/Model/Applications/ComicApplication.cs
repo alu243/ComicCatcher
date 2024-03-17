@@ -250,18 +250,16 @@ namespace ComicApi.Controllers
             MemoryCacheEntryOptions options = new();
             options.SetSlidingExpiration(TimeSpan.FromMinutes(80));
 
-            Parallel.ForEach(comics, async (comic) =>
+            foreach (var comic in comics)
             {
                 var comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
                 await dm5.LoadChapters(comicEntity);
                 string key = $"comic_{comic.Comic}";
-                lock (comicEntities)
-                {
-                    cache.Remove(key);
-                    cache.Set(key, comicEntity, options);
-                    comicEntities.Add(comicEntity);
-                }
-            });
+                cache.Remove(key);
+                cache.Set(key, comicEntity, options);
+                comicEntities.Add(comicEntity);
+            }
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comics.Count} comics are start save");
             await this.repo.SaveComics(comicEntities, true);
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comics.Count} comics are refreshed");
             //Task.Run(async () => await this.RefreshAllUnReadedChapters(comics, comicEntities));
@@ -275,7 +273,7 @@ namespace ComicApi.Controllers
             var comics = (await this.repo.GetAllComicsAreFavorite()).Where(c => c.LastUpdateChapterLink != c.ReadedChapterLink).Take(200).ToList();
             int count = 0;
 
-            Parallel.ForEach(comics, async (comic) =>
+            foreach (var comic in comics)
             {
                 var comicEntity = comicEntities.FirstOrDefault(e => e.Url.Contains(comic.Comic));
                 if (comicEntity == null) { return; }
@@ -290,7 +288,7 @@ namespace ComicApi.Controllers
                     await this.GetComicPages(comic.Comic, chapter);
                     count++;
                 }
-            });
+            }
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {count} chapters of comic are cached unreaded chapters");
         }
 
