@@ -1,5 +1,4 @@
 ﻿using ComicApi.Controllers;
-using ComicCatcherLib.ComicModels.Domains;
 using Quartz;
 
 namespace ComicApi.Model.Jobs

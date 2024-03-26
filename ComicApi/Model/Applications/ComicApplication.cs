@@ -126,7 +126,7 @@ namespace ComicApi.Controllers
         public async Task<ComicChapter> GetComicChapterWithPage(string comic, string chapter)
         {
             var comicChapter = await this.GetComicChapter(comic, chapter);
-            comicChapter.Pages = await this.GetComicPages(comic, chapter);
+            comicChapter.Pages = await this.GetComicPages(comic, chapter, true);
             return comicChapter;
         }
 
@@ -166,14 +166,20 @@ namespace ComicApi.Controllers
             return comicChapter;
         }
 
-        private async Task<List<ComicPage>> GetComicPages(string comic, string chapter)
+        private async Task<List<ComicPage>> GetComicPages(string comic, string chapter, bool showLog = false)
         {
             string key = $"comic_{comic}_chatper_{chapter}_pages";
-            if (!cache.TryGetValue(key, out List<ComicPage> comicPages) || comicPages.Count <= 0)
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] start get comic pages: {key}");
+
+            cache.TryGetValue(key, out List<ComicPage> comicPages);
+            if (comicPages == null || comicPages.Count <= 0)
             {
+                Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] cannot find in memory, start find in db: {key}");
+
                 comicPages = await repo.GetComicPages(comic, chapter);
                 if (comicPages.Count <= 0)
                 {
+                    Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] cannot find in db, start get from web: {key}");
                     var comicChapter = await this.GetComicChapter(comic, chapter);
                     comicChapter.ListState = ComicState.Created;
                     await dm5.LoadPages(comicChapter);
@@ -185,6 +191,7 @@ namespace ComicApi.Controllers
                 //    // compare if dm5 has new comicPage's data
                 //    Task.Run(async () => await CompareComicPagesBG(comic, chapter, comicPages));
                 //}
+                cache.Remove(key);
                 cache.Set(key, comicPages, pageCacheOptions);
             }
             return comicPages;
@@ -210,7 +217,7 @@ namespace ComicApi.Controllers
             var comicChapter = await this.GetComicChapter(comic, chapter);
             comicChapter.Pages.Clear();
             await this.repo.DeleteComicPages(comic, chapter);
-            comicChapter.Pages = await this.GetComicPages(comic, chapter);
+            comicChapter.Pages = await this.GetComicPages(comic, chapter, true);
             return comicChapter;
         }
 
