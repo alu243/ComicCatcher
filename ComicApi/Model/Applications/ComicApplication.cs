@@ -5,7 +5,9 @@ using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.ComicModels.Domains;
 using ComicCatcherLib.Utils;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Caching.Memory;
+using Quartz.Util;
 
 namespace ComicApi.Controllers
 {
@@ -232,7 +234,8 @@ namespace ComicApi.Controllers
                 //nullComic.ReadedChapter = nullComic.ReadedChapter;
                 comicEntities.Add(comicEntity);
             }
-            this.repo.SaveComics(comicEntities);
+            if (comicEntities.Count > 0)
+                await this.repo.SaveComics(comicEntities);
 
             if (level > 0)
             {
@@ -241,11 +244,65 @@ namespace ComicApi.Controllers
             return comics;
         }
 
+        private static bool startup = true;
+        public async Task RefreshPagesComicsAreFavorite(int pages)
+        {
+            if (ComicApplication.startup == false)
+            {
+                ComicApplication.startup = true;
+                return;
+            }
+            var comics = await this.repo.GetAllComicsAreFavorite();
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] {comics.Count} comics are start refreshed by Page");
+            var comicEntitiesInPagination = new List<ComicEntity>();
+            for (int i = 1; i <= pages; i++)
+            {
+                Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] page {i}/{pages} comics are start get");
+                var pagination = dm5.GetRoot().Paginations[i - 1];
+                pagination.ListState = ComicState.Created;
+                await dm5.LoadComicsForWeb(pagination);
+                comicEntitiesInPagination.AddRange(pagination.Comics);
+            }
+
+            MemoryCacheEntryOptions options = new();
+            options.SetSlidingExpiration(TimeSpan.FromMinutes(80));
+
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] start check which comic needs refresh");
+            var comicEntitiesNeedsUpdate = new List<ComicEntity>();
+            foreach (var comic in comics)
+            {
+                string key = $"comic_{comic.Comic}";
+                var comicEntityInPagination = comicEntitiesInPagination.FirstOrDefault(e => e.Url.Contains(comic.Comic));
+
+                var isGotComic = cache.TryGetValue(key, out ComicEntity comicEntity);
+                if (!isGotComic) //找不到 comic 重讀
+                {
+                    comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
+                    await dm5.LoadChapters(comicEntity);
+                    comicEntitiesNeedsUpdate.Add(comicEntity);
+                }
+                else if (comicEntityInPagination != null && comicEntity.LastUpdateChapter != comicEntityInPagination.LastUpdateChapter) //找到的 comic 有更新，重讀
+                {
+                    comicEntity = comicEntityInPagination;
+                    await dm5.LoadChapters(comicEntity);
+                    comicEntitiesNeedsUpdate.Add(comicEntity);
+                }
+                cache.Remove(key);
+                cache.Set(key, comicEntity, options);
+            }
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] {comics.Count} comics are start save");
+            await this.repo.SaveComics(comicEntitiesNeedsUpdate, true);
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] {comics.Count} comics are refreshed");
+            //Task.Run(async () => await this.RefreshAllUnReadedChapters(comics, comicEntities));
+            this.RefreshAllUnReadedChapters(comicEntitiesNeedsUpdate);
+            return;
+        }
+
         public async Task<List<ComicViewModel>> RefreshAllComicsAreFavorite()
         {
             var comics = await this.repo.GetAllComicsAreFavorite();
             var comicEntities = new List<ComicEntity>();
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comics.Count} comics are start refresh");
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshAllComicsAreFavorite] {comics.Count} comics are start refresh");
 
             MemoryCacheEntryOptions options = new();
             options.SetSlidingExpiration(TimeSpan.FromMinutes(80));
@@ -259,9 +316,9 @@ namespace ComicApi.Controllers
                 cache.Set(key, comicEntity, options);
                 comicEntities.Add(comicEntity);
             }
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comics.Count} comics are start save");
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshAllComicsAreFavorite] {comics.Count} comics are start save");
             await this.repo.SaveComics(comicEntities, true);
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {comics.Count} comics are refreshed");
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshAllComicsAreFavorite] {comics.Count} comics are refreshed");
             //Task.Run(async () => await this.RefreshAllUnReadedChapters(comics, comicEntities));
             this.RefreshAllUnReadedChapters(comicEntities);
             return comics;
@@ -269,8 +326,8 @@ namespace ComicApi.Controllers
 
         private async Task RefreshAllUnReadedChapters(List<ComicEntity> comicEntities)
         {
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: comics are start cache unreaded chapters");
-            var comics = (await this.repo.GetAllComicsAreFavorite()).Where(c => c.LastUpdateChapterLink != c.ReadedChapterLink).Take(200).ToList();
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: start cache unreaded chapters");
+            var comics = (await this.repo.GetAllComicsAreFavorite()).Where(c => c.LastUpdateChapterLink != c.ReadedChapterLink).Take(100).ToList();
             int count = 0;
 
             foreach (var comic in comics)
@@ -289,7 +346,7 @@ namespace ComicApi.Controllers
                     count++;
                 }
             }
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: {count} chapters of comic are cached unreaded chapters");
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshChapters] {count} chapters of comic are cached unreaded chapters");
         }
 
         public async Task<bool> AddFavoriteComic(FavoriteComic request)

@@ -83,12 +83,10 @@ UNIQUE (Comic) ON CONFLICT REPLACE
 
         await using var conn = await ApiSQLiteHelper.GetConnection();
         await using var cmd = conn.CreateCommand();
-        await conn.OpenAsync();
-        var tran = conn.BeginTransaction();
-        cmd.Transaction = tran;
         string sql = "";
         try
         {
+            await conn.OpenAsync();
             int i = 0;
             int size = 20;
             var batch = comics.Skip(i * size).ToList();
@@ -120,11 +118,10 @@ Caption = '{comic.Caption}',Url = '{comic.Url}', IconUrl = '{comic.IconUrl}',Lis
                 i++;
                 batch = comics.Skip(i * size).ToList();
             }
-            await tran.CommitAsync();
         }
         catch (Exception e)
         {
-            await tran.RollbackAsync();
+            conn.Dispose();
             Console.WriteLine(e);
             throw;
         }
@@ -220,11 +217,9 @@ COMMIT;");
     {
         await using var conn = await ApiSQLiteHelper.GetConnection();
         await using var cmd = conn.CreateCommand();
-        await conn.OpenAsync();
-        var tran = conn.BeginTransaction();
-        cmd.Transaction = tran;
         try
         {
+            await conn.OpenAsync();
             var sql = $"DELETE FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
             cmd.CommandText = sql;
             await cmd.ExecuteNonQueryAsync();
@@ -249,12 +244,10 @@ COMMIT;");
                 i++;
                 batch = pages.Skip(size * i).Take(size).ToList();
             }
-            await tran.CommitAsync();
             return result == pages.Count;
         }
         catch (Exception e)
         {
-            await tran.RollbackAsync();
             Console.WriteLine(e);
             throw;
         }

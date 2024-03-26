@@ -21,6 +21,23 @@ builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete
 
 builder.Services.AddQuartz(quartz =>
 {
+    // 建立 Job2
+    var jobKey2 = new JobKey("UpdateFavoriteByPagination", "UpdateFavoriteGroupByPagination");
+    quartz.AddJob<UpdateFavoriteByPaginationJob>(opts =>
+    {
+        opts.WithIdentity(jobKey2);
+        opts.StoreDurably();
+    });
+
+    // 建立觸發器，自動執行 Job
+    quartz.AddTrigger(opts =>
+    {
+        opts.ForJob(jobKey2);
+        opts.WithIdentity("HelloWordTriggerByPagination", "HelloWordGroupByPagination");
+        opts.WithSimpleSchedule(x => x.WithIntervalInHours(24 * 7).RepeatForever());
+    });
+
+
     quartz.UseMicrosoftDependencyInjectionJobFactory();
     // 建立 Job
     var jobKey = new JobKey("UpdateFavorite", "UpdateFavoriteGroup");
@@ -35,7 +52,7 @@ builder.Services.AddQuartz(quartz =>
     {
         opts.ForJob(jobKey);
         opts.WithIdentity("HelloWordTrigger", "HelloWordGroup");
-        opts.WithSimpleSchedule(x => x.WithIntervalInMinutes(60).RepeatForever());
+        opts.WithSimpleSchedule(x => x.WithIntervalInHours(29).RepeatForever());
     });
 });
 
