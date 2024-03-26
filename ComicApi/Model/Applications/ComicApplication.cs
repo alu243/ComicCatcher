@@ -169,17 +169,24 @@ namespace ComicApi.Controllers
         private async Task<List<ComicPage>> GetComicPages(string comic, string chapter, bool showLog = false)
         {
             string key = $"comic_{comic}_chatper_{chapter}_pages";
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] start get comic pages: {key}");
+
+            if (string.IsNullOrWhiteSpace(chapter))
+            {
+                Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] chapter is lost: {key}");
+                return new List<ComicPage>();
+
+            }
+            if (showLog) Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] start get comic pages: {key}");
 
             cache.TryGetValue(key, out List<ComicPage> comicPages);
             if (comicPages == null || comicPages.Count <= 0)
             {
-                Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] cannot find in memory, start find in db: {key}");
+                if (showLog) Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] cannot find in memory, start find in db: {key}");
 
                 comicPages = await repo.GetComicPages(comic, chapter);
                 if (comicPages.Count <= 0)
                 {
-                    Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] cannot find in db, start get from web: {key}");
+                    if (showLog) Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] cannot find in db, start get from web: {key}");
                     var comicChapter = await this.GetComicChapter(comic, chapter);
                     comicChapter.ListState = ComicState.Created;
                     await dm5.LoadPages(comicChapter);
