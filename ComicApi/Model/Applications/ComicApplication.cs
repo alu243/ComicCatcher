@@ -254,9 +254,10 @@ namespace ComicApi.Controllers
         private static bool startup = true;
         public async Task RefreshPagesComicsAreFavorite(int pages)
         {
-            if (ComicApplication.startup == false)
+            if (ComicApplication.startup == true)
             {
-                ComicApplication.startup = true;
+                Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] skip first run, it must run after full refresh!");
+                ComicApplication.startup = false;
                 return;
             }
             var comics = await this.repo.GetAllComicsAreFavorite();
@@ -274,8 +275,9 @@ namespace ComicApi.Controllers
             MemoryCacheEntryOptions options = new();
             options.SetSlidingExpiration(TimeSpan.FromMinutes(80));
 
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] start check which comic needs refresh");
+            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] start check which comic({comics.Count}) needs refresh");
             var comicEntitiesNeedsUpdate = new List<ComicEntity>();
+            int checkedCount = 0;
             foreach (var comic in comics)
             {
                 string key = $"comic_{comic.Comic}";
@@ -296,6 +298,8 @@ namespace ComicApi.Controllers
                 }
                 cache.Remove(key);
                 cache.Set(key, comicEntity, options);
+                checkedCount++;
+                if (checkedCount % 20 == 0) Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] {checkedCount}/{comics.Count}) are checked");
             }
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] {comics.Count} comics are start save");
             await this.repo.SaveComics(comicEntitiesNeedsUpdate, true);
