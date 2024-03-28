@@ -167,6 +167,7 @@ Url NVARCHAR(200) not NULL,
 PageFileName NVARCHAR(20) not NULL,
 Refer NVARCHAR(200) not NULL);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_ApiPage ON ApiPage (Comic, Chapter, PageNumber);
+CREATE INDEX IF NOT EXISTS ix_ApiPages ON ApiPage (Comic, Chapter);
 COMMIT;");
     }
 
@@ -186,7 +187,7 @@ COMMIT;");
 
     public async Task<List<ComicPage>> GetComicPages(string comic, string chapter)
     {
-        var sql = $"SELECT * FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}' ORDER BY PageNumber";
+        var sql = $"SELECT * FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
         await ApiSQLiteHelper.ExecuteNonQueryAsync(sql);
 
         var table = await ApiSQLiteHelper.GetTable(sql);
@@ -204,6 +205,7 @@ COMMIT;");
             };
             pages.Add(page);
         }
+        pages = pages.OrderBy(p => p.PageNumber).ToList();
         return pages;
     }
 
