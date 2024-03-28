@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
 using Jint.Parser.Ast;
+using Quartz.Util;
 
 namespace ComicCatcherLib.DbModel;
 
@@ -28,6 +29,19 @@ public static class ApiSQLiteHelper
         await using var reader = await cmd.ExecuteReaderAsync();
         DataTable dt = new DataTable();
         dt.Load(reader);
+        return dt;
+    }
+    public static async Task<DataTable> GetTableLog(string sql)
+    {
+        Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] start");
+        await using var conn = new SqliteConnection(connStr);
+        await conn.OpenAsync();
+        await using var cmd = new SqliteCommand(sql, conn);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] executed reader");
+        DataTable dt = new DataTable();
+        dt.Load(reader);
+        Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] got table");
         return dt;
     }
 
