@@ -31,7 +31,7 @@ public static class ApiSQLiteHelper
         return dt;
     }
 
-    public static async Task<int> ExecuteNonQuery(string sql)
+    public static async Task<int> ExecuteNonQueryAsync(string sql)
     {
         await using var conn = new SqliteConnection(connStr);
         await conn.OpenAsync();
@@ -49,13 +49,34 @@ public static class ApiSQLiteHelper
         return scalar;
     }
 
+    public static int ExecuteNonQuery(string sql)
+    {
+        using var conn = new SqliteConnection(connStr);
+        using var cmd = new SqliteCommand(sql, conn);
+        try
+        {
+            conn.Open();
+            int affectRecord = cmd.ExecuteNonQuery();
+            return affectRecord;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        finally
+        {
+            if (conn.State == ConnectionState.Open) conn.Close();
+        }
+    }
+
 
     public static async Task VACCUM()
     {
         try
         {
             string sql = "VACUUM";
-            await ExecuteNonQuery(sql);
+            await ExecuteNonQueryAsync(sql);
         }
         catch (Exception ex)
         {

@@ -1,12 +1,9 @@
 ﻿using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.DbModel;
-using System.Data;
 using ComicCatcherLib.Utils;
-using Quartz.Impl.Matchers;
+using System.Data;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-using ComicCatcherLib.ComicModels.Domains;
-using System.Runtime.CompilerServices;
 
 namespace ComicApi.Model.Repositories;
 
@@ -30,7 +27,7 @@ public class ComicApiRepository
     #region Comic
     private async Task CreateComicOnFly()
     {
-        await ApiSQLiteHelper.ExecuteNonQuery(@"
+        await ApiSQLiteHelper.ExecuteNonQueryAsync(@"
 CREATE TABLE IF NOT EXISTS ApiComic(
 Comic NVARCHAR(200) not NULL,
 Caption NVARCHAR(200) not NULL,
@@ -49,12 +46,12 @@ UNIQUE (Comic) ON CONFLICT REPLACE
         string sql = "SELECT LastUpdateChapterLink FROM ApiComic limit 1";
         try
         {
-            await ApiSQLiteHelper.ExecuteNonQuery(sql);
+            await ApiSQLiteHelper.ExecuteNonQueryAsync(sql);
         }
         catch (Exception a)
         {
             sql = "ALTER TABLE ApiComic ADD LastUpdateChapterLink NVARCHAR(100);";
-            await ApiSQLiteHelper.ExecuteNonQuery(sql);
+            await ApiSQLiteHelper.ExecuteNonQueryAsync(sql);
         }
     }
 
@@ -77,6 +74,7 @@ UNIQUE (Comic) ON CONFLICT REPLACE
         };
     }
 
+    private static object lockObj = new object();
     public async Task<bool> SaveComics(List<ComicEntity> comics, bool updateLastChapterLink = false)
     {
         var result = 0;
@@ -84,46 +82,53 @@ UNIQUE (Comic) ON CONFLICT REPLACE
         await using var conn = await ApiSQLiteHelper.GetConnection();
         await using var cmd = conn.CreateCommand();
         string sql = "";
-        try
+        lock (lockObj)
         {
-            await conn.OpenAsync();
-            int i = 0;
-            int size = 20;
-            var batch = comics.Skip(i * size).ToList();
-            while (batch.Count > 0)
+            try
             {
-                sql = "";
-                foreach (var comic in batch)
+                conn.Open();
+                int i = 0;
+                int size = 20;
+                var batch = comics.Skip(i * size).ToList();
+                while (batch.Count > 0)
                 {
-                    var lastUpdateChapterLink = comic.Chapters?.FirstOrDefault()?.Url?.GetUrlDirectoryName() ?? "";
-                    var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
-                    if (updateLastChapterLink)
+                    sql = "";
+                    foreach (var comic in batch)
                     {
-                        sql += $@"INSERT INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateChapterLink, LastUpdateDate) VALUES 
+                        var lastUpdateChapterLink = comic.Chapters?.FirstOrDefault()?.Url?.GetUrlDirectoryName() ?? "";
+                        var comicUrl = (new Uri(comic.Url)).LocalPath.Trim('/');
+                        if (updateLastChapterLink)
+                        {
+                            sql += $@"INSERT INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateChapterLink, LastUpdateDate) VALUES 
 ('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{lastUpdateChapterLink}', '{comic.LastUpdateDate}')
 ON CONFLICT(Comic) DO UPDATE SET 
 Caption = '{comic.Caption}',Url = '{comic.Url}', IconUrl = '{comic.IconUrl}',ListState = {(int)comic.ListState}, LastUpdateChapter = '{comic.LastUpdateChapter}', LastUpdateChapterLink = '{lastUpdateChapterLink}', LastUpdateDate = '{comic.LastUpdateDate}';";
-                    }
-                    else
-                    {
-                        sql += $@"INSERT INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
+                        }
+                        else
+                        {
+                            sql += $@"INSERT INTO ApiComic (Comic,Caption,Url,IconUrl, ListState, LastUpdateChapter, LastUpdateDate) VALUES 
 ('{comicUrl}','{comic.Caption}','{comic.Url}','{comic.IconUrl}', {(int)comic.ListState}, '{comic.LastUpdateChapter}', '{comic.LastUpdateDate}')
 ON CONFLICT(Comic) DO UPDATE SET 
 Caption = '{comic.Caption}',Url = '{comic.Url}', IconUrl = '{comic.IconUrl}',ListState = {(int)comic.ListState}, LastUpdateChapter = '{comic.LastUpdateChapter}', LastUpdateDate = '{comic.LastUpdateDate}';";
+                        }
                     }
-                }
-                cmd.CommandText = sql;
-                result += await cmd.ExecuteNonQueryAsync();
 
-                i++;
-                batch = comics.Skip(i * size).ToList();
+                    cmd.CommandText = sql;
+                    result += cmd.ExecuteNonQuery();
+
+                    i++;
+                    batch = comics.Skip(i * size).ToList();
+                }
             }
-        }
-        catch (Exception e)
-        {
-            conn.Dispose();
-            Console.WriteLine(e);
-            throw;
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open) conn.Close();
+            }
         }
         return result == comics.Count;
     }
@@ -131,14 +136,18 @@ Caption = '{comic.Caption}',Url = '{comic.Url}', IconUrl = '{comic.IconUrl}',Lis
     public async Task<bool> UpdateComicLastUpdateChapterLink(string comic, string lastUpdateChapterLink)
     {
         string sql = $@"UPDATE ApiComic SET LastUpdateChapterLink = '{lastUpdateChapterLink}' WHERE Comic = '{comic}';";
-        return await ApiSQLiteHelper.ExecuteNonQuery(sql) > 0;
+        lock (lockObj)
+        {
+            var result = ApiSQLiteHelper.ExecuteNonQuery(sql);
+            return result > 0;
+        }
     }
     #endregion
 
     #region Chapter
     private async Task CreateApiChapterOnFly()
     {
-        await ApiSQLiteHelper.ExecuteNonQuery(@"
+        await ApiSQLiteHelper.ExecuteNonQueryAsync(@"
 BEGIN;
 CREATE TABLE IF NOT EXISTS ApiChapter(
 Comic NVARCHAR(200) not NULL,
@@ -147,7 +156,7 @@ Caption NVARCHAR(200) not NULL,
 Url NVARCHAR(200) not NULL);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_ApiChapter ON ApiChapter (Comic, Chapter);
 COMMIT;");
-        await ApiSQLiteHelper.ExecuteNonQuery(@"
+        await ApiSQLiteHelper.ExecuteNonQueryAsync(@"
 BEGIN;
 CREATE TABLE IF NOT EXISTS ApiPage(
 Comic NVARCHAR(200) not NULL,
@@ -178,7 +187,7 @@ COMMIT;");
     public async Task<List<ComicPage>> GetComicPages(string comic, string chapter)
     {
         var sql = $"SELECT * FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}' ORDER BY PageNumber";
-        await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        await ApiSQLiteHelper.ExecuteNonQueryAsync(sql);
 
         var table = await ApiSQLiteHelper.GetTable(sql);
 
@@ -201,56 +210,71 @@ COMMIT;");
     public async Task<bool> SaveComicChapter(string comic, string chapter, ComicChapter comicChapter)
     {
         string sql = $@"INSERT OR REPLACE INTO ApiChapter (Comic, Chapter, Caption, Url) VALUES
-    ('{comic}', '{chapter}', '{comicChapter.Caption}', '{comicChapter.Url}');";
-        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
-        return result > 0;
+            ('{comic}', '{chapter}', '{comicChapter.Caption}', '{comicChapter.Url}');";
+
+        lock (lockObj)
+        {
+            var result = ApiSQLiteHelper.ExecuteNonQuery(sql);
+            return result > 0;
+        }
     }
 
     public async Task<bool> DeleteComicPages(string comic, string chapter)
     {
         var sql = $"DELETE FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
-        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
-        return result > 0;
+        lock (lockObj)
+        {
+            var result = ApiSQLiteHelper.ExecuteNonQuery(sql);
+            return result > 0;
+        }
     }
 
     public async Task<bool> SaveComicPages(string comic, string chapter, List<ComicPage> pages)
     {
         await using var conn = await ApiSQLiteHelper.GetConnection();
         await using var cmd = conn.CreateCommand();
-        try
+        lock (lockObj)
         {
-            await conn.OpenAsync();
-            var sql = $"DELETE FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
-            cmd.CommandText = sql;
-            await cmd.ExecuteNonQueryAsync();
-
-            var result = 0;
-
-            int i = 0;
-            int size = 20;
-            var batch = pages.Skip(size * i).Take(size).ToList();
-            while (batch.Count > 0)
+            try
             {
-                sql = "";
-                foreach (var page in batch)
+                conn.Open();
+                var sql = $"DELETE FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
+                cmd.CommandText = sql;
+                cmd.ExecuteNonQuery();
+
+                var result = 0;
+
+                int i = 0;
+                int size = 20;
+                var batch = pages.Skip(size * i).Take(size).ToList();
+                while (batch.Count > 0)
                 {
-                    sql += $@"INSERT OR REPLACE INTO ApiPage (Comic, Chapter, PageNumber, Caption, Url, PageFileName, Refer) VALUES
+                    sql = "";
+                    foreach (var page in batch)
+                    {
+                        sql += $@"INSERT OR REPLACE INTO ApiPage (Comic, Chapter, PageNumber, Caption, Url, PageFileName, Refer) VALUES
                         ('{comic}', '{chapter}', {page.PageNumber}, '{page.Caption}', '{page.Url}', '{page.PageFileName}', '{page.Refer}');";
 
-                }
-                cmd.CommandText = sql;
-                result += await cmd.ExecuteNonQueryAsync();
+                    }
+                    cmd.CommandText = sql;
+                    result += cmd.ExecuteNonQuery();
 
-                i++;
-                batch = pages.Skip(size * i).Take(size).ToList();
+                    i++;
+                    batch = pages.Skip(size * i).Take(size).ToList();
+                }
+                return result == pages.Count;
             }
-            return result == pages.Count;
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open) conn.Close();
+            }
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+
     }
 
     public async Task<string> GetLocalPath(string comic, string chapter)
@@ -264,7 +288,7 @@ COMMIT;");
     #region UserProfiles
     private async Task CreateIgnoreComicOnFly()
     {
-        await ApiSQLiteHelper.ExecuteNonQuery(@"
+        await ApiSQLiteHelper.ExecuteNonQueryAsync(@"
 BEGIN;
 CREATE TABLE IF NOT EXISTS UserIgnoreComic(
 UserId NVARCHAR(20) not NULL,
@@ -290,27 +314,37 @@ COMMIT;");
     public async Task AddIgnoreComic(IgnoreComicRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return;
+
         var sql = $"INSERT OR REPLACE INTO UserIgnoreComic (UserId, Comic, ComicName) VALUES ('{request.UserId}', '{request.Comic}', '{request.ComicName}')";
-        await ApiSQLiteHelper.ExecuteNonQuery(sql);
+        lock (lockObj)
+        {
+            ApiSQLiteHelper.ExecuteNonQuery(sql);
+        }
     }
     public async Task DeleteIgnoreComic(IgnoreComicRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return;
 
         var sql = $"DELETE FROM UserIgnoreComic WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
-        await ApiSQLiteHelper.GetTable(sql);
+        lock (lockObj)
+        {
+            ApiSQLiteHelper.ExecuteNonQuery(sql);
+        }
     }
     public async Task ClearIgnoreComics(string userId)
     {
         var sql = $"DELETE FROM UserIgnoreComic WHERE UserId = '{userId}'";
-        await ApiSQLiteHelper.GetTable(sql);
+        lock (lockObj)
+        {
+            ApiSQLiteHelper.ExecuteNonQuery(sql);
+        }
     }
     #endregion
 
     #region Favorite
     private async Task CreateFavoriteComicOnFly()
     {
-        await ApiSQLiteHelper.ExecuteNonQuery(@"
+        await ApiSQLiteHelper.ExecuteNonQueryAsync(@"
 BEGIN;
 CREATE TABLE IF NOT EXISTS UserFavoriteComic(
 UserId NVARCHAR(20) not NULL,
@@ -327,17 +361,17 @@ COMMIT;");
         string sql = "SELECT Level FROM UserFavoriteComic limit 1";
         try
         {
-            await ApiSQLiteHelper.ExecuteNonQuery(sql);
+            await ApiSQLiteHelper.ExecuteNonQueryAsync(sql);
         }
         catch (Exception a)
         {
             sql = "ALTER TABLE UserFavoriteComic ADD Level INT NOT NULL DEFAULT 1;";
-            await ApiSQLiteHelper.ExecuteNonQuery(sql);
+            await ApiSQLiteHelper.ExecuteNonQueryAsync(sql);
         }
     }
     private async Task CreateFavoriteChapterOnFly()
     {
-        await ApiSQLiteHelper.ExecuteNonQuery(@"
+        await ApiSQLiteHelper.ExecuteNonQueryAsync(@"
 BEGIN;
 CREATE TABLE IF NOT EXISTS UserFavoriteChapter(
 UserId NVARCHAR(20) not NULL,
@@ -351,29 +385,38 @@ COMMIT;");
     public async Task<bool> AddFavoriteComic(FavoriteComic request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return false;
+
         var sql = $"INSERT OR REPLACE INTO UserFavoriteComic (UserId, Comic, ComicName, IconUrl) VALUES ('{request.UserId}', '{request.Comic}', '{request.ComicName}', '{request.IconUrl}')";
-        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
-        return result > 0;
+        lock (lockObj)
+        {
+            var result = ApiSQLiteHelper.ExecuteNonQuery(sql);
+            return result > 0;
+        }
     }
 
     public async Task<bool> UpdateFavoriteComicLevel(FavoriteComicLevel request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return false;
+
         var sql = $"UPDATE UserFavoriteComic SET Level = {request.Level} WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
-        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
-        return result > 0;
+        lock (lockObj)
+        {
+            var result = ApiSQLiteHelper.ExecuteNonQuery(sql);
+            return result > 0;
+        }
     }
 
     public async Task<bool> DeleteFavoriteComic(FavoriteComic request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return false;
 
-        var sql = $"DELETE FROM UserFavoriteComic WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
-        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
-
-        sql = $"DELETE FROM UserFavoriteChapter WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}'";
-        result += await ApiSQLiteHelper.ExecuteNonQuery(sql);
-        return result > 0;
+        var sql = $"DELETE FROM UserFavoriteComic WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}';";
+        sql += $"DELETE FROM UserFavoriteChapter WHERE UserId = '{request.UserId}' AND Comic = '{request.Comic}';";
+        lock (lockObj)
+        {
+            var result = ApiSQLiteHelper.ExecuteNonQuery(sql);
+            return result > 0;
+        }
     }
 
     public async Task<List<FavoriteComic>> GetFavoriteComics(string userId, int? level = null)
@@ -468,10 +511,14 @@ COMMIT;");
     public async Task<bool> AddFavoriteChapter(FavoriteChapter request)
     {
         if (string.IsNullOrWhiteSpace(request.UserId)) return false;
+
         var sql = $@"INSERT OR REPLACE INTO UserFavoriteChapter (UserId, Comic, Chapter, ChapterName) VALUES 
             ('{request.UserId}', '{request.Comic}', '{request.Chapter}', '{request.ChapterName}')";
-        var result = await ApiSQLiteHelper.ExecuteNonQuery(sql);
-        return result > 0;
+        lock (lockObj)
+        {
+            var result = ApiSQLiteHelper.ExecuteNonQuery(sql);
+            return result > 0;
+        }
     }
 
     public async Task<FavoriteChapter> GetFavoriteChapter(string userId, string comic)
