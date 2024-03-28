@@ -188,8 +188,6 @@ COMMIT;");
     public async Task<List<ComicPage>> GetComicPages(string comic, string chapter)
     {
         var sql = $"SELECT * FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
-        await ApiSQLiteHelper.ExecuteNonQueryAsync(sql);
-
         var table = await ApiSQLiteHelper.GetTable(sql);
 
         var pages = new List<ComicPage>();
