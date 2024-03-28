@@ -198,8 +198,10 @@ namespace ComicApi.Controllers
                 //    // compare if dm5 has new comicPage's data
                 //    Task.Run(async () => await CompareComicPagesBG(comic, chapter, comicPages));
                 //}
+                if (showLog) Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] pages got, reset memory: {key}");
                 cache.Remove(key);
                 cache.Set(key, comicPages, pageCacheOptions);
+                if (showLog) Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPages] pages got, complete: {key}");
             }
             return comicPages;
         }

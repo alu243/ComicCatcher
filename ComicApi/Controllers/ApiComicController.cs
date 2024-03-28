@@ -2,6 +2,7 @@
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.ComicModels.Domains;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace ComicApi.Controllers
@@ -75,11 +76,14 @@ namespace ComicApi.Controllers
             var comicChapter = await app.GetComicChapterWithPage(comic, chapter);
 
             // 預讀下一章
-            var nextChapter = await app.GetNextChapter(comicEntity, chapter);
-            if (false == string.IsNullOrWhiteSpace(nextChapter))
+            Task.Run(async () =>
             {
-                app.GetComicChapterWithPage(comic, nextChapter);
-            }
+                var nextChapter = await app.GetNextChapter(comicEntity, chapter);
+                if (false == string.IsNullOrWhiteSpace(nextChapter))
+                {
+                    await app.GetComicChapterWithPage(comic, nextChapter);
+                }
+            });
             return ComicConverter.Convert(comic, chapter, comicEntity, comicChapter);
         }
 
@@ -87,14 +91,20 @@ namespace ComicApi.Controllers
         public async Task<ChapterModel> ShowComicPagesInNextChapter(string comic, string chapter)
         {
             var comicEntity = await app.GetComic(comic);
+
             var nextChapter = await app.GetNextChapter(comicEntity, chapter);
             if (string.IsNullOrWhiteSpace(nextChapter)) return null;
-
             ComicChapter comicChapter = await app.GetComicChapterWithPage(comic, nextChapter);
-            // 預讀下下一章
-            var nextnextChapter = await app.GetNextChapter(comicEntity, nextChapter);
-            app.GetComicChapterWithPage(comic, nextnextChapter);
 
+            // 預讀下下一章
+            Task.Run(async () =>
+            {
+                var nextnextChapter = await app.GetNextChapter(comicEntity, nextChapter);
+                if (false == string.IsNullOrWhiteSpace(nextChapter))
+                {
+                    await app.GetComicChapterWithPage(comic, nextnextChapter);
+                }
+            });
             return ComicConverter.Convert(comic, nextChapter, comicEntity, comicChapter);
         }
 
