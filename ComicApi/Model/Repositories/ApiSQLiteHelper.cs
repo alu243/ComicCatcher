@@ -2,6 +2,7 @@
 using System.Data;
 using Jint.Parser.Ast;
 using Quartz.Util;
+using System.Reflection;
 
 namespace ComicCatcherLib.DbModel;
 
@@ -31,18 +32,31 @@ public static class ApiSQLiteHelper
         dt.Load(reader);
         return dt;
     }
-    public static async Task<DataTable> GetTableLog(string sql)
+    public static async Task<List<T>> GetListLog<T>(string sql)
     {
+        List<T> list = new List<T>();
+        T obj = default(T);
+
         Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] start");
         await using var conn = new SqliteConnection(connStr);
         await conn.OpenAsync();
         await using var cmd = new SqliteCommand(sql, conn);
-        await using var reader = await cmd.ExecuteReaderAsync();
+        await using var dr = await cmd.ExecuteReaderAsync();
         Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] executed reader");
-        DataTable dt = new DataTable();
-        dt.Load(reader);
+        while (await dr.ReadAsync())
+        {
+            obj = Activator.CreateInstance<T>();
+            foreach (PropertyInfo prop in obj.GetType().GetProperties())
+            {
+                if (!object.Equals(dr[prop.Name], DBNull.Value))
+                {
+                    prop.SetValue(obj, dr[prop.Name], null);
+                }
+            }
+            list.Add(obj);
+        }
         Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] got table");
-        return dt;
+        return list;
     }
 
     public static async Task<int> ExecuteNonQueryAsync(string sql)

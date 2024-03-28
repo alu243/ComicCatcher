@@ -188,21 +188,22 @@ COMMIT;");
     public async Task<List<ComicPage>> GetComicPages(string comic, string chapter)
     {
         var sql = $"SELECT * FROM ApiPage WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
-        var table = await ApiSQLiteHelper.GetTableLog(sql);
+        //var table = await ApiSQLiteHelper.GetListLog(sql);
 
-        var pages = new List<ComicPage>();
-        foreach (DataRow row in table.Rows)
-        {
-            var page = new ComicPage()
-            {
-                Url = row.GetValue<string>("Url"),
-                Caption = row.GetValue<string>("Caption"),
-                PageFileName = row.GetValue<string>("PageFileName"),
-                PageNumber = Convert.ToInt32(row.GetValue<long>("PageNumber")),
-                Refer = row.GetValue<string>("Refer"),
-            };
-            pages.Add(page);
-        }
+        //var pages = new List<ComicPage>();
+        //foreach (DataRow row in table.Rows)
+        //{
+        //    var page = new ComicPage()
+        //    {
+        //        Url = row.GetValue<string>("Url"),
+        //        Caption = row.GetValue<string>("Caption"),
+        //        PageFileName = row.GetValue<string>("PageFileName"),
+        //        PageNumber = Convert.ToInt32(row.GetValue<long>("PageNumber")),
+        //        Refer = row.GetValue<string>("Refer"),
+        //    };
+        //    pages.Add(page);
+        //}
+        var pages = await ApiSQLiteHelper.GetListLog<ComicPage>(sql);
         pages = pages.OrderBy(p => p.PageNumber).ToList();
         return pages;
     }
