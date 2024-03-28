@@ -203,7 +203,7 @@ COMMIT;");
         //    };
         //    pages.Add(page);
         //}
-        var pages = await ApiSQLiteHelper.GetListLog<ComicPage>(sql);
+        var pages = await ApiSQLiteHelper.GetList<ComicPage>(sql);
         pages = pages.OrderBy(p => p.PageNumber).ToList();
         return pages;
     }
@@ -424,19 +424,20 @@ COMMIT;");
     {
         var sql = $"SELECT * FROM UserFavoriteComic WHERE UserId = '{userId}'";
         if (level != null) sql += $" AND Level = {level}";
-        var result = await ApiSQLiteHelper.GetTable(sql);
-        var list = new List<FavoriteComic>();
-        foreach (DataRow row in result.Rows)
-        {
-            var favorite = new FavoriteComic()
-            {
-                Comic = row.GetValue<string>("Comic")?.Trim(),
-                IconUrl = row.GetValue<string>("IconUrl")?.Trim(),
-                ComicName = row.GetValue<string>("ComicName")?.Trim(),
-                UserId = row.GetValue<string>("UserId")?.Trim(),
-            };
-            list.Add(favorite);
-        }
+        //var result = await ApiSQLiteHelper.GetTable(sql);
+        //var list = new List<FavoriteComic>();
+        //foreach (DataRow row in result.Rows)
+        //{
+        //    var favorite = new FavoriteComic()
+        //    {
+        //        Comic = row.GetValue<string>("Comic")?.Trim(),
+        //        IconUrl = row.GetValue<string>("IconUrl")?.Trim(),
+        //        ComicName = row.GetValue<string>("ComicName")?.Trim(),
+        //        UserId = row.GetValue<string>("UserId")?.Trim(),
+        //    };
+        //    list.Add(favorite);
+        //}
+        var list = await ApiSQLiteHelper.GetList<FavoriteComic>(sql);
         return list;
     }
 
@@ -450,7 +451,11 @@ COMMIT;");
                     IFNULL(c.ListState, 0) ListState, 
                     IFNULL(c.LastUpdateChapter, '') LastUpdateChapter,
                     IFNULL(c.LastUpdateChapterLink, '') LastUpdateChapterLink,
-                    IFNULL(c.LastUpdateDate, '') LastUpdateDate
+                    IFNULL(c.LastUpdateDate, '') LastUpdateDate,
+                    true IsFavorite,
+                    false IsIgnore,
+                    null ReadedChapter,
+                    null ReadedChapterLink
                     FROM UserFavoriteComic f
                     LEFT JOIN ApiComic c on f.Comic = c.Comic WHERE f.UserId = '{userId}'
                     ORDER BY c.LastUpdateDate DESC";
@@ -475,7 +480,11 @@ COMMIT;");
                     IFNULL(c.ListState, 0) ListState, 
                     IFNULL(c.LastUpdateChapter, '') LastUpdateChapter, 
                     IFNULL(c.LastUpdateChapterLink, '') LastUpdateChapterLink,
-                    IFNULL(c.LastUpdateDate, '') LastUpdateDate
+                    IFNULL(c.LastUpdateDate, '') LastUpdateDate,
+                    true IsFavorite,
+                    false IsIgnore,
+                    null ReadedChapter,
+                    null ReadedChapterLink
                     FROM UserFavoriteComic f
                     LEFT JOIN ApiComic c on f.Comic = c.Comic
                     ORDER BY c.LastUpdateDate DESC";
@@ -486,26 +495,30 @@ COMMIT;");
 
     private async Task<List<ComicViewModel>> GetComicViews(string sql)
     {
-        var result = await ApiSQLiteHelper.GetTable(sql);
-        var list = new List<ComicViewModel>();
-        foreach (DataRow row in result.Rows)
-        {
-            var comic = new ComicViewModel()
-            {
-                Level = row.GetValue<long>("Level"),
-                Comic = row.GetValue<string>("Comic"),
-                Url = row.GetValue<string>("Url"),
-                Caption = row.GetValue<string>("Caption"),
-                IconUrl = row.GetValue<string>("IconUrl"),
-                LastUpdateChapter = row.GetValue<string>("LastUpdateChapter"),
-                LastUpdateDate = row.GetValue<string>("LastUpdateDate"),
-                LastUpdateChapterLink = row.GetValue<string>("LastUpdateChapterLink"),
-                IsFavorite = true,
-                IsIgnore = false,
-                ReadedChapter = null,
-            };
-            list.Add(comic);
-        }
+        //var result = await ApiSQLiteHelper.GetTable(sql);
+        //var list = new List<ComicViewModel>();
+        //foreach (DataRow row in result.Rows)
+        //{
+        //    var comic = new ComicViewModel()
+        //    {
+        //        Level = row.GetValue<long>("Level"),
+        //        Comic = row.GetValue<string>("Comic"),
+        //        Url = row.GetValue<string>("Url"),
+        //        Caption = row.GetValue<string>("Caption"),
+        //        IconUrl = row.GetValue<string>("IconUrl"),
+        //        LastUpdateChapter = row.GetValue<string>("LastUpdateChapter"),
+        //        LastUpdateDate = row.GetValue<string>("LastUpdateDate"),
+        //        LastUpdateChapterLink = row.GetValue<string>("LastUpdateChapterLink"),
+        //        IsFavorite = true,
+        //        IsIgnore = false,
+        //        ReadedChapter = null,
+        //    };
+        //    list.Add(comic);
+        //}
+
+        var list = await ApiSQLiteHelper.GetList<ComicViewModel>(sql);
+        list.ForEach(l => l.ReadedChapter = null);
+        list.ForEach(l => l.IsFavorite = true);
         return list;
     }
 

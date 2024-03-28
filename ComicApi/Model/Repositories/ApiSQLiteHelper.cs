@@ -32,17 +32,17 @@ public static class ApiSQLiteHelper
         dt.Load(reader);
         return dt;
     }
-    public static async Task<List<T>> GetListLog<T>(string sql)
+    public static async Task<List<T>> GetList<T>(string sql)
     {
         List<T> list = new List<T>();
         T obj = default(T);
 
-        Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] start");
+        //Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] start");
         await using var conn = new SqliteConnection(connStr);
         await conn.OpenAsync();
         await using var cmd = new SqliteCommand(sql, conn);
         await using var dr = await cmd.ExecuteReaderAsync();
-        Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] executed reader");
+        //Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] executed reader");
         while (await dr.ReadAsync())
         {
             obj = Activator.CreateInstance<T>();
@@ -50,12 +50,25 @@ public static class ApiSQLiteHelper
             {
                 if (!object.Equals(dr[prop.Name], DBNull.Value))
                 {
-                    prop.SetValue(obj, dr[prop.Name], null);
+                    object propValue;
+                    switch (System.Type.GetTypeCode(prop.PropertyType))
+                    {
+                        case TypeCode.Boolean:
+                            propValue =Convert.ToBoolean(dr[prop.Name]);
+                            break;
+                        case TypeCode.Int32:
+                            propValue = Convert.ToInt32(dr[prop.Name]);
+                            break;
+                        default:
+                            propValue = dr[prop.Name];
+                            break;
+                    }
+                    prop.SetValue(obj, propValue, null);
                 }
             }
             list.Add(obj);
         }
-        Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] got table");
+        //Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] got table");
         return list;
     }
 
