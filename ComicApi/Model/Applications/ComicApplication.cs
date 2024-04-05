@@ -1,13 +1,10 @@
-﻿using System.Collections;
-using ComicApi.Model;
+﻿using ComicApi.Model;
 using ComicApi.Model.Repositories;
 using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.ComicModels.Domains;
 using ComicCatcherLib.Utils;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Caching.Memory;
-using Quartz.Util;
 
 namespace ComicApi.Controllers
 {
@@ -30,9 +27,9 @@ namespace ComicApi.Controllers
             repo = repository;
             cache = memoryCache;
             cacheOptions = new();
-            cacheOptions.SetSlidingExpiration(TimeSpan.FromMinutes(Config.CacheMinute));
+            cacheOptions.SetSlidingExpiration(TimeSpan.FromHours(24));
             pageCacheOptions = new();
-            pageCacheOptions.SetSlidingExpiration(TimeSpan.FromMinutes(Config.PageCacheMinute));
+            pageCacheOptions.SetSlidingExpiration(TimeSpan.FromHours(1));
         }
 
         ////////public async Task<ResponseModel> DownloadComicChapter(string comic, string chapter)
@@ -282,7 +279,7 @@ namespace ComicApi.Controllers
             }
 
             MemoryCacheEntryOptions options = new();
-            options.SetSlidingExpiration(TimeSpan.FromMinutes(80));
+            options.SetSlidingExpiration(TimeSpan.FromHours(24));
 
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] start check which comic({comics.Count}) needs refresh");
             var comicEntitiesNeedsUpdate = new List<ComicEntity>();
@@ -325,7 +322,7 @@ namespace ComicApi.Controllers
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshAllComicsAreFavorite] {comics.Count} comics are start refresh");
 
             MemoryCacheEntryOptions options = new();
-            options.SetSlidingExpiration(TimeSpan.FromMinutes(80));
+            options.SetSlidingExpiration(TimeSpan.FromHours(24));
 
             foreach (var comic in comics)
             {

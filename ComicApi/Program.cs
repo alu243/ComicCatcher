@@ -21,8 +21,10 @@ builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete
 
 builder.Services.AddQuartz(quartz =>
 {
+    quartz.UseMicrosoftDependencyInjectionJobFactory();
+
     // 建立 Job2
-    var jobKey2 = new JobKey("UpdateFavoriteByPagination", "UpdateFavoriteGroupByPagination");
+    var jobKey2 = new JobKey("UpdateFavoritesByPagination", "UpdateFavoritesByPaginationGroup");
     quartz.AddJob<UpdateFavoriteByPaginationJob>(opts =>
     {
         opts.WithIdentity(jobKey2);
@@ -33,14 +35,13 @@ builder.Services.AddQuartz(quartz =>
     quartz.AddTrigger(opts =>
     {
         opts.ForJob(jobKey2);
-        opts.WithIdentity("HelloWordTriggerByPagination", "HelloWordGroupByPagination");
-        opts.WithSimpleSchedule(x => x.WithIntervalInHours(24 * 7).RepeatForever());
+        opts.WithIdentity("UpdateFavoritesByPaginationTrigger", "UpdateFavoritesByPaginationTriggerGroup");
+        opts.WithSimpleSchedule(x => x.WithIntervalInHours(1).RepeatForever());
     });
 
 
-    quartz.UseMicrosoftDependencyInjectionJobFactory();
     // 建立 Job
-    var jobKey = new JobKey("UpdateFavorite", "UpdateFavoriteGroup");
+    var jobKey = new JobKey("UpdateAllFavorites", "UpdateAllFavoritesGroup");
     quartz.AddJob<UpdateFavoriteJob>(opts =>
     {
         opts.WithIdentity(jobKey);
@@ -51,8 +52,8 @@ builder.Services.AddQuartz(quartz =>
     quartz.AddTrigger(opts =>
     {
         opts.ForJob(jobKey);
-        opts.WithIdentity("HelloWordTrigger", "HelloWordGroup");
-        opts.WithSimpleSchedule(x => x.WithIntervalInHours(29).RepeatForever());
+        opts.WithIdentity("UpdateAllFavoritesTrigger", "UpdateAllFavoritesTriggerGroup");
+        opts.WithSimpleSchedule(x => x.WithIntervalInHours(14).RepeatForever());
     });
 });
 
