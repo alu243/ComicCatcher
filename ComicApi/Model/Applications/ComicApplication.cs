@@ -323,7 +323,7 @@ namespace ComicApi.Controllers
 
             MemoryCacheEntryOptions options = new();
             options.SetSlidingExpiration(TimeSpan.FromHours(24));
-
+            int count = 0;
             foreach (var comic in comics)
             {
                 var comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
@@ -332,6 +332,8 @@ namespace ComicApi.Controllers
                 cache.Remove(key);
                 cache.Set(key, comicEntity, options);
                 comicEntities.Add(comicEntity);
+                count++;
+                if (count % 50 == 0) Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshAllComicsAreFavorite] {count} comics are refreshed");
             }
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshAllComicsAreFavorite] {comics.Count} comics are start save");
             await this.repo.SaveComics(comicEntities, true);
