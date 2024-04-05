@@ -284,7 +284,10 @@ namespace ComicApi.Controllers
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] start check which comic({comics.Count}) needs refresh");
             var comicEntitiesNeedsUpdate = new List<ComicEntity>();
             int checkedCount = 0;
-            foreach (var comic in comics)
+            Parallel.ForEach(
+                comics,
+                new ParallelOptions { MaxDegreeOfParallelism = 3 },
+                async (comic) =>
             {
                 string key = $"comic_{comic.Comic}";
                 var comicEntityInPagination = comicEntitiesInPagination.FirstOrDefault(e => e.Url.Contains(comic.Comic));
@@ -306,7 +309,7 @@ namespace ComicApi.Controllers
                 cache.Set(key, comicEntity, options);
                 checkedCount++;
                 if (checkedCount % 20 == 0) Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] {checkedCount}/{comics.Count}) are checked");
-            }
+            });
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] {comics.Count} comics are start save");
             await this.repo.SaveComics(comicEntitiesNeedsUpdate, true);
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] {comics.Count} comics are refreshed");
@@ -324,7 +327,10 @@ namespace ComicApi.Controllers
             MemoryCacheEntryOptions options = new();
             options.SetSlidingExpiration(TimeSpan.FromHours(24));
             int count = 0;
-            Parallel.ForEach(comics, async (comic) =>
+            Parallel.ForEach(
+                comics,
+                new ParallelOptions { MaxDegreeOfParallelism = 3 },
+                async (comic) =>
             {
                 var comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
                 await dm5.LoadChapters(comicEntity);
