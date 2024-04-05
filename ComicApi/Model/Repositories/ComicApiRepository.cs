@@ -174,15 +174,13 @@ COMMIT;");
     public async Task<ComicChapter> GetComicChapter(string comic, string chapter)
     {
         var sql = $"SELECT * FROM ApiChapter WHERE Comic = '{comic}' AND Chapter = '{chapter}'";
-        var table = await ApiSQLiteHelper.GetTable(sql);
-        if (table.Rows.Count <= 0) return null;
-        var comicChapter = new ComicChapter()
+        var results= await ApiSQLiteHelper.GetList<ComicChapter>(sql);
+        if (results.Count <= 0) return null;
+        foreach (var item in results)
         {
-            Url = table.Rows[0].GetValue<string>("Url"),
-            Caption = table.Rows[0].GetValue<string>("Caption"),
-            ListState = ComicState.Created
-        };
-        return comicChapter;
+            item.ListState = ComicState.Created;
+        }
+        return results.FirstOrDefault();
     }
 
     public async Task<List<ComicPage>> GetComicPages(string comic, string chapter)
@@ -301,12 +299,12 @@ COMMIT;");
     public async Task<Dictionary<string, string>> GetIgnoreComics(string userId)
     {
         var sql = $"SELECT * FROM UserIgnoreComic WHERE UserId = '{userId}'";
-        var result = await ApiSQLiteHelper.GetTable(sql);
+        var results = await ApiSQLiteHelper.GetList<UserIgnoreComic>(sql);
         var dic = new Dictionary<string, string>();
-        foreach (DataRow row in result.Rows)
+        foreach (var row in results)
         {
-            string url = row.GetValue<string>("Comic")?.Trim();
-            string name = row.GetValue<string>("ComicName")?.Trim();
+            string url = row.Comic.Trim();
+            string name = row.ComicName.Trim();
             dic.TryAdd(url, name);
         }
 
@@ -424,19 +422,6 @@ COMMIT;");
     {
         var sql = $"SELECT * FROM UserFavoriteComic WHERE UserId = '{userId}'";
         if (level != null) sql += $" AND Level = {level}";
-        //var result = await ApiSQLiteHelper.GetTable(sql);
-        //var list = new List<FavoriteComic>();
-        //foreach (DataRow row in result.Rows)
-        //{
-        //    var favorite = new FavoriteComic()
-        //    {
-        //        Comic = row.GetValue<string>("Comic")?.Trim(),
-        //        IconUrl = row.GetValue<string>("IconUrl")?.Trim(),
-        //        ComicName = row.GetValue<string>("ComicName")?.Trim(),
-        //        UserId = row.GetValue<string>("UserId")?.Trim(),
-        //    };
-        //    list.Add(favorite);
-        //}
         var list = await ApiSQLiteHelper.GetList<FavoriteComic>(sql);
         return list;
     }
@@ -495,27 +480,6 @@ COMMIT;");
 
     private async Task<List<ComicViewModel>> GetComicViews(string sql)
     {
-        //var result = await ApiSQLiteHelper.GetTable(sql);
-        //var list = new List<ComicViewModel>();
-        //foreach (DataRow row in result.Rows)
-        //{
-        //    var comic = new ComicViewModel()
-        //    {
-        //        Level = row.GetValue<long>("Level"),
-        //        Comic = row.GetValue<string>("Comic"),
-        //        Url = row.GetValue<string>("Url"),
-        //        Caption = row.GetValue<string>("Caption"),
-        //        IconUrl = row.GetValue<string>("IconUrl"),
-        //        LastUpdateChapter = row.GetValue<string>("LastUpdateChapter"),
-        //        LastUpdateDate = row.GetValue<string>("LastUpdateDate"),
-        //        LastUpdateChapterLink = row.GetValue<string>("LastUpdateChapterLink"),
-        //        IsFavorite = true,
-        //        IsIgnore = false,
-        //        ReadedChapter = null,
-        //    };
-        //    list.Add(comic);
-        //}
-
         var list = await ApiSQLiteHelper.GetList<ComicViewModel>(sql);
         list.ForEach(l => l.ReadedChapter = null);
         list.ForEach(l => l.IsFavorite = true);
@@ -538,19 +502,7 @@ COMMIT;");
     public async Task<FavoriteChapter> GetFavoriteChapter(string userId, string comic)
     {
         var sql = $"SELECT * FROM UserFavoriteChapter WHERE UserId = '{userId}' AND comic = '{comic}'";
-        var result = await ApiSQLiteHelper.GetTable(sql);
-        var list = new List<FavoriteChapter>();
-        foreach (DataRow row in result.Rows)
-        {
-            var favorite = new FavoriteChapter()
-            {
-                Comic = row.GetValue<string>("Comic")?.Trim(),
-                Chapter = row.GetValue<string>("Chapter")?.Trim(),
-                ChapterName = row.GetValue<string>("ChapterName")?.Trim(),
-                UserId = row.GetValue<string>("UserId")?.Trim(),
-            };
-            list.Add(favorite);
-        }
+        var list = await ApiSQLiteHelper.GetList<FavoriteChapter>(sql);
         return list.FirstOrDefault();
     }
 
@@ -558,19 +510,7 @@ COMMIT;");
     public async Task<List<FavoriteChapter>> GetFavoriteChapters(string userId)
     {
         var sql = $"SELECT * FROM UserFavoriteChapter WHERE UserId = '{userId}'";
-        var result = await ApiSQLiteHelper.GetTable(sql);
-        var list = new List<FavoriteChapter>();
-        foreach (DataRow row in result.Rows)
-        {
-            var favorite = new FavoriteChapter()
-            {
-                Comic = row.GetValue<string>("Comic")?.Trim(),
-                Chapter = row.GetValue<string>("Chapter")?.Trim(),
-                ChapterName = row.GetValue<string>("ChapterName")?.Trim(),
-                UserId = row.GetValue<string>("UserId")?.Trim(),
-            };
-            list.Add(favorite);
-        }
+        var list = await ApiSQLiteHelper.GetList<FavoriteChapter>(sql);
         return list;
     }
     #endregion

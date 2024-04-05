@@ -43,18 +43,19 @@ public static class ApiSQLiteHelper
         await using var cmd = new SqliteCommand(sql, conn);
         await using var dr = await cmd.ExecuteReaderAsync();
         //Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [GetComicPagesDb] executed reader");
+        var fieldNames = Enumerable.Range(0, dr.FieldCount).Select(i => dr.GetName(i)).ToArray();
         while (await dr.ReadAsync())
         {
             obj = Activator.CreateInstance<T>();
             foreach (PropertyInfo prop in obj.GetType().GetProperties())
             {
-                if (!object.Equals(dr[prop.Name], DBNull.Value))
+                if (fieldNames.Contains(prop.Name) && !object.Equals(dr[prop.Name], DBNull.Value))
                 {
                     object propValue;
                     switch (System.Type.GetTypeCode(prop.PropertyType))
                     {
                         case TypeCode.Boolean:
-                            propValue =Convert.ToBoolean(dr[prop.Name]);
+                            propValue = Convert.ToBoolean(dr[prop.Name]);
                             break;
                         case TypeCode.Int32:
                             propValue = Convert.ToInt32(dr[prop.Name]);
