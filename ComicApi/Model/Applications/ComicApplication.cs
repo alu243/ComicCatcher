@@ -284,10 +284,10 @@ namespace ComicApi.Controllers
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] start check which comic({comics.Count}) needs refresh");
             var comicEntitiesNeedsUpdate = new List<ComicEntity>();
             int checkedCount = 0;
-            Parallel.ForEach(
+            await Parallel.ForEachAsync(
                 comics,
                 new ParallelOptions { MaxDegreeOfParallelism = 3 },
-                async (comic) =>
+                async (comic, t) =>
             {
                 string key = $"comic_{comic.Comic}";
                 var comicEntityInPagination = comicEntitiesInPagination.FirstOrDefault(e => e.Url.Contains(comic.Comic));
@@ -327,10 +327,10 @@ namespace ComicApi.Controllers
             MemoryCacheEntryOptions options = new();
             options.SetSlidingExpiration(TimeSpan.FromHours(24));
             int count = 0;
-            Parallel.ForEach(
+            await Parallel.ForEachAsync(
                 comics,
                 new ParallelOptions { MaxDegreeOfParallelism = 3 },
-                async (comic) =>
+                async (comic, t) =>
             {
                 var comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
                 await dm5.LoadChapters(comicEntity);
