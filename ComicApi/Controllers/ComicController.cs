@@ -18,7 +18,8 @@ namespace ComicApi.Controllers
             _httpClientFactory = httpClientFactory;
             if (client == null)
             {
-                var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null };
+                //var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null };
+                var handler = new HttpClientHandler() { UseCookies = true, Proxy = null };
                 client = new HttpClient(handler);// { BaseAddress = baseAddress };
             }
         }
@@ -50,11 +51,9 @@ namespace ComicApi.Controllers
                 url = Uri.UnescapeDataString(url);
                 var referer = $"https://www.dm5.cn/{chapter}/";
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-                //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}");
-                //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
                 //requestMessage.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
                 requestMessage.Headers.Referrer = new Uri(referer);
-                requestMessage.Headers.CacheControl = new CacheControlHeaderValue() { NoCache = true };
+                //requestMessage.Headers.CacheControl = new CacheControlHeaderValue() { NoCache = true };
 
                 //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
                 //using var client = new HttpClient();
