@@ -10,11 +10,17 @@ namespace ComicApi.Controllers
     {
         private ComicApplication app;
         private readonly IHttpClientFactory _httpClientFactory;
+        private static HttpClient client = null;
 
         public ComicController(ComicApplication comicApplication, IHttpClientFactory httpClientFactory)
         {
             app = comicApplication;
             _httpClientFactory = httpClientFactory;
+            if (client == null)
+            {
+                var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null };
+                client = new HttpClient(handler);// { BaseAddress = baseAddress };
+            }
         }
 
         [HttpGet("{comic}")]
@@ -51,7 +57,7 @@ namespace ComicApi.Controllers
                 requestMessage.Headers.CacheControl = new CacheControlHeaderValue() { NoCache = true };
 
                 //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
-                using var client = new HttpClient();
+                //using var client = new HttpClient();
                 var response = await client.SendAsync(requestMessage);
                 if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
