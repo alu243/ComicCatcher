@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace ComicApi.Controllers
 {
@@ -47,9 +48,10 @@ namespace ComicApi.Controllers
                 //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
                 //requestMessage.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
                 requestMessage.Headers.Referrer = new Uri(referer);
+                requestMessage.Headers.CacheControl = new CacheControlHeaderValue() { NoCache = true };
 
                 //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
-                using var client = _httpClientFactory.CreateClient("new");
+                using var client = new HttpClient();
                 var response = await client.SendAsync(requestMessage);
                 if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
