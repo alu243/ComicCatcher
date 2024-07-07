@@ -7,7 +7,7 @@ namespace ComicApi.Controllers
     public class ComicController : Controller
     {
         private ComicApplication app;
-        private static  HttpClient _httpClient = null;
+        private static HttpClient _httpClient = null;
 
         public ComicController(ComicApplication comicApplication)
         {
@@ -44,7 +44,8 @@ namespace ComicApi.Controllers
             try
             {
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, Uri.UnescapeDataString(url));
-                _httpClient.DefaultRequestHeaders.Referrer = new Uri($"https://www.dm5.cn/{chapter}");
+                requestMessage.Headers.Add("Referrer-Policy", "unsafe-url");
+                requestMessage.Headers.Referrer = new Uri($"https://www.dm5.cn/{chapter}");
 
                 var response = await _httpClient.SendAsync(requestMessage);
                 if (!response.IsSuccessStatusCode)
