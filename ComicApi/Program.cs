@@ -3,6 +3,7 @@ using ComicApi.Model.Jobs;
 using ComicApi.Model.Repositories;
 using ComicCatcherLib.ComicModels.Domains;
 using Quartz;
+using System.Net.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +59,12 @@ builder.Services.AddQuartz(quartz =>
 });
 
 
+builder.Services.AddHttpClient("proxy", client =>
+{
+    //var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null };
+    //_httpClient = new HttpClient(handler);// { BaseAddress = baseAddress };
+    client.DefaultRequestHeaders.Add("Referrer-Policy", "unsafe-url");
+});
 
 var app = builder.Build();
 // web

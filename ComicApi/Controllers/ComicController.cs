@@ -7,16 +7,12 @@ namespace ComicApi.Controllers
     public class ComicController : Controller
     {
         private ComicApplication app;
-        private static HttpClient _httpClient = null;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public ComicController(ComicApplication comicApplication)
+        public ComicController(ComicApplication comicApplication, IHttpClientFactory httpClientFactory)
         {
             app = comicApplication;
-            if (_httpClient == null)
-            {
-                var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null };
-                _httpClient = new HttpClient(handler);// { BaseAddress = baseAddress };
-            }
+            _httpClientFactory = httpClientFactory;
         }
 
         [HttpGet("{comic}")]
@@ -48,8 +44,8 @@ namespace ComicApi.Controllers
                 //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}");
                 requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
                 requestMessage.Headers.Referrer = new Uri($"https://www.dm5.cn/{chapter}");
-
-                var response = await _httpClient.SendAsync(requestMessage);
+                var client = _httpClientFactory.CreateClient("proxy");
+                var response = await client.SendAsync(requestMessage);
                 if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
                     Console.WriteLine(response.RequestMessage.Headers.ToString());
