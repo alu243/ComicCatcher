@@ -64,6 +64,11 @@ builder.Services.AddHttpClient("proxy", client =>
     //var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null };
     //_httpClient = new HttpClient(handler);// { BaseAddress = baseAddress };
     client.DefaultRequestHeaders.Add("Referrer-Policy", "unsafe-url");
+}).ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler()
+{
+    UseCookies = true,
+    Proxy = null,
+    MaxConnectionsPerServer = int.MaxValue
 });
 
 var app = builder.Build();
