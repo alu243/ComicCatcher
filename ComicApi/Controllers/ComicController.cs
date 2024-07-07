@@ -44,7 +44,7 @@ namespace ComicApi.Controllers
             try
             {
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, Uri.UnescapeDataString(url));
-                requestMessage.Headers.Referrer = new Uri($"https://www.dm5.cn/{chapter}/");
+                _httpClient.DefaultRequestHeaders.Referrer = new Uri($"https://www.dm5.cn/{chapter}");
 
                 var response = await _httpClient.SendAsync(requestMessage);
                 if (!response.IsSuccessStatusCode)
