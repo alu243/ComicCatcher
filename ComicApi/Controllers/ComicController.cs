@@ -50,6 +50,7 @@ namespace ComicApi.Controllers
                 var response = await _httpClient.SendAsync(requestMessage);
                 if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
+                    Console.WriteLine(response.RequestMessage.Headers.ToString());
                     return StatusCode(431);
                 }
 
