@@ -48,6 +48,11 @@ namespace ComicApi.Controllers
                 requestMessage.Headers.Referrer = new Uri($"https://www.dm5.cn/{chapter}");
 
                 var response = await _httpClient.SendAsync(requestMessage);
+                if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    return StatusCode(431);
+                }
+
                 if (!response.IsSuccessStatusCode)
                 {
                     return StatusCode((int)response.StatusCode);
