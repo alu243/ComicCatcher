@@ -19,7 +19,7 @@ namespace ComicApi.Controllers
             if (client == null)
             {
                 //var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null };
-                var handler = new HttpClientHandler() { UseCookies = true, Proxy = null };
+                var handler = new HttpClientHandler() { UseCookies = true, UseProxy = false, Proxy = null };
                 client = new HttpClient(handler);// { BaseAddress = baseAddress };
             }
         }
