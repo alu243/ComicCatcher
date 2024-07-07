@@ -45,6 +45,8 @@ namespace ComicApi.Controllers
             {
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, Uri.UnescapeDataString(url));
                 requestMessage.Headers.Add("Referrer-Policy", "unsafe-url");
+                //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}");
+                requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
                 requestMessage.Headers.Referrer = new Uri($"https://www.dm5.cn/{chapter}");
 
                 var response = await _httpClient.SendAsync(requestMessage);
