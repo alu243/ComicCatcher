@@ -40,40 +40,45 @@ namespace ComicApi.Controllers
 
             try
             {
-                //var requestMessage = new HttpRequestMessage(HttpMethod.Get, Uri.UnescapeDataString(url));
-                ////requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}");
-                ////requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
-                ////requestMessage.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
-                //requestMessage.Headers.Referrer = new Uri($"https://www.dm5.cn/{chapter}/");
-                ////requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
-                //var client = _httpClientFactory.CreateClient("proxy");
-                //var response = await client.SendAsync(requestMessage);
-                //if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
-                //{
-                //    Console.WriteLine(response.RequestMessage.Headers.ToString());
-                //    return StatusCode(431);
-                //}
+                url = Uri.UnescapeDataString(url);
+                var referer = $"https://www.dm5.cn/{chapter}/";
+                var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}");
+                //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
+                //requestMessage.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
+                requestMessage.Headers.Referrer = new Uri(referer);
 
-                //if (!response.IsSuccessStatusCode)
-                //{
-                //    return StatusCode((int)response.StatusCode);
-                //}
-                //var content = await response.Content.ReadAsByteArrayAsync();
-                //return File(content, "image/jpeg"); // 你可以根据图片的 MIME 类型修改这里
-                using (var client = new WebClient())
+                //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
+                using var client = _httpClientFactory.CreateClient("new");
+                var response = await client.SendAsync(requestMessage);
+                if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
-                    client.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
-                    try
-                    {
-                        var content = await client.DownloadDataTaskAsync(Uri.UnescapeDataString(url));
-                        var contentType = client.ResponseHeaders["Content-Type"] ?? "application/octet-stream";
-                        return File(content, contentType); 
-                    }
-                    catch (WebException ex) when (ex.Response is HttpWebResponse response)
-                    {
-                        return StatusCode((int)response.StatusCode);
-                    }
+                    Console.WriteLine(response.RequestMessage.Headers.ToString());
+                    return StatusCode(431);
                 }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return StatusCode((int)response.StatusCode);
+                }
+                var content = await response.Content.ReadAsByteArrayAsync();
+                return File(content, "image/jpeg");
+
+
+                //using (var client = new WebClient())
+                //{
+                //    client.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
+                //    try
+                //    {
+                //        var content = await client.DownloadDataTaskAsync(Uri.UnescapeDataString(url));
+                //        var contentType = client.ResponseHeaders["Content-Type"] ?? "application/octet-stream";
+                //        return File(content, contentType); 
+                //    }
+                //    catch (WebException ex) when (ex.Response is HttpWebResponse response)
+                //    {
+                //        return StatusCode((int)response.StatusCode);
+                //    }
+                //}
             }
             catch (Exception e)
             {
