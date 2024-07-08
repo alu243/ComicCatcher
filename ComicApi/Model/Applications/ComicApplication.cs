@@ -120,6 +120,29 @@ namespace ComicApi.Controllers
             return comicEntity;
         }
 
+        public async Task DelComicPages(string comic, string chapter)
+        {
+            string chapterKey = $"comic_{comic}_chatper_{chapter}";
+            string pageKey = $"comic_{comic}_chatper_{chapter}_pages";
+            try
+            {
+                cache.Remove(chapterKey);
+            }
+            catch
+            {
+            }
+            try
+            {
+                cache.Remove(pageKey);
+            }
+            catch
+            {
+            }
+
+            await this.repo.DeleteComicPages(comic, chapter);
+        }
+        
+        
         public async Task<ComicChapter> GetComicChapterWithPage(string comic, string chapter)
         {
             var comicChapter = await this.GetComicChapter(comic, chapter);
