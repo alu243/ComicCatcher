@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Security;
 
 namespace ComicApi.Controllers
 {
@@ -18,8 +19,8 @@ namespace ComicApi.Controllers
             _httpClientFactory = httpClientFactory;
             if (client == null)
             {
-                //var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null };
-                var handler = new HttpClientHandler() { UseCookies = true, UseProxy = false, Proxy = null };
+                var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null, UseProxy = false, MaxConnectionsPerServer = int.MaxValue };
+                //var handler = new HttpClientHandler() { UseCookies = true, UseProxy = false, Proxy = null };
                 client = new HttpClient(handler);// { BaseAddress = baseAddress };
             }
         }
@@ -38,24 +39,20 @@ namespace ComicApi.Controllers
         }
 
 
-        [HttpGet("{comic}/{chapter}/{url}")]
-        public async Task<IActionResult> GetImage(string comic, string chapter, string url)
+        [HttpGet("{comic}/{chapter}/{page:int}")]
+        public async Task<IActionResult> GetImage(string comic, string chapter, int page)
         {
-            if (string.IsNullOrEmpty(url))
-            {
-                return BadRequest("URL is required");
-            }
-
             try
             {
-                url = Uri.UnescapeDataString(url);
+                var comicChapter = await app.GetComicChapterWithPage(comic, chapter);
+                var comicPage = comicChapter.Pages[page - 1];
+                var url = comicPage.Url;
                 var referer = $"https://www.dm5.cn/{chapter}/";
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 //requestMessage.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
                 requestMessage.Headers.Referrer = new Uri(referer);
                 //requestMessage.Headers.CacheControl = new CacheControlHeaderValue() { NoCache = true };
 
-                //requestMessage.Headers.Add("Referrer", $"https://www.dm5.cn/{chapter}/");
                 //using var client = new HttpClient();
                 var response = await client.SendAsync(requestMessage);
                 if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
@@ -70,27 +67,10 @@ namespace ComicApi.Controllers
                 }
                 var content = await response.Content.ReadAsByteArrayAsync();
                 return File(content, "image/jpeg");
-
-
-                //using (var client = new WebClient())
-                //{
-                //    client.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
-                //    try
-                //    {
-                //        var content = await client.DownloadDataTaskAsync(Uri.UnescapeDataString(url));
-                //        var contentType = client.ResponseHeaders["Content-Type"] ?? "application/octet-stream";
-                //        return File(content, contentType); 
-                //    }
-                //    catch (WebException ex) when (ex.Response is HttpWebResponse response)
-                //    {
-                //        return StatusCode((int)response.StatusCode);
-                //    }
-                //}
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                return StatusCode((int)404);
             }
         }
     }
