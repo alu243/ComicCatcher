@@ -19,7 +19,15 @@ namespace ComicApi.Controllers
             _httpClientFactory = httpClientFactory;
             if (client == null)
             {
-                var handler = new SocketsHttpHandler() { UseCookies = true, Proxy = null, UseProxy = false, MaxConnectionsPerServer = int.MaxValue };
+                var handler = new SocketsHttpHandler()
+                {
+                    UseCookies = true, 
+                    Proxy = null, 
+                    UseProxy = false, 
+                    MaxConnectionsPerServer = 20, // 設置每個服務器的最大連接數
+                    PooledConnectionLifetime = TimeSpan.FromMinutes(2), // 連接在池中的最大存活時間
+                    PooledConnectionIdleTimeout = TimeSpan.FromSeconds(90) // 空閒連接的超時時間
+                };
                 //var handler = new HttpClientHandler() { UseCookies = true, UseProxy = false, Proxy = null };
                 client = new HttpClient(handler);// { BaseAddress = baseAddress };
             }
