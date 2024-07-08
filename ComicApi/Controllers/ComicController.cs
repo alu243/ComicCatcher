@@ -49,9 +49,9 @@ namespace ComicApi.Controllers
                 //var comicPage = comicChapter.Pages[page - 1];
                 //var url = comicPage.Url;
                 url = Uri.UnescapeDataString(url);
-                var referer = $"https://www.dm5.cn/{chapter}/";
-                url = "https://manhua1038zjcdn123.cdndm5.com/82/81521/1542619/1_4319.jpg?cid=1542619&key=18e3d587dc68f7552e5945dae2a0f570";
-                
+                var referer = $"https://www.dm5.cn/" + chapter + "/";
+                //url = "https://manhua1038zjcdn123.cdndm5.com/82/81521/1542619/1_4319.jpg?cid=1542619&key=18e3d587dc68f7552e5945dae2a0f570";
+
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 //requestMessage.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
                 requestMessage.Headers.Referrer = new Uri(referer);
