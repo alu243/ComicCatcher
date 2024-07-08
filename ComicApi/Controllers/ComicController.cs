@@ -67,9 +67,9 @@ namespace ComicApi.Controllers
                 Console.WriteLine(url);
                 if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
-                    Console.WriteLine(url);
+                    var rt = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine(rt);
                     Console.WriteLine(response.RequestMessage.Headers.ToString());
-                    Console.WriteLine(response.Content);
                     return StatusCode(431);
                 }
 
