@@ -21,9 +21,9 @@ namespace ComicApi.Controllers
             {
                 var handler = new SocketsHttpHandler()
                 {
-                    UseCookies = true, 
-                    Proxy = null, 
-                    UseProxy = false, 
+                    UseCookies = true,
+                    Proxy = null,
+                    UseProxy = false,
                     MaxConnectionsPerServer = 20, // 設置每個服務器的最大連接數
                     PooledConnectionLifetime = TimeSpan.FromMinutes(2), // 連接在池中的最大存活時間
                     PooledConnectionIdleTimeout = TimeSpan.FromSeconds(90) // 空閒連接的超時時間
@@ -47,15 +47,15 @@ namespace ComicApi.Controllers
         }
 
 
-        [HttpGet("{comic}/{chapter}/{page:int}")]
-        public async Task<IActionResult> GetImage(string comic, string chapter, int page)
+        [HttpGet("{comic}/{chapter}/{url}")] //[HttpGet("{comic}/{chapter}/{page:int}")]
+        public async Task<IActionResult> GetImage(string comic, string chapter, string url)
         {
             try
             {
-                var comicChapter = await app.GetComicChapterWithPage(comic, chapter);
-                var comicPage = comicChapter.Pages[page - 1];
-                //var comicPage = comicChapter.Pages[0];
-                var url = comicPage.Url;
+                //var comicChapter = await app.GetComicChapterWithPage(comic, chapter);
+                //var comicPage = comicChapter.Pages[page - 1];
+                //var url = comicPage.Url;
+                url = Uri.UnescapeDataString(url);
                 var referer = $"https://www.dm5.cn/{chapter}/";
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 //requestMessage.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
@@ -64,6 +64,7 @@ namespace ComicApi.Controllers
 
                 //using var client = new HttpClient();
                 var response = await client.SendAsync(requestMessage);
+                Console.WriteLine(url);
                 if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
                     Console.WriteLine(url);
