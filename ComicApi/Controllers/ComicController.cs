@@ -53,7 +53,8 @@ namespace ComicApi.Controllers
             try
             {
                 var comicChapter = await app.GetComicChapterWithPage(comic, chapter);
-                var comicPage = comicChapter.Pages[page - 1];
+                //var comicPage = comicChapter.Pages[page - 1];
+                var comicPage = comicChapter.Pages[0];
                 var url = comicPage.Url;
                 var referer = $"https://www.dm5.cn/{chapter}/";
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
@@ -65,7 +66,9 @@ namespace ComicApi.Controllers
                 var response = await client.SendAsync(requestMessage);
                 if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
+                    Console.WriteLine(url);
                     Console.WriteLine(response.RequestMessage.Headers.ToString());
+                    Console.WriteLine(response.Content);
                     return StatusCode(431);
                 }
 
