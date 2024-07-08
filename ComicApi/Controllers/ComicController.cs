@@ -53,8 +53,8 @@ namespace ComicApi.Controllers
             try
             {
                 var comicChapter = await app.GetComicChapterWithPage(comic, chapter);
-                //var comicPage = comicChapter.Pages[page - 1];
-                var comicPage = comicChapter.Pages[0];
+                var comicPage = comicChapter.Pages[page - 1];
+                //var comicPage = comicChapter.Pages[0];
                 var url = comicPage.Url;
                 var referer = $"https://www.dm5.cn/{chapter}/";
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
