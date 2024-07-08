@@ -1,8 +1,4 @@
-﻿using System.Net;
-using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Security;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace ComicApi.Controllers
 {
@@ -10,13 +6,11 @@ namespace ComicApi.Controllers
     public class ComicController : Controller
     {
         private ComicApplication app;
-        private readonly IHttpClientFactory _httpClientFactory;
         private static HttpClient client = null;
 
-        public ComicController(ComicApplication comicApplication, IHttpClientFactory httpClientFactory)
+        public ComicController(ComicApplication comicApplication)
         {
             app = comicApplication;
-            _httpClientFactory = httpClientFactory;
             if (client == null)
             {
                 var handler = new SocketsHttpHandler()
@@ -28,7 +22,6 @@ namespace ComicApi.Controllers
                     PooledConnectionLifetime = TimeSpan.FromMinutes(2), // 連接在池中的最大存活時間
                     PooledConnectionIdleTimeout = TimeSpan.FromSeconds(90) // 空閒連接的超時時間
                 };
-                //var handler = new HttpClientHandler() { UseCookies = true, UseProxy = false, Proxy = null };
                 client = new HttpClient(handler);// { BaseAddress = baseAddress };
             }
         }
@@ -57,6 +50,10 @@ namespace ComicApi.Controllers
                 //var url = comicPage.Url;
                 url = Uri.UnescapeDataString(url);
                 var referer = $"https://www.dm5.cn/{chapter}/";
+                url = "https://manhua1038zjcdn123.cdndm5.com/82/81521/1542619/1_4319.jpg?cid=1542619&key=18e3d587dc68f7552e5945dae2a0f570";
+                referer = "https://www.dm5.cn/m1542619/";
+                
+                
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 //requestMessage.Headers.Add("Referer", $"https://www.dm5.cn/{chapter}/");
                 requestMessage.Headers.Referrer = new Uri(referer);
