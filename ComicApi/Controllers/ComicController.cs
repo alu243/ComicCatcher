@@ -55,9 +55,10 @@ namespace ComicApi.Controllers
                 var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 requestMessage.Headers.Referrer = new Uri(referer);
                 var response = await client.SendAsync(requestMessage);
-                Console.WriteLine(url);
                 if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
+                    Console.WriteLine("get image error");
+                    Console.WriteLine(url);
                     var rt = await response.Content.ReadAsStringAsync();
                     Console.WriteLine(rt);
                     Console.WriteLine(response.RequestMessage.Headers.ToString());
