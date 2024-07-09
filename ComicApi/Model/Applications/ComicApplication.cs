@@ -142,13 +142,37 @@ namespace ComicApi.Controllers
             return comicEntity;
         }
 
+        private async Task SavePageImageOnly(string chapter, string url)
+        {
+            var file = Path.GetFileName(url).Split('?')[0];
+
+            if (!fileHelper.IsExists(chapter, file))
+            {
+                var response = await GetImageFromWeb(chapter, url);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsByteArrayAsync();
+                    await fileHelper.SaveFile(chapter, file, content);
+                }
+            }
+        }
+
+        private async Task<HttpResponseMessage> GetImageFromWeb(string chapter, string url)
+        {
+            //var url2 = "https://manhua1038zjcdn123.cdndm5.com/82/81521/1542619/1_4319.jpg?cid=1542619&key=18e3d587dc68f7552e5945dae2a0f570";
+            //Console.WriteLine("url equal? " + url.Equals(url2));
+            var referer = dm5.GetRoot().ReferrerHost + chapter + "/";
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+            requestMessage.Headers.Referrer = new Uri(referer);
+            var response = await client.SendAsync(requestMessage);
+            return response;
+        }
+
         public async Task<byte[]> GetImage(string comic, string chapter, string url)
         {
 
             var file = Path.GetFileName(url).Split('?')[0];
 
-            //var url2 = "https://manhua1038zjcdn123.cdndm5.com/82/81521/1542619/1_4319.jpg?cid=1542619&key=18e3d587dc68f7552e5945dae2a0f570";
-            //Console.WriteLine("url equal? " + url.Equals(url2));
 
             if (fileHelper.IsExists(chapter, file))
             {
@@ -156,11 +180,7 @@ namespace ComicApi.Controllers
                 return fileContent;
             }
 
-            var referer = dm5.GetRoot().ReferrerHost + chapter + "/";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Referrer = new Uri(referer);
-            var response = await client.SendAsync(requestMessage);
-
+            var response = await GetImageFromWeb(chapter, url);
             if (!response.IsSuccessStatusCode)
             {
                 Console.WriteLine($"response {(int)response.StatusCode} error:");
@@ -448,7 +468,11 @@ namespace ComicApi.Controllers
                     var chapter = chapterList[3];
                     if (chapter.Equals(comic.ReadedChapterLink ?? "")) return;
 
-                    await this.GetComicPages(comic.Comic, chapter);
+                    chapterEntity.Pages = await this.GetComicPages(comic.Comic, chapter);
+                    foreach (var page in chapterEntity.Pages)
+                    {
+                        await this.SavePageImageOnly(chapter, page.Url);
+                    }
                     count++;
                 }
             }
