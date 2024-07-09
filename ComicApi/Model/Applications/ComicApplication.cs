@@ -1,8 +1,10 @@
-﻿using ComicApi.Model;
+﻿using System.Net;
+using ComicApi.Model;
 using ComicApi.Model.Repositories;
 using ComicApi.Model.Requests;
 using ComicCatcherLib.ComicModels;
 using ComicCatcherLib.ComicModels.Domains;
+using ComicCatcherLib.DbModel;
 using ComicCatcherLib.Utils;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -16,20 +18,40 @@ namespace ComicApi.Controllers
         private IMemoryCache cache;
         private MemoryCacheEntryOptions cacheOptions;
         private MemoryCacheEntryOptions pageCacheOptions;
+        private ApiFileHelper fileHelper;
+        private static HttpClient client = null;
+
 
         public ComicApplication(Dm5 comic,
             //IHostingEnvironment hostEnvironment,
             ComicApiRepository repository,
+            ApiFileHelper fh,
             IMemoryCache memoryCache)
         {
             dm5 = comic;
             //env = hostEnvironment;
             repo = repository;
             cache = memoryCache;
+            fileHelper = fh;
+
             cacheOptions = new();
             cacheOptions.SetSlidingExpiration(TimeSpan.FromHours(24));
             pageCacheOptions = new();
             pageCacheOptions.SetSlidingExpiration(TimeSpan.FromHours(1));
+
+            if (client == null)
+            {
+                var handler = new SocketsHttpHandler()
+                {
+                    UseCookies = true,
+                    Proxy = null,
+                    UseProxy = false,
+                    MaxConnectionsPerServer = 999, // 設置每個服務器的最大連接數
+                    PooledConnectionLifetime = TimeSpan.FromMinutes(10), // 連接在池中的最大存活時間
+                    PooledConnectionIdleTimeout = TimeSpan.FromSeconds(90) // 空閒連接的超時時間
+                };
+                client = new HttpClient(handler);// { BaseAddress = baseAddress };
+            }
         }
 
         ////////public async Task<ResponseModel> DownloadComicChapter(string comic, string chapter)
@@ -120,7 +142,43 @@ namespace ComicApi.Controllers
             return comicEntity;
         }
 
-        public async Task DelComicPages(string comic, string chapter)
+        public async Task<byte[]> GetImage(string comic, string chapter, string url)
+        {
+
+            var file = Path.GetFileName(url).Split('?')[0];
+
+            //var url2 = "https://manhua1038zjcdn123.cdndm5.com/82/81521/1542619/1_4319.jpg?cid=1542619&key=18e3d587dc68f7552e5945dae2a0f570";
+            //Console.WriteLine("url equal? " + url.Equals(url2));
+
+            if (fileHelper.IsExists(chapter, file))
+            {
+                var fileContent = await fileHelper.GetFileContent(chapter, file);
+                return fileContent;
+            }
+
+            var referer = dm5.GetRoot().ReferrerHost + chapter + "/";
+            var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+            requestMessage.Headers.Referrer = new Uri(referer);
+            var response = await client.SendAsync(requestMessage);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"response {(int)response.StatusCode} error:");
+                Console.WriteLine(url);
+                var rt = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(rt);
+                Console.WriteLine(response.RequestMessage.Headers.ToString());
+
+                await DelComicPages(comic, chapter);
+                throw new WebException($"{(int)response.StatusCode}");
+            }
+
+            var content = await response.Content.ReadAsByteArrayAsync();
+            fileHelper.SaveFile(chapter, file, content);
+            return content;
+        }
+
+        private async Task DelComicPages(string comic, string chapter)
         {
             string chapterKey = $"comic_{comic}_chatper_{chapter}";
             string pageKey = $"comic_{comic}_chatper_{chapter}_pages";
@@ -141,8 +199,8 @@ namespace ComicApi.Controllers
 
             await this.repo.DeleteComicPages(comic, chapter);
         }
-        
-        
+
+
         public async Task<ComicChapter> GetComicChapterWithPage(string comic, string chapter)
         {
             var comicChapter = await this.GetComicChapter(comic, chapter);

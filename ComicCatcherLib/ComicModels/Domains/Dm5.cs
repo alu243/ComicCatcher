@@ -11,6 +11,7 @@ public class Dm5 : IComicCatcher
         {
             Caption = "動漫屋(dm5)",
             Url = @"https://www.dm5.com/",
+            ReferrerHost = @"https://www.dm5.cn/",
             WebSiteName = "dm5",
             IconHost = @"",
             PicHost = @"",

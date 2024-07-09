@@ -2,6 +2,7 @@ using ComicApi.Controllers;
 using ComicApi.Model.Jobs;
 using ComicApi.Model.Repositories;
 using ComicCatcherLib.ComicModels.Domains;
+using ComicCatcherLib.DbModel;
 using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ builder.Services.AddServerSideBlazor(c => c.DetailedErrors = true);
 
 builder.Services.AddSingleton<Dm5>();
 builder.Services.AddSingleton<ComicApiRepository>();
+builder.Services.AddSingleton<ApiFileHelper>();
 builder.Services.AddSingleton<ComicApplication>();
 
 // quartz

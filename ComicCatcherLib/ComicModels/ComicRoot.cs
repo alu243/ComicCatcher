@@ -3,6 +3,7 @@
 public class ComicRoot : ComicBaseProperty
 {
     public string WebSiteName { get; set; }
+    public string ReferrerHost { get; set; }
     public string IconHost { get; set; }
     public string PicHost { get; set; }
     public string PicHost2 { get; set; }
