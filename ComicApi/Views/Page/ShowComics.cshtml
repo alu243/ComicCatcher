@@ -49,8 +49,12 @@
                     <a :href="getComicAction(comic)">
                         <p :class="{'card-title': true, 'bg-primary': comic.isFavorite, 'text-light': true ,'fw-bold': comic.isFavorite, 'lh-sm':true }" style="font-size:14px;padding-top:3px">{{comic.caption}}</p>
                     </a>
-                    <span class="card-text lh-sm center" style="font-size:14px; color:lightgray">{{comic.lastUpdateDate}}</span>
-                    <span class="card-text lh-sm center" style="font-size:14px; color: lightgray; white-space: nowrap;">>{{comic.readedChapter}}{{comic.readedChapter?'/':''}}{{comic.lastUpdateChapter}}<</span>
+                    <span class="card-text lh-sm center" style="font-size:12px; color:lightgray; text-align:center;">
+                        {{comic.lastUpdateDate.split(' ')[0]}}
+                        <br v-if="comic.lastUpdateDate.split(' ')[1]" />{{comic.lastUpdateDate.split(' ')[1]}}
+                        <br />>{{comic.lastUpdateChapter}}<
+                        <br v-if="comic.readedChapter" />{{comic.readedChapter?'('+comic.readedChapter+')':''}}
+                    </span>
                 </div>
             </div>
         </div>

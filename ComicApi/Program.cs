@@ -9,7 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
-builder.Services.AddRazorPages();
+if (builder.Environment.IsDevelopment())
+{
+    // development 設定為即時重新編譯 cshtml
+    builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+}
+else
+{
+    builder.Services.AddRazorPages();
+}
 //builder.Services.AddSystemWebAdapters();
 builder.Services.AddServerSideBlazor(c => c.DetailedErrors = true);
 
