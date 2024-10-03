@@ -264,6 +264,20 @@ namespace ComicApi.Controllers
             return comicChapter;
         }
 
+        public async Task<bool> DeleteChapterPages(string comic, string chapter)
+        {
+            //string keyC = $"comic_{comic}_chatper_{chapter}";
+            string keyP = $"comic_{comic}_chatper_{chapter}_pages";
+            cache.Remove(keyP);
+            //cache.Remove(cache);
+            if (fileHelper.IsExists(chapter))
+            {
+                fileHelper.Delete(chapter);
+            }
+            return await repo.DeleteComicPages(comic, chapter);
+        }
+
+
         private async Task<List<ComicPage>> GetComicPages(string comic, string chapter, bool showLog = false)
         {
             string key = $"comic_{comic}_chatper_{chapter}_pages";

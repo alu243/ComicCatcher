@@ -68,6 +68,12 @@ namespace ComicApi.Controllers
 
         }
 
+        [HttpPost("{comic}/{chapter}/deletepages")]
+        public async Task<bool> DeleteComicChapterPages(string comic, string chapter)
+        {
+            return await app.DeleteChapterPages(comic, chapter);
+        }
+
         #region Show ComicPages In ComicChapter
         [HttpGet("{comic}/{chapter}")]
         public async Task<ChapterModel> ShowComicPagesInChapter(string comic, string chapter)

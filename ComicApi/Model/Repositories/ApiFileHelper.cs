@@ -21,6 +21,19 @@ public class ApiFileHelper
         return File.Exists(fullpath);
     }
 
+    public bool IsExists(string chapter)
+    {
+        var fullpath = Path.Combine(baseDir, chapter);
+        return Directory.Exists(fullpath);
+    }
+
+    public void Delete(string chapter)
+    {
+        var fullpath = Path.Combine(baseDir, chapter);
+        Directory.Delete(fullpath, true);
+    }
+
+
     public async Task<byte[]> GetFileContent(string chapter, string file)
     {
         if (!IsExists(chapter, file))
