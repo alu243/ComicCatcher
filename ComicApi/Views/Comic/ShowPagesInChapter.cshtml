@@ -27,7 +27,7 @@
         </div>
         <h2 style="text-align: center;">{{ chapter.currChapter.caption }}</h2>
         <div v-for="x in chapter.currChapter.pages" :id="`${chapter.chapter}_${x.pageNumber}`" class="center sapce page-info">
-            <div v-if="pagely" style="width:100%;border-bottom: 1px solid;display:flex">
+            <div v-if="pagely" style="width:100%;border-bottom: 1px solid;display:flex;justify-content:center">
                 <span class="fw-bold center">{{chapter.currChapter.caption}}：第{{x.pageNumber}}頁/共{{chapter.currChapter.pages.length}}頁</span>
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 <button class="btn btn-outline-secondary btn-sm" style="z-index:10000" @@click="chapter.dt=(chapter.dt??0)+1"><i class="bi bi-arrow-clockwise"></i></button>
