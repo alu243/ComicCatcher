@@ -161,3 +161,4 @@ $RECYCLE.BIN/
 /ComicCatcher2
 .vs
 ComicApi/wwwroot/ComicApi.s3db
+ComicApi/db/ComicApi.s3db
