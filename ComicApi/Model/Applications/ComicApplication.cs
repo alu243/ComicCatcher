@@ -410,9 +410,17 @@ namespace ComicApi.Controllers
                 var isGotComic = cache.TryGetValue(key, out ComicEntity comicEntity);
                 if (!isGotComic) //找不到 comic 重讀
                 {
-                    comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
-                    await dm5.LoadChapters(comicEntity);
-                    comicEntitiesNeedsUpdate.Add(comicEntity);
+                    try
+                    {
+                        comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
+                        await dm5.LoadChapters(comicEntity);
+                        comicEntitiesNeedsUpdate.Add(comicEntity);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] 取得失敗: {comic.Caption}");
+                        Console.WriteLine(ex.ToString());
+                    }
                 }
                 else if (comicEntityInPagination != null && comicEntity.LastUpdateChapter != comicEntityInPagination.LastUpdateChapter) //找到的 comic 有更新，重讀
                 {
