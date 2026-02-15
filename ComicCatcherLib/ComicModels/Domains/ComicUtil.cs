@@ -61,7 +61,7 @@ public class ComicUtil
 
     public static async Task<string> GetUtf8Content(string url, string reffer = "")
     {
-        int origTries = 10;
+        int origTries = 5;
         int remainTries = origTries;
         while (remainTries >= 0)
         {
@@ -80,7 +80,7 @@ public class ComicUtil
                 remainTries--;
             }
         }
-        throw new NullReferenceException(string.Format("GetUtf8Content:連線發生錯誤，且重新測試超過{0}次！！", origTries));
+        throw new NullReferenceException(string.Format("GetUtf8Content:連線發生錯誤，且重新測試超過{0}次！！:{1}", origTries, url));
     }
 
     private IJsEngine engine;
