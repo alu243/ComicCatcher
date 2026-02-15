@@ -436,7 +436,6 @@ namespace ComicApi.Controllers
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] {comics.Count} comics are start save");
             await this.repo.SaveComics(comicEntitiesNeedsUpdate, true);
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] {comics.Count} comics are refreshed");
-            //Task.Run(async () => await this.RefreshAllUnReadedChapters(comics, comicEntities));
             this.RefreshAllUnReadedChapters(comicEntitiesNeedsUpdate);
             return;
         }
@@ -455,19 +454,26 @@ namespace ComicApi.Controllers
                 new ParallelOptions { MaxDegreeOfParallelism = 3 },
                 async (comic, t) =>
             {
-                var comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
-                await dm5.LoadChapters(comicEntity);
                 string key = $"comic_{comic.Comic}";
-                cache.Remove(key);
-                cache.Set(key, comicEntity, options);
-                comicEntities.Add(comicEntity);
+                try
+                {
+                    var comicEntity = await dm5.GetSingleComicName($"{dm5.GetRoot().Url}{comic.Comic}/");
+                    await dm5.LoadChapters(comicEntity);
+                    cache.Remove(key);
+                    cache.Set(key, comicEntity, options);
+                    comicEntities.Add(comicEntity);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshPagesComicsAreFavorite] 取得失敗: {comic.Caption}");
+                    Console.WriteLine(ex.ToString());
+                }
                 count++;
                 if (count % 50 == 0) Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshAllComicsAreFavorite] {count} comics are refreshed");
             });
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshAllComicsAreFavorite] {comics.Count} comics are start save");
             await this.repo.SaveComics(comicEntities, true);
             Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: [RefreshAllComicsAreFavorite] {comics.Count} comics are refreshed");
-            //Task.Run(async () => await this.RefreshAllUnReadedChapters(comics, comicEntities));
             this.RefreshAllUnReadedChapters(comicEntities);
             return comics;
         }
