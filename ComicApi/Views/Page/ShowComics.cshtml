@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Pagination";
     Layout = "_Layout";
 }
@@ -35,7 +35,7 @@
 
     <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 gx-0">
         <div class="col gx-1" v-for="comic in state.comics">
-            <div class="card text-bg-dark">
+            <div class="card text-bg-dark" :id="'comic_' + getComicId(comic)">
                 <div class="g-0 comic-info">
                     <a :href="getComicAction(comic)">
                         <img style="width:100%" :src="comic.iconUrl" />
@@ -112,6 +112,15 @@
                     addCookie("currentPage", page + queryString.value ?? "");
 
                     setTimeout(() => loading.value = false, 100);
+
+                    setTimeout(() => {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const targetComic = urlParams.get('comic');
+                        if (targetComic) {
+                            const el = document.getElementById('comic_' + targetComic);
+                            if (el) el.scrollIntoView({ block: 'center' });
+                        }
+                    }, 300);
                 }
 
                 const getShowPages = function () {
@@ -157,6 +166,11 @@
                 function getComicAction(comic) {
                     const c = getComic(comic.url);
                     return `../comic/${c}`;
+                }
+
+                function getComicId(comic) {
+                    const c = getComic(comic.url);
+                    return c;
                 }
 
                 function addIgnoreComic(comic) {
@@ -234,6 +248,7 @@
                     //chunkedList,
                     queryString,
                     getComicAction,
+                    getComicId,
                     addIgnoreComic,
                     deleteIgnoreComic,
                     addFavoriteComic,

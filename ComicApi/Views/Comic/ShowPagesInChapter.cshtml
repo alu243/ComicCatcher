@@ -1,4 +1,4 @@
-﻿@model ComicCatcherLib.ComicModels.ComicEntity
+@model ComicCatcherLib.ComicModels.ComicEntity
 
 @{
     ViewBag.Title = "title";
@@ -127,7 +127,12 @@
                     const pathArray = window.location.pathname.split('/');
                     const chapter = pathArray[pathArray.length - 1];
                     const comic = pathArray[pathArray.length - 2];
-                    location.href = `/comic/${comic}`;
+                    
+                    let targetChapter = nowChapter.value;
+                    if (!targetChapter) {
+                         targetChapter = chapter;
+                    }
+                    location.href = `/comic/${comic}?chapter=${targetChapter}`;
                 }
 
                 const resetChapter = async function (comic, chapter) {

@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Comic";
     Layout = "_Layout";
 }
@@ -11,7 +11,7 @@
     <div v-if="loading" class="loader-background"><div class="loader"></div></div>
     <div class="row row-cols-md-4 row-cols-3 gx-0 gy-1">
         <div class="col gx-1" v-for="chapter in state.currComic?.chapters">
-            <div style="padding:3px" class="chapter" @@click="goChapter(chapter)">
+            <div style="padding:3px" class="chapter" :id="'chapter_' + getRelativePath(chapter?.url)" @@click="goChapter(chapter)">
                 <span :class="{'text-primary': state.readedChapter === getRelativePath(chapter?.url)}">{{chapter?.caption}}</span>
             </div>
         </div>
@@ -68,6 +68,18 @@
                     document.addEventListener("keydown", onKeydown, false);
                     setTimeout(() => loading.value = false, 100);
 
+                    // Restore scroll position if chapter param exists
+                    setTimeout(() => {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const targetChapter = urlParams.get('chapter');
+                        if (targetChapter) {
+                            const el = document.getElementById('chapter_' + targetChapter);
+                            if (el) {
+                                el.scrollIntoView({ block: 'center' });
+                            }
+                        }
+                    }, 200);
+
                     //setTimeout(() => { window.scrollTo(0, 1); }, 1500);
                 });
 
@@ -76,13 +88,34 @@
                     location.href = `./${state.comic}/${relative}`;
                 }
 
+                function replaceQueryStringParam(url, param, value) {
+                    const re = new RegExp("([?&])" + param + "=.*?(&|$)", "i");
+                    if (url.match(re)) {
+                        return url.replace(re, '$1' + param + "=" + value + '$2');
+                    } else {
+                        const sep = url.toString().includes('?') ? '&' : '?';
+                        return url + sep + param + "=" + value;
+                    }
+                }
+
                 const goBack = function () {
                     var page = getCookie("currentPage");
                     if (!page || page == undefined) page = state.page;
-                    if (page.indexOf("favorite") >= 0) {
-                        location.href = "/" + page.replace("//", "/");
+
+                    const sep = page.toString().includes('?') ? '&' : '?';
+
+                    const target = replaceQueryStringParam(page.toString(), 'comic', comic)
+                    console.log("target", target);
+
+                    // console.log("page", page);
+                    // console.log("sep", sep);
+                    console.log("target", target);
+
+
+                    if (page.toString().indexOf("favorite") >= 0) {
+                        location.href = "/" + target.replace("//", "/");
                     } else {
-                        location.href = `/page/${page}`;
+                        location.href = `/page/${target}`;
                     }
                 }
                 const getComic = function(url) {
