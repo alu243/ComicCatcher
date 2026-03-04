@@ -25,9 +25,9 @@
 
     <div class="row row-cols-3 row-cols-sm-4 row-cols-md-5 row-cols-lg-6 gx-0">
         <div class="col gx-1" v-for="comic in state.comics">
-            <div class="card text-bg-dark" :id="'comic_' + getComicId(comic)">
+            <div class="card text-bg-dark" :id="'comic_' + getComicIndex(comic)">
                 <div class="g-0 comic-info">
-                    <a :href="getComicAction(comic)">
+                    <a :href="getComicAction(comic)" @@click="addComicIdCookie(comic)">
                         <img style="width:100%" :src="comic.iconUrl" />
                     </a>
                     <button v-if="comic.level == 0" class="btn btn-primary btn-sm btnleft" style="padding:1px 4px;" @@click="setFavoriteLevel(comic, 1)"><i class="bi bi-arrow-up-circle"></i></button>
@@ -43,7 +43,7 @@
 
                 </div>
                 <div class="card-body g-1" style="padding:3px">
-                    <a :href="getComicAction(comic)">
+                    <a :href="getComicAction(comic)" @@click="addComicIdCookie(comic)">
                         <p :class="{'card-title': true, 'bg-primary': comic.isFavorite, 'text-light': true ,'fw-bold': comic.isFavorite, 'lh-sm':true }" style="font-size:14px;padding-top:3px">{{comic.caption}}</p>
                     </a>
                     <span class="card-text lh-sm center" style="font-size:12px; color:lightgray; text-align:center;">
@@ -107,8 +107,11 @@
                         const urlParams = new URLSearchParams(window.location.search);
                         const targetComic = urlParams.get('comic');
                         if (targetComic) {
-                            const el = document.getElementById('comic_' + targetComic);
-                            if (el) el.scrollIntoView({ block: 'center' });
+                            if (targetComic == getCookie("currentComic")) {
+                                const comicId = getCookie("currentComicId");
+                                const el = document.getElementById(comicId);
+                                if (el) el.scrollIntoView({ block: 'center' });
+                            }
                         }
                     }, 300);
                 }
@@ -125,9 +128,14 @@
                     return `../comic/${c}`;
                 }
 
-                function getComicId(comic) {
-                    const c = getComic(comic.url);
-                    return c;
+                function getComicIndex(comic) {
+                    const idx = state.comics.findIndex(c => c.url === comic.url);
+                    return idx === -1 ? 0 : idx;
+                }
+
+                function addComicIdCookie(comic) {
+                    addCookie("currentComic", getComic(comic.url));
+                    addCookie("currentComicId", 'comic_' + getComicIndex(comic));
                 }
 
                 function goto(url) {
@@ -166,8 +174,9 @@
                     loading,
                     queryString,
                     getComicAction,
-                    getComicId,
-                    setFavoriteLevel
+                    getComicIndex,
+                    setFavoriteLevel,
+                    addComicIdCookie
                 }
             }
         });

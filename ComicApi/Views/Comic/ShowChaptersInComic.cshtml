@@ -105,16 +105,10 @@
                     const sep = page.toString().includes('?') ? '&' : '?';
 
                     const target = replaceQueryStringParam(page.toString(), 'comic', comic)
-                    console.log("target", target);
-
-                    // console.log("page", page);
-                    // console.log("sep", sep);
-                    console.log("target", target);
-
-
-                    if (page.toString().indexOf("favorite") >= 0) {
+                    
+                    if (page.toString().indexOf("favorite") >= 0) { // 最愛區
                         location.href = "/" + target.replace("//", "/");
-                    } else {
+                    } else { // 分頁區
                         location.href = `/page/${target}`;
                     }
                 }
